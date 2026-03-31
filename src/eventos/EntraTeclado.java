@@ -19,9 +19,9 @@ public class EntraTeclado implements KeyListener {
   public void keyTyped(KeyEvent e) {
     // char c = e.getKeyChar();
     // for (JefeFinal j : pan.getGame().getEnemyManager().getJefesFinales()) {
-    //   if (j.isActivo() && Character.isDigit(c)) {
-    //     j.agregarCaracter(c);
-    //   }
+    // if (j.isActivo() && Character.isDigit(c)) {
+    // j.agregarCaracter(c);
+    // }
     // }
   }
 
@@ -53,21 +53,21 @@ public class EntraTeclado implements KeyListener {
         pan.getGame().getPlayer().setJump(true);
         break;
       // case KeyEvent.VK_BACK_SPACE:
-      //   for (JefeFinal j : pan.getGame().getEnemyManager().getJefesFinales()) {
-      //     if (j.isActivo())
-      //       j.borrarCaracter();
-      //   }
-      //   break;
-case KeyEvent.VK_ENTER:
-        if (pan.getGame().isVictoria() || pan.getGame().isGameOver()) {
-            pan.getGame().reiniciarDesdePantalla();
+      // for (JefeFinal j : pan.getGame().getEnemyManager().getJefesFinales()) {
+      // if (j.isActivo())
+      // j.borrarCaracter();
+      // }
+      // break;
+      case KeyEvent.VK_ENTER:
+        if (pan.getGame().isVictoria() || pan.getGame().isGameOver() || pan.getGame().isEnInicio()) {
+          pan.getGame().reiniciarDesdePantalla();
         }
-        
+
         // else {
-        //   for (JefeFinal j : pan.getGame().getEnemyManager().getJefesFinales()) {
-        //     if (j.isActivo())
-        //       j.confirmarRespuesta();
-        //   }
+        // for (JefeFinal j : pan.getGame().getEnemyManager().getJefesFinales()) {
+        // if (j.isActivo())
+        // j.confirmarRespuesta();
+        // }
         // }
         break;
     }
