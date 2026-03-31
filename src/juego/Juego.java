@@ -1,17 +1,14 @@
 package juego;
 
-import niveles.LevelManager;
-import utils.LoadSave;
-
-import static utils.Constantes.Enviroment.*;
-
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.util.Random;
-
 import elementos.EnemyManager;
 import elementos.Jugador;
 import elementos.ObjectManager;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.util.Random;
+import niveles.LevelManager;
+import static utils.Constantes.Enviroment.*;
+import utils.LoadSave;
 
 public class Juego extends Thread {
     private VtaJuego vta;
@@ -45,12 +42,13 @@ public class Juego extends Thread {
 
     private java.awt.Font customFont;
     
-    // NUEVAS VARIABLES GLOBALES PARA OPTIMIZAR MEMORIA (VRAM/RAM)
     private java.awt.Font titleFont;
     private java.awt.Font subFont;
     private java.awt.Color redColor;
     private java.awt.Color goldColor;
     private java.awt.Color shadowColor;
+
+    private boolean enInicio = true;
 
     public boolean isResetRequerido() {
         return resetRequerido;
@@ -153,7 +151,6 @@ public class Juego extends Thread {
                 update = 0;
             }
             
-            // FRENO AL HILO PARA DARLE UN RESPIRO AL CPU
             if (deltaU < 1 && deltaF < 1) {
                 try {
                     Thread.sleep(1);
@@ -168,6 +165,7 @@ public class Juego extends Thread {
         if (resetRequerido) {
             victoria = false;
             gameOver = false;
+            enInicio = false;
             reiniciarJuego();
             resetRequerido = false;
             return;
@@ -180,6 +178,12 @@ public class Juego extends Thread {
         }
 
         if (victoria || gameOver) {
+            return;
+        }
+        if (enInicio) {
+            if (player.isReadyToRestart()) {
+                enInicio = false;
+            }
             return;
         }
         if (enemyManager.todosDerrotados() && !victoria) {
@@ -226,7 +230,37 @@ public class Juego extends Thread {
         g2.setColor(java.awt.Color.WHITE);
         g2.drawString(subText, xSub, ySub);
     }
-    
+    void dibujarInicio(Graphics g) {
+        g.setColor(java.awt.Color.BLACK);
+        g.fillRect(0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT);
+        java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
+        g2.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,
+                java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        String tituloText = "¡LIMPIA LA CUEVA!";
+        String subText = "[Presiona ENTER para comenzar]";
+
+        g2.setFont(titleFont);
+        java.awt.FontMetrics metricsTitle = g2.getFontMetrics(titleFont);
+        int xTitle = (Juego.GAME_WIDTH - metricsTitle.stringWidth(tituloText)) / 2;
+        int yTitle = (Juego.GAME_HEIGHT / 2) - (metricsTitle.getHeight() / 2);
+
+        g2.setFont(subFont);
+        java.awt.FontMetrics metricsSub = g2.getFontMetrics(subFont);
+        int xSub = (Juego.GAME_WIDTH - metricsSub.stringWidth(subText)) / 2;
+        int ySub = yTitle + metricsTitle.getHeight() + (int) (20 * Juego.SCALE);
+
+        g2.setFont(titleFont);
+        g2.setColor(shadowColor);
+        g2.drawString(tituloText, xTitle + 3, yTitle + 3);
+        g2.setColor(goldColor);
+        g2.drawString(tituloText, xTitle, yTitle);
+        
+        g2.setFont(subFont);
+        g2.setColor(java.awt.Color.WHITE);
+        g2.drawString(subText, xSub, ySub);
+    }
+
     void render(Graphics g) {
         g.drawImage(bgImg, 0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT, null);
         drawArboles(g);
@@ -239,6 +273,10 @@ public class Juego extends Thread {
         
         if (gameOver)  {
             dibujarGameOver(g);
+            return;
+        }
+        if (enInicio) {
+            dibujarInicio(g);
             return;
         }
         
@@ -314,7 +352,7 @@ public class Juego extends Thread {
     }
 
     public void reiniciarDesdePantalla() {
-        if (victoria || gameOver) {
+        if (victoria || gameOver || enInicio) {
             resetRequerido = true;
             reproductorAudio.detenerMusica();
             reproductorAudio.reproducirMusica("pista_cueva.wav");
@@ -326,5 +364,8 @@ public class Juego extends Thread {
     }
     public boolean isGameOver() {
         return gameOver;
+    }
+    public boolean isEnInicio() {
+        return enInicio;
     }
 }
