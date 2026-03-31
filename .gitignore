@@ -1,0 +1,33 @@
+# Archivos compilados
+*.class
+
+# Archivos de log
+*.log
+
+# Directorios de compilación y binarios
+/bin/
+/build/
+/out/
+/target/
+
+# Configuración de IDEs
+.vscode/
+.idea/
+*.iml
+
+# Archivos temporales del sistema
+*.swp
+*.tmp
+*.bak
+*~
+
+# Configuración específica de OS
+.DS_Store
+Thumbs.db
+
+# Librerías externas (si usas un gestor de dependencias, no subas jars manuales)
+*.jar
+
+# Archivos de cache
+.gradle/
+.mvn/
