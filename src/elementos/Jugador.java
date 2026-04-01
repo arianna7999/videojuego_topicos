@@ -24,6 +24,7 @@ public class Jugador extends Cascaron {
     private int animInd, animTick = 0, animSpeed = 15;
     private int playerAction = INACTIVO;
     private int playerDirec = -1;
+    private utils.AudioPlayer audioPlayer;
 
     private boolean up, down, left, right, jump;
 
@@ -73,8 +74,9 @@ public class Jugador extends Cascaron {
     private int golpesAcertados = 0;
     private int enemigosDerrotados = 0;
 
-    public Jugador(float x, float y, int w, int h) {
+    public Jugador(float x, float y, int w, int h, utils.AudioPlayer audioPlayer) {
         super(x, y, w, h);
+        this.audioPlayer = audioPlayer; // Guardamos el reproductor
         this.spawnX = x;
         this.spawnY = y;
         loadAnimation();
@@ -163,6 +165,7 @@ public class Jugador extends Cascaron {
             }
 
             if (playerAction == ATACAR1 && animInd == 1 && !attackChecked) {
+                audioPlayer.reproducirEfecto("sonido-golpe.wav");
                 enemyMan.checkEnemyHit(attackBox, this);
                 objectMan.checkObjectHit(attackBox);
                 attackChecked = true;
@@ -360,9 +363,20 @@ public class Jugador extends Cascaron {
         left = right = up = down = false;
     }
 
-    public void recibirDaño(int cantidad, int dirEnemigo) {
+ public void recibirDaño(int cantidad, int dirEnemigo) {
+        // Llama al método de abajo diciéndole que SÍ haga ruido (true)
+        recibirDaño(cantidad, dirEnemigo, true); 
+    }
+
+    // 2. Nuevo método que acepta la variable 'hacerRuido'
+    public void recibirDaño(int cantidad, int dirEnemigo, boolean hacerRuido) {
         if (isDead || invulnerableTimer > 0)
             return;
+
+        // Solo reproduce el sonido si 'hacerRuido' es true
+        if (hacerRuido && audioPlayer != null) {
+            audioPlayer.reproducirEfecto("sonido-dano.wav");
+        }
 
         vidaActual -= cantidad;
         invulnerableTimer = 80;
@@ -379,6 +393,7 @@ public class Jugador extends Cascaron {
             airSpeed = -1.0f * Juego.SCALE;
         }
     }
+    
 
     public void curarVida(int cantidad) {
         vidaActual += cantidad;
@@ -389,6 +404,16 @@ public class Jugador extends Cascaron {
 
     private void revisarPicos() {
         if (utils.MetodosAyuda.tocandoPicos(hitbox, lvlData)) {
+            
+            // Verificamos que no esté muerto y que no sea invulnerable AHORA MISMO.
+            // Así el sonido solo se dispara 1 sola vez cuando realmente le baja vida.
+            if (!isDead && invulnerableTimer == 0) {
+                if (audioPlayer != null) {
+                    audioPlayer.reproducirEfecto("sonido-dano.wav");
+                }
+            }
+            
+            // Llamamos al método original, el cual bajará la vida y pondrá el invulnerableTimer en 80
             recibirDaño(20, -playerDirec); 
         }
     }

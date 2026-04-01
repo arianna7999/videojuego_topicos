@@ -73,7 +73,7 @@ public class Juego extends Thread {
         comenzarJuego();
     }
 
-    private void inicializar() {
+   private void inicializar() {
         bgImg = LoadSave.GetSpriteAtlas(LoadSave.PLAYING_BG_IMG);
         fondoArboles = LoadSave.GetSpriteAtlas(LoadSave.FONDO_ARBOLES_IMG);
         fondoArboles2 = LoadSave.GetSpriteAtlas(LoadSave.FONDO2_ARBOLES_IMG);
@@ -88,12 +88,18 @@ public class Juego extends Thread {
         goldColor = new java.awt.Color(212, 175, 55);
         shadowColor = java.awt.Color.DARK_GRAY;
 
-        player = new Jugador(250, 200, (int) (200 * SCALE), (int) (200 * SCALE));
+        // 1. INICIALIZAMOS EL AUDIO PRIMERO
+        reproductorAudio = new utils.AudioPlayer();
+        
+        // 2. CREAMOS EL JUGADOR Y OBJETOS PASANDO EL REPRODUCTOR
+        player = new Jugador(250, 200, (int) (200 * SCALE), (int) (200 * SCALE), reproductorAudio);
         enemyManager = new EnemyManager();
-        objectManager = new ObjectManager();
+        objectManager = new ObjectManager(reproductorAudio);
+        
         levelMan = new LevelManager(this);
         player.loadLvlData(levelMan.currentLevel().getLvlData());
-        reproductorAudio = new utils.AudioPlayer();
+        
+        // 3. REPRODUCIMOS LA MÚSICA DE FONDO
         reproductorAudio.reproducirMusica("pista_cueva.wav");
     }
 
