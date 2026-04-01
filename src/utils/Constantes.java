@@ -122,6 +122,8 @@ public class Constantes {
         public static final int COFRE = 1;
         public static final int CORAZON = 2;
         public static final int PLATAFORMA = 4;
+        public static final int LLAVE = 5;
+        public static final int PUERTA = 6;
 
         public static final int INACTIVO = 0;
         public static final int ANIMACION = 1;

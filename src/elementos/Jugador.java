@@ -28,6 +28,7 @@ public class Jugador extends Cascaron {
     private utils.AudioPlayer audioPlayer;
     private ArrayList<PlataformaMovil> plataformas;
     private boolean enPlataforma = false;
+    private boolean tieneLlave = false;
 
     private boolean up, down, left, right, jump;
 
@@ -532,7 +533,17 @@ public class Jugador extends Cascaron {
     }
 }
 
+public void recogerLlave() {
+    this.tieneLlave = true;
+}
+
+public boolean getTieneLlave() {
+    return tieneLlave;
+}
+
+// Necesario para el salto desde plataformas que vimos antes
 public float getAirSpeed() {
-        return airSpeed;
-    }
+    return airSpeed;
+}
+    
 }
