@@ -30,6 +30,7 @@ public class LoadSave {
     public static final String EXPLOSION_BLUE = "explosion_blue.png";
     public static final String VICTORY_SCREEN = "win.png";
     public static final String POSTE_DUENOS = "poste-duenos.png";
+    public static final String PLATAFORMA_MOVIBLE = "plataforma-movible.png";
     
     
     public static BufferedImage GetSpriteAtlas(String name) {

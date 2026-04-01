@@ -13,6 +13,8 @@ public class ObjectManager {
 
     private ArrayList<Contenedor> contenedores = new ArrayList<>();
     private ArrayList<Recompensas> recompensas = new ArrayList<>();
+    private ArrayList<PlataformaMovil> plataformas = new ArrayList<>();
+    private BufferedImage plataformaImg;
     private utils.AudioPlayer audioPlayer;
 
     private BufferedImage[] barrilImgs;
@@ -28,10 +30,16 @@ public class ObjectManager {
         contenedores.add(new Contenedor(810, 585, COFRE));
         contenedores.add(new Contenedor(100, 485, BARRIL));
         contenedores.add(new Contenedor(1800, 200, BARRIL));
+        // Plataforma Horizontal (false)
+        plataformas.add(new PlataformaMovil(1900, 450, PLATAFORMA, 300, false)); 
+        
+        // Plataforma Vertical (true) - Se moverá de Y=300 hasta Y=500
+        plataformas.add(new PlataformaMovil(2300, 300, PLATAFORMA, 200, true));
     }
 
     private void cargarSprites() {
         BufferedImage img = LoadSave.GetSpriteAtlas("objetos-sprite.png");
+        plataformaImg = LoadSave.GetSpriteAtlas("plataforma-movible.png");
 
         barrilImgs = new BufferedImage[8];
         cofreImgs = new BufferedImage[8];
@@ -63,21 +71,22 @@ public class ObjectManager {
     public void checkExplosionHit(Jugador j) {
         for (Contenedor c : contenedores) {
             if (c.isActivo() && c.getTipoObjeto() == BARRIL && c.getEstado() == ANIMACION && !c.danoAplicado) {
-                
-                int expAncho = (int)(100 * Juego.SCALE);
-                int expAlto = (int)(100 * Juego.SCALE);
-                int expX = (int)(c.getHitbox().x) - (expAncho / 2) + (int)(c.getHitbox().width / 2);
-                int expY = (int)(c.getHitbox().y) - (expAlto / 2) + (int)(c.getHitbox().height / 2);
-                
-                java.awt.geom.Rectangle2D.Float cajaExplosion = new java.awt.geom.Rectangle2D.Float(expX, expY, expAncho, expAlto);
-                
+
+                int expAncho = (int) (100 * Juego.SCALE);
+                int expAlto = (int) (100 * Juego.SCALE);
+                int expX = (int) (c.getHitbox().x) - (expAncho / 2) + (int) (c.getHitbox().width / 2);
+                int expY = (int) (c.getHitbox().y) - (expAlto / 2) + (int) (c.getHitbox().height / 2);
+
+                java.awt.geom.Rectangle2D.Float cajaExplosion = new java.awt.geom.Rectangle2D.Float(expX, expY,
+                        expAncho, expAlto);
+
                 if (cajaExplosion.intersects(j.getHitbox())) {
                     int direccionEmpuje = (j.getHitbox().x < c.getHitbox().x) ? -1 : 1;
-                    
+
                     // AQUI ESTÁ EL CAMBIO: Agregamos 'false' al final para que no suene el golpe
-                    j.recibirDaño(25, direccionEmpuje, false); 
-                    
-                    c.danoAplicado = true; 
+                    j.recibirDaño(25, direccionEmpuje, false);
+
+                    c.danoAplicado = true;
                 }
             }
         }
@@ -118,6 +127,8 @@ public class ObjectManager {
         for (Recompensas r : recompensas)
             if (r.isActivo())
                 r.update();
+        for (PlataformaMovil p : plataformas)
+            p.update();
     }
 
     public void draw(Graphics g, int xLvlOffset) {
@@ -147,14 +158,55 @@ public class ObjectManager {
 
                     g.drawImage(explosionImgs[c.getAnimInd()], expX, expY, expAncho, expAlto, null);
                 }
+                
             }
+            
         }
 
+        for (PlataformaMovil p : plataformas) {
+        if (p.isActivo()) {
+            g.drawImage(plataformaImg, 
+                (int) (p.getHitbox().x - xLvlOffset), 
+                (int) (p.getHitbox().y), 
+                Juego.TILES_SIZE*3, // Esto usa los 32 píxeles definidos en Juego
+                Juego.TILES_SIZE, 
+                null);
+        }
+    }
         for (Recompensas r : recompensas) {
             if (r.isActivo()) {
                 g.drawImage(corazonImgs[r.getAnimInd()], (int) (r.getX() - xLvlOffset), r.getY(),
                         (int) (30 * Juego.SCALE), (int) (30 * Juego.SCALE), null);
             }
         }
+    }
+
+  public void actualizarJugadorEnPlataforma(Jugador j) {
+        
+        // ¡NUEVO! Si el airSpeed es menor a 0, significa que el jugador está saltando hacia arriba.
+        // Lo ignoramos por completo para que la plataforma no cancele su salto.
+        if (j.getAirSpeed() < 0) {
+            j.setEnPlataforma(false);
+            return;
+        }
+
+        for (PlataformaMovil p : plataformas) {
+            if (p.isActivo()) {
+                if (utils.MetodosAyuda.IsEntityOnGameObject(j.getHitbox(), p.getHitbox())) {
+                    
+                    // Movemos al jugador en X junto con la plataforma
+                    j.getHitbox().x += p.getVelocidadX(); 
+                    
+                    // Lo pegamos a la Y de la plataforma
+                    j.getHitbox().y = p.getHitbox().y - j.getHitbox().height;
+                    
+                    // Le avisamos que está a salvo
+                    j.setEnPlataforma(true);
+                    return;
+                }
+            }
+        }
+        // Si no tocó ninguna, no está en plataforma
+        j.setEnPlataforma(false);
     }
 }

@@ -201,6 +201,7 @@ public class Juego extends Thread {
         levelMan.update();
         enemyManager.update(levelMan.currentLevel().getLvlData(), player);
         objectManager.update();
+        objectManager.actualizarJugadorEnPlataforma(player);
         objectManager.checkPicking(player);
         objectManager.checkExplosionHit(player);
         checkCloseToBorder();

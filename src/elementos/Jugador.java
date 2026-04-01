@@ -11,6 +11,7 @@ import static utils.MetodosAyuda.*;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import juego.Juego;
 import utils.LoadSave;
@@ -25,6 +26,8 @@ public class Jugador extends Cascaron {
     private int playerAction = INACTIVO;
     private int playerDirec = -1;
     private utils.AudioPlayer audioPlayer;
+    private ArrayList<PlataformaMovil> plataformas;
+    private boolean enPlataforma = false;
 
     private boolean up, down, left, right, jump;
 
@@ -98,10 +101,9 @@ public class Jugador extends Cascaron {
 
     public void loadLvlData(int[][] getLevelData) {
         this.lvlData = getLevelData;
-        /*
-         * if(!IsEntityOnFloor(hitbox,lvlData))
-         * inAir=true;
-         */
+        if (!utils.MetodosAyuda.IsEntityOnFloor(hitbox, lvlData) && !enPlataforma) {
+        inAir = true;
+}
     }
 
     private void colocarAnim() {
@@ -266,7 +268,8 @@ public class Jugador extends Cascaron {
         if (!left && !right && !inAir && !inKnockback)
             return;
 
-        if (!inAir && !IsEntityOnFloor(hitbox, lvlData))
+       
+        if (!inAir && !IsEntityOnFloor(hitbox, lvlData) && !enPlataforma)
             inAir = true;
 
         if (inAir) {
@@ -520,5 +523,16 @@ public class Jugador extends Cascaron {
             curarVida(cantidadCuraAutomatica);
             healTimer = 0;
         }
+    }
+
+    public void setEnPlataforma(boolean b) {
+    this.enPlataforma = b;
+    if(b) {
+        inAir = false; // Detiene la caída
+    }
+}
+
+public float getAirSpeed() {
+        return airSpeed;
     }
 }
