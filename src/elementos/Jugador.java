@@ -84,7 +84,7 @@ public class Jugador extends Cascaron {
         this.spawnX = x;
         this.spawnY = y;
         loadAnimation();
-        initHitbox(x, y, 28 * Juego.SCALE, 32 * Juego.SCALE);
+        initHitbox(x, y, 28 * Juego.SCALE, 31 * Juego.SCALE);
         attackBox = new java.awt.geom.Rectangle2D.Float(x, y, (int) (20 * Juego.SCALE), (int) (20 * Juego.SCALE));
     }
 
