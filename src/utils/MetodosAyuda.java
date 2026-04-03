@@ -111,4 +111,13 @@ public static float GetEntityXPosNextToWall(Rectangle2D.Float hitbox, float xSpe
         }
         return false;
     }
+
+    public static boolean IsEntityOnGameObject(java.awt.geom.Rectangle2D.Float hitbox, java.awt.geom.Rectangle2D.Float objHitbox) {
+        // Cambiamos el + 1 por un + 10 para aumentar el rango de detección hacia abajo.
+        // Así el jugador detectará la plataforma incluso si esta acaba de bajar.
+        return (hitbox.y + hitbox.height + 10 >= objHitbox.y &&
+                hitbox.y + hitbox.height <= objHitbox.y + 10 &&
+                hitbox.x + hitbox.width > objHitbox.x &&
+                hitbox.x < objHitbox.x + objHitbox.width);
+    }
 }
