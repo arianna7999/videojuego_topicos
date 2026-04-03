@@ -11,6 +11,7 @@ import static utils.Constantes.Enviroment.*;
 import utils.LoadSave;
 
 public class Juego extends Thread {
+    private int prueba;
     private VtaJuego vta;
     private PanelJuego pan;
     private int FPS_SET = 60;
