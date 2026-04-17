@@ -20,16 +20,19 @@ public class LoadSave {
     public static final String LEVEL_ATLAS_3 = "3.png";
     public static final String LEVEL_ATLAS_4 = "4.png";
     
+    // --- MAPAS (ROJO = TERRENO) ---
     public static final String LEVEL_ONE_LONG = "mapa.png";
     public static final String LEVEL_TWO_LONG = "mapa2.png";
     public static final String LEVEL_THREE_LONG = "mapa3.png";
     public static final String LEVEL_FOUR_LONG = "mapa4.png";
 
-    public static final String LEVEL_TWO_OBJECTS = "objetosm2.png";
+    // --- MAPAS (VERDE = ENEMIGOS, AZUL = OBJETOS) ---
     public static final String LEVEL_ONE_OBJECTS = "objetosm1.png";
+    public static final String LEVEL_TWO_OBJECTS = "objetosm2.png";
     public static final String LEVEL_THREE_OBJECTS = "objetosm3.png";
     public static final String LEVEL_FOUR_OBJECTS = "objetosm4.png";
 
+    // --- SPRITES ---
     public static final String PLAYER_ATLAS = "Soldier.png";
     public static final String SKELETON_SPRITE = "Skeleton.png";
     public static final String FINAL_BOSS_SPRITE = "Lancer.png";
@@ -46,11 +49,19 @@ public class LoadSave {
     public static final String VICTORY_SCREEN = "win.png";
     public static final String POSTE_DUENOS = "poste-duenos.png";
     public static final String PLATAFORMA_MOVIBLE = "plataforma-movible.png";
+    public static final String CANDELABRO_SPRITE = "candelabro_1.png";
 
     public static int[][] GetEnemyData(int levelNumber) {
-        String mapName = (levelNumber == 1) ? LEVEL_ONE_OBJECTS : LEVEL_TWO_OBJECTS;
-        BufferedImage img = GetSpriteAtlas(mapName);
+        String mapName = LEVEL_ONE_OBJECTS;
         
+        switch (levelNumber) {
+            case 1: mapName = LEVEL_ONE_OBJECTS; break;
+            case 2: mapName = LEVEL_TWO_OBJECTS; break;
+            case 3: mapName = LEVEL_THREE_OBJECTS; break;
+            case 4: mapName = LEVEL_FOUR_OBJECTS; break;
+        }
+
+        BufferedImage img = GetSpriteAtlas(mapName);
         int[][] enemyData = new int[img.getHeight()][img.getWidth()];
         
         for (int j = 0; j < img.getHeight(); j++) {
@@ -61,12 +72,20 @@ public class LoadSave {
         }
         return enemyData;
     }
-    public static final String CANDELABRO_SPRITE = "candelabro_1.png";
 
     public static int[][] GetObjectData(int levelNumber) {
-        String mapName = (levelNumber == 1) ? LEVEL_ONE_OBJECTS : LEVEL_TWO_OBJECTS;
+        String mapName = LEVEL_ONE_OBJECTS;
+        
+        switch (levelNumber) {
+            case 1: mapName = LEVEL_ONE_OBJECTS; break;
+            case 2: mapName = LEVEL_TWO_OBJECTS; break;
+            case 3: mapName = LEVEL_THREE_OBJECTS; break;
+            case 4: mapName = LEVEL_FOUR_OBJECTS; break;
+        }
+
         BufferedImage img = GetSpriteAtlas(mapName);
         int[][] objData = new int[img.getHeight()][img.getWidth()];
+        
         for (int j = 0; j < img.getHeight(); j++) {
             for (int i = 0; i < img.getWidth(); i++) {
                 Color color = new Color(img.getRGB(i, j));
@@ -78,14 +97,17 @@ public class LoadSave {
     
     public static BufferedImage GetSpriteAtlas(String name) {
         BufferedImage img = null;
-        InputStream is = LoadSave.class
-                .getResourceAsStream("/res/" + name);
+        InputStream is = LoadSave.class.getResourceAsStream("/res/" + name);
         try {
             img = ImageIO.read(is);
-
         } catch (IOException e) {
-            Logger.getLogger(PanelJuego.class.getName())
-                    .log(Level.SEVERE, null, e);
+            Logger.getLogger(PanelJuego.class.getName()).log(Level.SEVERE, null, e);
+        } finally {
+            try {
+                if (is != null) is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return img;
     }
@@ -93,30 +115,16 @@ public class LoadSave {
     public static int[][] GetLevelData(int levelNumber) {
         String mapName = LEVEL_ONE_LONG;
         
-        // if (levelNumber == 1) {
-        //     mapName = LEVEL_ONE_LONG;
-        // } else if (levelNumber == 2) {
-        //     mapName = LEVEL_TWO_LONG;
-        // }
         switch (levelNumber) {
-            case 1:
-                mapName = LEVEL_ONE_LONG;
-                break;
-            case 2:
-                mapName = LEVEL_TWO_LONG;
-                break;
-            case 3:
-                mapName = LEVEL_THREE_LONG;
-                break;
-            case 4:
-                mapName = LEVEL_FOUR_LONG;
-                break;
-            default:
-                break;
+            case 1: mapName = LEVEL_ONE_LONG; break;
+            case 2: mapName = LEVEL_TWO_LONG; break;
+            case 3: mapName = LEVEL_THREE_LONG; break;
+            case 4: mapName = LEVEL_FOUR_LONG; break;
         }
 
         BufferedImage img = LoadSave.GetSpriteAtlas(mapName);
         int[][] lvlData = new int[img.getHeight()][img.getWidth()];
+        
         for (int j = 0; j < img.getHeight(); j++) {
             for (int i = 0; i < img.getWidth(); i++) {
                 Color color = new Color(img.getRGB(i, j));
