@@ -100,7 +100,7 @@ public class JefeFinal extends Enemigo {
         }
     }
 
-    public void render(Graphics g, int xLvlOffset) {
+    public void render(Graphics g, int xLvlOffset, int yLvlOffset) {
         int flipX = 0;
         int flipW = 1;
         int drawWidth = (int) (BOSS_DRAW_WIDTH * Juego.SCALE);
@@ -113,17 +113,17 @@ public class JefeFinal extends Enemigo {
 
         g.drawImage(animaciones[enemyState][aniIndex],
                 (int) (hitbox.x - xDrawOffset) - xLvlOffset + flipX,
-                (int) (hitbox.y - yDrawOffset),
+                (int) (hitbox.y - yDrawOffset) - yLvlOffset,
                 drawWidth * flipW,
                 drawHeight, null);
 
-        drawHealthBar(g, xLvlOffset);
-        drawHitbox(g, xLvlOffset);
-        drawAttackBox(g, xLvlOffset);
-        drawEscudo(g, xLvlOffset);
+        drawHealthBar(g, xLvlOffset, yLvlOffset);
+        drawHitbox(g, xLvlOffset, yLvlOffset);
+        drawAttackBox(g, xLvlOffset, yLvlOffset);
+        drawEscudo(g, xLvlOffset, yLvlOffset);
     }
 
-    private void drawEscudo(Graphics g, int xLvlOffset) {
+    private void drawEscudo(Graphics g, int xLvlOffset, int yLvlOffset) {
         if (enemyState == MUERTO || !escudoActivo) return;
         int cx = (int)(hitbox.x + hitbox.width / 2) - xLvlOffset;
         java.awt.Graphics2D g2d = (java.awt.Graphics2D) g;
@@ -141,8 +141,7 @@ public class JefeFinal extends Enemigo {
         int anchoBarra = (int) (50 * Juego.SCALE);
         int altoBarra = (int) (4 * Juego.SCALE);
         int xBarra = (int) (hitbox.x - xLvlOffset) + (int)(hitbox.width/2) - (anchoBarra/2);
-        // Ajuste el valor Y para que quede debajito de la barra roja (ajusta el 12 si se empalma)
-        int yBarra = (int) (hitbox.y - (18 * Juego.SCALE)); 
+        int yBarra = (int) (hitbox.y - (18 * Juego.SCALE) - yLvlOffset); 
 
         g.setColor(new java.awt.Color(50, 50, 50)); 
         g.fillRect(xBarra, yBarra, anchoBarra, altoBarra);

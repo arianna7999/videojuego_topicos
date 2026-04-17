@@ -13,13 +13,28 @@ import juego.Juego;
 import juego.PanelJuego;
 
 public class LoadSave {
+    
+    // --- TILESETS DE LOS NIVELES ---
     public static final String LEVEL_ATLAS = "1.png";
+    public static final String LEVEL_ATLAS_2 = "2.png";
+    public static final String LEVEL_ATLAS_3 = "3.png";
+    public static final String LEVEL_ATLAS_4 = "4.png";
+    
+    public static final String LEVEL_ONE_LONG = "mapa.png";
+    public static final String LEVEL_TWO_LONG = "mapa2.png";
+    public static final String LEVEL_THREE_LONG = "mapa3.png";
+    public static final String LEVEL_FOUR_LONG = "mapa4.png";
+
+    public static final String LEVEL_TWO_OBJECTS = "objetosm2.png";
+    public static final String LEVEL_ONE_OBJECTS = "objetosm1.png";
+    public static final String LEVEL_THREE_OBJECTS = "objetosm3.png";
+    public static final String LEVEL_FOUR_OBJECTS = "objetosm4.png";
+
     public static final String PLAYER_ATLAS = "Soldier.png";
     public static final String SKELETON_SPRITE = "Skeleton.png";
     public static final String FINAL_BOSS_SPRITE = "Lancer.png";
     public static final String KNIGHT_SPRITE = "Knight.png";
     public static final String ORC_SPRITE = "Orc.png";
-    public static final String LEVEL_ONE_LONG = "mapa.png";
     public static final String PLAYING_BG_IMG ="fondo1.png";
     public static final String FONDO_ARBOLES_IMG="fondo2.png";
     public static final String FONDO2_ARBOLES_IMG="fondo2.2.png";
@@ -31,7 +46,35 @@ public class LoadSave {
     public static final String VICTORY_SCREEN = "win.png";
     public static final String POSTE_DUENOS = "poste-duenos.png";
     public static final String PLATAFORMA_MOVIBLE = "plataforma-movible.png";
-    
+
+    public static int[][] GetEnemyData(int levelNumber) {
+        String mapName = (levelNumber == 1) ? LEVEL_ONE_OBJECTS : LEVEL_TWO_OBJECTS;
+        BufferedImage img = GetSpriteAtlas(mapName);
+        
+        int[][] enemyData = new int[img.getHeight()][img.getWidth()];
+        
+        for (int j = 0; j < img.getHeight(); j++) {
+            for (int i = 0; i < img.getWidth(); i++) {
+                Color color = new Color(img.getRGB(i, j));
+                enemyData[j][i] = color.getGreen();
+            }
+        }
+        return enemyData;
+    }
+    public static final String CANDELABRO_SPRITE = "candelabro_1.png";
+
+    public static int[][] GetObjectData(int levelNumber) {
+        String mapName = (levelNumber == 1) ? LEVEL_ONE_OBJECTS : LEVEL_TWO_OBJECTS;
+        BufferedImage img = GetSpriteAtlas(mapName);
+        int[][] objData = new int[img.getHeight()][img.getWidth()];
+        for (int j = 0; j < img.getHeight(); j++) {
+            for (int i = 0; i < img.getWidth(); i++) {
+                Color color = new Color(img.getRGB(i, j));
+                objData[j][i] = color.getBlue();
+            }
+        }
+        return objData;
+    }
     
     public static BufferedImage GetSpriteAtlas(String name) {
         BufferedImage img = null;
@@ -47,9 +90,32 @@ public class LoadSave {
         return img;
     }
 
-    public static int[][] GetLevelData() {
+    public static int[][] GetLevelData(int levelNumber) {
+        String mapName = LEVEL_ONE_LONG;
+        
+        // if (levelNumber == 1) {
+        //     mapName = LEVEL_ONE_LONG;
+        // } else if (levelNumber == 2) {
+        //     mapName = LEVEL_TWO_LONG;
+        // }
+        switch (levelNumber) {
+            case 1:
+                mapName = LEVEL_ONE_LONG;
+                break;
+            case 2:
+                mapName = LEVEL_TWO_LONG;
+                break;
+            case 3:
+                mapName = LEVEL_THREE_LONG;
+                break;
+            case 4:
+                mapName = LEVEL_FOUR_LONG;
+                break;
+            default:
+                break;
+        }
 
-        BufferedImage img = LoadSave.GetSpriteAtlas(LEVEL_ONE_LONG);
+        BufferedImage img = LoadSave.GetSpriteAtlas(mapName);
         int[][] lvlData = new int[img.getHeight()][img.getWidth()];
         for (int j = 0; j < img.getHeight(); j++) {
             for (int i = 0; i < img.getWidth(); i++) {
@@ -61,7 +127,5 @@ public class LoadSave {
             }
         }
         return lvlData;
-
     }
-
 }

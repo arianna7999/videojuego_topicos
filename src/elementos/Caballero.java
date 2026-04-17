@@ -69,7 +69,7 @@ public class Caballero extends Enemigo {
         }
     }
 
-    public void render(Graphics g, int xLvlOffset) {
+    public void render(Graphics g, int xLvlOffset, int yLvlOffset) {
         int flipX = 0;
         int flipW = 1;
         int drawWidth = (int) (KNIGHT_DRAW_WIDTH * Juego.SCALE);
@@ -82,13 +82,13 @@ public class Caballero extends Enemigo {
 
         g.drawImage(animaciones[enemyState][aniIndex],
                 (int) (hitbox.x - xDrawOffset) - xLvlOffset + flipX,
-                (int) (hitbox.y - yDrawOffset),
+                (int) (hitbox.y - yDrawOffset) - yLvlOffset,
                 drawWidth * flipW,
                 drawHeight, null);
 
-        drawHitbox(g, xLvlOffset);
-        drawAttackBox(g, xLvlOffset);
-        drawHealthBar(g, xLvlOffset);
+        drawHitbox(g, xLvlOffset, yLvlOffset);
+        drawAttackBox(g, xLvlOffset, yLvlOffset);
+        drawHealthBar(g, xLvlOffset, yLvlOffset);
     }
 
     
