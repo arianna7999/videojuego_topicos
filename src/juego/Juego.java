@@ -19,12 +19,20 @@ public class Juego extends Thread {
     private LevelManager levelMan;
     private EnemyManager enemyManager;
     private ObjectManager objectManager;
+
     private int xLvlOffset;
     private int leftBorder = (int) (0.2 * Juego.GAME_WIDTH);
     private int rightBorder = (int) (0.8 * Juego.GAME_WIDTH);
-    private int lvlTileWide = LoadSave.GetLevelData()[0].length;
-    private int maxLvlOffset = lvlTileWide - Juego.TILES_WIDTH;
-    private int maxLvlOffsetX = maxLvlOffset * Juego.TILES_SIZE;
+    private int lvlTileWide;
+    private int maxLvlOffset;
+    private int maxLvlOffsetX;
+
+    private int yLvlOffset;
+    private int topBorder = (int) (0.3 * Juego.GAME_HEIGHT); // Borde superior (30% de la pantalla)
+    private int bottomBorder = (int) (0.7 * Juego.GAME_HEIGHT); // Borde inferior (70% de la pantalla)
+    private int lvlTileHeight;
+    private int maxLvlOffsetY_tiles;
+    private int maxLvlOffsetY;
     public final static int TILES_DEF_SIZE = 32;
     public final static float SCALE = 1.5f;
     public final static int TILES_WIDTH = 26;
@@ -81,25 +89,22 @@ public class Juego extends Thread {
         fondoPiedras = LoadSave.GetSpriteAtlas(LoadSave.FONDO_PIEDRAS_IMG);
         inicializarObjetos();
         
-        // INICIALIZAR FUENTES Y COLORES UNA SOLA VEZ
         titleFont = customFont.deriveFont(java.awt.Font.BOLD, (int) (48 * Juego.SCALE));
         subFont = customFont.deriveFont(java.awt.Font.PLAIN, (int) (16 * Juego.SCALE));
         redColor = new java.awt.Color(200, 50, 50);
         goldColor = new java.awt.Color(212, 175, 55);
         shadowColor = java.awt.Color.DARK_GRAY;
-
-        // 1. INICIALIZAMOS EL AUDIO PRIMERO
+        
         reproductorAudio = new utils.AudioPlayer();
         
-        // 2. CREAMOS EL JUGADOR Y OBJETOS PASANDO EL REPRODUCTOR
         player = new Jugador(250, 200, (int) (200 * SCALE), (int) (200 * SCALE), reproductorAudio);
         enemyManager = new EnemyManager();
         objectManager = new ObjectManager(reproductorAudio);
         
         levelMan = new LevelManager(this);
+        calcularCameraOffset();
         player.loadLvlData(levelMan.currentLevel().getLvlData());
-        
-        // 3. REPRODUCIMOS LA MÚSICA DE FONDO
+        objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
         reproductorAudio.reproducirMusica("pista_cueva.wav");
     }
 
@@ -123,8 +128,31 @@ public class Juego extends Thread {
             xLvlOffset = maxLvlOffsetX;
         else if (xLvlOffset < 0)
             xLvlOffset = 0;
-    }
 
+        int playerY = (int) player.getHitbox().y;
+        int diffY = playerY - yLvlOffset;
+        
+        if (diffY > bottomBorder)
+            yLvlOffset += diffY - bottomBorder;
+        else if (diffY < topBorder)
+            yLvlOffset += diffY - topBorder;
+
+        if (yLvlOffset > maxLvlOffsetY)
+            yLvlOffset = maxLvlOffsetY;
+        else if (yLvlOffset < 0)
+            yLvlOffset = 0;
+    }
+    private void calcularCameraOffset() {
+        if (levelMan == null || levelMan.currentLevel() == null) return;
+        
+        lvlTileWide = levelMan.currentLevel().getLvlData()[0].length;
+        maxLvlOffset = lvlTileWide - Juego.TILES_WIDTH;
+        maxLvlOffsetX = maxLvlOffset * Juego.TILES_SIZE;
+
+        lvlTileHeight = levelMan.currentLevel().getLvlData().length;
+        maxLvlOffsetY_tiles = lvlTileHeight - Juego.TILES_HEIGHT;
+        maxLvlOffsetY = maxLvlOffsetY_tiles * Juego.TILES_SIZE;
+    }
     public void run() {
         double framePorTiempo = 1000000000.0 / FPS_SET;
         double updatePorTiempo = 1000000000.0 / UPS_SET;
@@ -193,8 +221,7 @@ public class Juego extends Thread {
             return;
         }
         if (enemyManager.todosDerrotados() && !victoria) {
-            victoria = true;
-            reproductorAudio.reproducirMusica("pista_victory.wav");
+            cargarSiguienteNivel();
             return; 
         }
         player.update(enemyManager, objectManager);
@@ -272,11 +299,11 @@ public class Juego extends Thread {
     void render(Graphics g) {
         g.drawImage(bgImg, 0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT, null);
         drawArboles(g);
-        levelMan.draw(g, xLvlOffset);
+        levelMan.draw(g, xLvlOffset, yLvlOffset);
         drawObjetosRandom(g);
-        objectManager.draw(g, xLvlOffset);
-        player.render(g, xLvlOffset);
-        enemyManager.draw(g, xLvlOffset);
+        objectManager.draw(g, xLvlOffset, yLvlOffset);
+        player.render(g, xLvlOffset, yLvlOffset);
+        enemyManager.draw(g, xLvlOffset, yLvlOffset);
         player.drawUI(g);
         
         if (gameOver)  {
@@ -355,8 +382,10 @@ public class Juego extends Thread {
 
     private void reiniciarJuego() {
         player.resetAll();
-        enemyManager.resetAllEnemies();
+        enemyManager.resetAllEnemies(levelMan.getLevelIndex());
+        objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
         xLvlOffset = 0;
+        yLvlOffset = 0;
     }
 
     public void reiniciarDesdePantalla() {
@@ -364,6 +393,23 @@ public class Juego extends Thread {
             resetRequerido = true;
             reproductorAudio.detenerMusica();
             reproductorAudio.reproducirMusica("pista_cueva.wav");
+        }
+    }
+
+    public void cargarSiguienteNivel() {
+        levelMan.loadNextLevel();
+        
+        if (levelMan.getLevelIndex() >= levelMan.getAmountOfLevels()) {
+            victoria = true;
+            reproductorAudio.reproducirMusica("pista_victory.wav");
+        } else {
+            player.loadLvlData(levelMan.currentLevel().getLvlData());
+            calcularCameraOffset();
+            player.resetAll(); 
+            xLvlOffset = 0;
+            yLvlOffset = 0;
+            enemyManager.resetAllEnemies(levelMan.getLevelIndex());
+            objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
         }
     }
 

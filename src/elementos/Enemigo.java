@@ -1,7 +1,14 @@
 package elementos;
 
-import static utils.Constantes.ConstantesEnemigos.*;
-import static utils.MetodosAyuda.*;
+import static utils.Constantes.ConstantesEnemigos.ATACAR;
+import static utils.Constantes.ConstantesEnemigos.CORRER;
+import static utils.Constantes.ConstantesEnemigos.INACTIVO;
+import static utils.Constantes.ConstantesEnemigos.MUERTO;
+import static utils.Constantes.ConstantesEnemigos.RECIBIR_GOLPE;
+import static utils.MetodosAyuda.CanMoveHere;
+import static utils.MetodosAyuda.EsSueloSolido;
+import static utils.MetodosAyuda.GetEntityYPosUnderRoofOrAboveFloor;
+import static utils.MetodosAyuda.IsEntityOnFloor;
 
 import juego.Juego;
 
@@ -54,9 +61,10 @@ public abstract class Enemigo extends Cascaron {
         }
     }
 
-    protected void drawAttackBox(java.awt.Graphics g, int xLvlOffset) {
+    // --- MODIFICADO: Añadido yLvlOffset ---
+    protected void drawAttackBox(java.awt.Graphics g, int xLvlOffset, int yLvlOffset) {
         g.setColor(java.awt.Color.BLUE);
-        g.drawRect((int) attackBox.x - xLvlOffset, (int) attackBox.y, (int) attackBox.width, (int) attackBox.height);
+        g.drawRect((int) attackBox.x - xLvlOffset, (int) attackBox.y - yLvlOffset, (int) attackBox.width, (int) attackBox.height);
     }
 
     public void update(int[][] lvlData, Jugador jugador) {
@@ -167,13 +175,14 @@ public abstract class Enemigo extends Cascaron {
         return activo;
     }
 
-    public void drawHealthBar(java.awt.Graphics g, int xLvlOffset) {
+    // --- MODIFICADO: Añadido yLvlOffset y restado a las variables "Y" ---
+    public void drawHealthBar(java.awt.Graphics g, int xLvlOffset, int yLvlOffset) {
         if (enemyState == MUERTO) return;
 
         int barW = (int)(40 * Juego.SCALE);
         int barH = (int)(5 * Juego.SCALE);
         int barX = (int)(hitbox.x + hitbox.width / 2 - barW / 2) - xLvlOffset;
-        int barY = (int)(hitbox.y - 10 * Juego.SCALE);
+        int barY = (int)(hitbox.y - 10 * Juego.SCALE) - yLvlOffset; // Restado aquí
 
         g.setColor(new java.awt.Color(30, 30, 30));
         g.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
