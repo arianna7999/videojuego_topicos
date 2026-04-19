@@ -40,7 +40,7 @@ public class Juego extends Thread {
     public final static int TILES_SIZE = (int) (TILES_DEF_SIZE * SCALE);
     public final static int GAME_WIDTH = TILES_SIZE * TILES_WIDTH;
     public final static int GAME_HEIGHT = TILES_SIZE * TILES_HEIGHT;
-    private BufferedImage bgImg, fondoArboles, fondoArboles2, fondoPiedras, posteInicio, posteDuenos;
+    private BufferedImage bgImg, fondo1_1, fondo1_2, fondo1_3, posteInicio, posteDuenos, fondo2_1, fondo2_2;
     private int[] fondoArbolesPos;
     private Random rnd = new Random();
     private boolean victoria = false;
@@ -83,10 +83,12 @@ public class Juego extends Thread {
 
    private void inicializar() {
         bgImg = LoadSave.GetSpriteAtlas(LoadSave.PLAYING_BG_IMG);
-        fondoArboles = LoadSave.GetSpriteAtlas(LoadSave.FONDO_ARBOLES_IMG);
-        fondoArboles2 = LoadSave.GetSpriteAtlas(LoadSave.FONDO2_ARBOLES_IMG);
+        fondo1_1 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_ARBOLES_IMG);
+        fondo1_2 = LoadSave.GetSpriteAtlas(LoadSave.FONDO2_ARBOLES_IMG);
         fondoArbolesPos = new int[8];
-        fondoPiedras = LoadSave.GetSpriteAtlas(LoadSave.FONDO_PIEDRAS_IMG);
+        fondo1_3 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_PIEDRAS_IMG);
+        fondo2_1 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_CASTLE_IMG_1);
+        fondo2_2 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_CASTLE_IMG_2);
         inicializarObjetos();
         
         titleFont = customFont.deriveFont(java.awt.Font.BOLD, (int) (48 * Juego.SCALE));
@@ -298,9 +300,9 @@ public class Juego extends Thread {
 
     void render(Graphics g) {
         g.drawImage(bgImg, 0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT, null);
-        drawArboles(g);
+        drawFondos(g);
         levelMan.draw(g, xLvlOffset, yLvlOffset);
-        drawObjetosRandom(g);
+        // drawObjetosRandom(g);
         objectManager.draw(g, xLvlOffset, yLvlOffset);
         player.render(g, xLvlOffset, yLvlOffset);
         enemyManager.draw(g, xLvlOffset, yLvlOffset);
@@ -347,24 +349,45 @@ public class Juego extends Thread {
         }
     }
     
-    private void drawObjetosRandom(Graphics g){
-        g.drawImage(posteDuenos,(int)(270 * SCALE) - xLvlOffset, 
-                (int)( 127* SCALE), (int)(POSTE_DUENOS_HEIGHT *.15*SCALE), 
-                (int)(POSTE_DUENOS_HEIGHT*.15* SCALE), null);
+    private void drawObjetosRandom(Graphics g, BufferedImage[] objetos, float[] posicionesX, float[] posicionesY, float[] alturas, float[] anchos) {
+       for (int i = 0; i < objetos.length; i++) {
+            int x = (int) (posicionesX[i] * SCALE) - xLvlOffset;
+            int y = (int) (posicionesY[i] * SCALE);
+            int width = (int) (anchos[i] * SCALE);
+            int height = (int) (alturas[i] * SCALE);
+            
+            g.drawImage(objetos[i], x, y, width, height, null);
+        }
     }
 
-    private void drawArboles(Graphics g) {
-        for (int i = 0; i < fondoArbolesPos.length; i++) {
-            g.drawImage(fondoArboles, FONDO_ARBOLES_WIDTH * i - (int) (xLvlOffset * 0.4),
+    private void drawFondos(Graphics g) {
+
+        switch (levelMan.getLevelIndex()) {
+            case 0:
+                drawFondoLevel(g, new BufferedImage[]{fondo1_1, fondo1_2, fondo1_3});
+                drawObjetosRandom(g, 
+                    new BufferedImage[]{posteDuenos}, 
+                    new float[]{270f},
+                    new float[]{127f}, 
+                    new float[]{(float)(POSTE_DUENOS_HEIGHT * 0.15)},
+                    new float[]{(float)(POSTE_DUENOS_HEIGHT * 0.15)}
+                );
+                break;
+            case 1:
+                drawFondoLevel(g, new BufferedImage[]{fondo2_1, fondo2_2});
+                break;
+            default:
+                break;
+        }
+
+    }
+    private void drawFondoLevel(Graphics g, BufferedImage [] fondos) {
+
+        for (BufferedImage fondo: fondos) {
+            for (int i = 0; i < fondoArbolesPos.length; i++) {
+            g.drawImage(fondo, FONDO_ARBOLES_WIDTH * i - (int) (xLvlOffset * 0.4),
                     fondoArbolesPos[i], FONDO_ARBOLES_WIDTH, FONDO_ARBOLES_HEIGHT, null);
         }
-        for (int i = 0; i < fondoArbolesPos.length; i++) {
-            g.drawImage(fondoArboles2, FONDO_ARBOLES_WIDTH * i - (int) (xLvlOffset * 0.7),
-                    fondoArbolesPos[i], FONDO_ARBOLES_WIDTH, FONDO_ARBOLES_HEIGHT, null);
-        }
-        for (int i = 0; i < 3; i++) {
-            g.drawImage(fondoPiedras, i * FONDO_ARBOLES_WIDTH - (int) (xLvlOffset * 0.7),
-                    (int) (Juego.SCALE), FONDO_ARBOLES_WIDTH, FONDO_ARBOLES_HEIGHT, null);
         }
     }
 
