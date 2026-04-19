@@ -42,6 +42,8 @@ public class LoadSave {
     public static final String FONDO_ARBOLES_IMG="fondo2.png";
     public static final String FONDO2_ARBOLES_IMG="fondo2.2.png";
     public static final String FONDO_PIEDRAS_IMG="fondo3.png";
+    public static final String FONDO_CASTLE_IMG_1="layer_1.png";
+    public static final String FONDO_CASTLE_IMG_2="layer_2.png";
     public static final String HEALTH_BAR_EMPTY = "health_bar_empty.png";
     public static final String HEALTH_BAR_FULL = "health_bar_full.png";
     public static final String HEART_SPRITESHEET = "heart_spritesheet.png";
