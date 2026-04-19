@@ -15,7 +15,7 @@ public class Orc extends Enemigo {
     private int deadTimer = 0;
 
     private float xDrawOffset = 58 * Juego.SCALE;
-    private float yDrawOffset = 62 * Juego.SCALE;
+    private float yDrawOffset = 55 * Juego.SCALE;
     private static final int ORC_DRAW_WIDTH = 140;
     private static final int ORC_DRAW_HEIGHT = 140;
 
