@@ -34,6 +34,7 @@ public class Constantes {
         public static final int MUERTO = 6;
         public static final int SALTAR = 1;
         public static final int CAYENDO = 1;
+        public static final int ESCALAR = 7;
     }
 
     public static int GetNoSprite(int playerAction) {
@@ -48,6 +49,8 @@ public class Constantes {
             case RECIBIR_GOLPE:
             case MUERTO:
                 return 4;
+            case ESCALAR:      // <--- Añadir esto
+            return 4;
             default:
                 return 1;
         }
