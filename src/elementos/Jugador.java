@@ -7,6 +7,7 @@ import static utils.Constantes.ConstantesJugador.CORRER;
 import static utils.Constantes.ConstantesJugador.INACTIVO;
 import static utils.Constantes.ConstantesJugador.MUERTO;
 import static utils.Constantes.ConstantesJugador.SALTAR;
+import static utils.Constantes.ConstantesJugador.ESCALAR;
 import static utils.MetodosAyuda.*;
 
 import java.awt.Graphics;
@@ -18,7 +19,7 @@ import utils.LoadSave;
 
 public class Jugador extends Cascaron {
     private java.awt.geom.Rectangle2D.Float attackBox;
-
+    private boolean onLadder = false;
     private int vidaMaxima = 100;
     private int vidaActual = vidaMaxima;
     private BufferedImage[][] idLeAni;
@@ -74,13 +75,13 @@ public class Jugador extends Cascaron {
         return isDead;
     }
 
-    private int dañoAtaque = 1500;
+    private int dañoAtaque = 150;
     private int golpesAcertados = 0;
     private int enemigosDerrotados = 0;
 
     public Jugador(float x, float y, int w, int h, utils.AudioPlayer audioPlayer) {
         super(x, y, w, h);
-        this.audioPlayer = audioPlayer;
+        this.audioPlayer = audioPlayer; // Guardamos el reproductor
         this.spawnX = x;
         this.spawnY = y;
         loadAnimation();
@@ -91,6 +92,7 @@ public class Jugador extends Cascaron {
     public void update(EnemyManager enemyMan, ObjectManager objectMan) {
         if (invulnerableTimer > 0)
             invulnerableTimer--;
+        onLadder = utils.MetodosAyuda.IsEntityOnLadder(hitbox, lvlData);
         updateAttackBox();
         actualizarAnim(enemyMan, objectMan);
         colocarAnim();
@@ -98,6 +100,7 @@ public class Jugador extends Cascaron {
         autoCurar();
         revisarPicos();
         revisarCaidaVacio();
+        revisarAgua(objectMan);
     }
 
     public void loadLvlData(int[][] getLevelData) {
@@ -125,6 +128,9 @@ public class Jugador extends Cascaron {
                 playerAction = SALTAR;
             else
                 playerAction = CAYENDO;
+        }
+        if (onLadder && (up || down)) {
+            playerAction = ESCALAR;
         }
 
         if (attacking) {
@@ -240,7 +246,7 @@ public class Jugador extends Cascaron {
         this.right = right;
     }
 
-    public void ActuPosicion() {
+   public void ActuPosicion() {
         if (isDead)
             return;
 
@@ -249,6 +255,7 @@ public class Jugador extends Cascaron {
             jump();
 
         float xSpeed = 0;
+        float ySpeed = 0; // NUEVA VARIABLE PARA MOVERSE ARRIBA/ABAJO
 
         if (inKnockback) {
             xSpeed = knockbackDir * knockbackSpeed;
@@ -256,20 +263,37 @@ public class Jugador extends Cascaron {
                 inKnockback = false;
             }
         } else {
-            if (left) {
-                xSpeed -= playerSpeed;
-                playerDirec = -1;
-            }
-            if (right) {
-                xSpeed += playerSpeed;
-                playerDirec = 1;
-            }
+            if (left) { xSpeed -= playerSpeed; playerDirec = -1; }
+            if (right) { xSpeed += playerSpeed; playerDirec = 1; }
         }
+
+        // --- INICIO LÓGICA DE ESCALERAS ---
+        if (onLadder) {
+            inAir = false; // Anulamos la gravedad
+            airSpeed = 0;
+
+            if (up) {
+                ySpeed = -playerSpeed;
+                moving = true;
+            } else if (down) {
+                ySpeed = playerSpeed;
+                moving = true;
+            }
+
+            if (ySpeed != 0) {
+                if (CanMoveHere(hitbox.x, hitbox.y + ySpeed, (int) hitbox.width, (int) hitbox.height, lvlData)) {
+                    hitbox.y += ySpeed;
+                }
+            }
+            updateXPos(xSpeed); // Permitir que se mueva a los lados en la escalera
+            if (xSpeed != 0 || ySpeed != 0) moving = true;
+            return; // Salimos de la función para que NO aplique la gravedad de abajo
+        }
+        // --- FIN LÓGICA DE ESCALERAS ---
 
         if (!left && !right && !inAir && !inKnockback)
             return;
 
-       
         if (!inAir && !IsEntityOnFloor(hitbox, lvlData) && !enPlataforma)
             inAir = true;
 
@@ -290,7 +314,7 @@ public class Jugador extends Cascaron {
         } else
             updateXPos(xSpeed);
 
-        moving = true;
+        if (xSpeed != 0) moving = true;
     }
 
     private void updateXPos(float xSpeed) {
@@ -357,8 +381,12 @@ public class Jugador extends Cascaron {
         for (int i = 0; i < 2; i++) {
             heartFrames[i] = heartSheet.getSubimage(i * 90, 0, 90, 28);
         }
+        
         BufferedImage img = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS);
-        idLeAni = new BufferedImage[7][9];
+        
+        // ¡ESTE ES EL CAMBIO CLAVE! Cambiamos el 7 por un 8
+        idLeAni = new BufferedImage[8][9]; 
+        
         for (int j = 0; j < idLeAni.length; j++) {
             for (int i = 0; i < idLeAni[j].length; i++) {
                 idLeAni[j][i] = img.getSubimage(i * 100, j * 100, 100, 100);
@@ -548,5 +576,16 @@ public boolean getTieneLlave() {
 public float getAirSpeed() {
     return airSpeed;
 }
+private void revisarAgua(ObjectManager objectMan) {
+        if (objectMan.checkMuertePorAgua(hitbox)) {
+            if (!isDead) {
+                if (audioPlayer != null) {
+                    audioPlayer.reproducirEfecto("sonido-dano.wav");
+                }
+                vidaActual = 0;
+                setDead(true);
+            }
+        }
+    }
     
 }

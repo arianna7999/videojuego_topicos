@@ -27,6 +27,12 @@ public class ObjectManager {
     private BufferedImage[] explosionImgs;
     private BufferedImage[] llaveImgs;
     private BufferedImage[] candelabroImgs;
+    // Variables para el Mar
+    private ArrayList<java.awt.geom.Rectangle2D.Float> aguas = new ArrayList<>();
+    private BufferedImage[] marSprites;
+    private int marAniTick = 0;
+    private int marAniIndex = 0;
+    private int marAniSpeed = 30; // Qué tan rápido se mueven las olas
 
     public ObjectManager(utils.AudioPlayer audioPlayer) {
         this.audioPlayer = audioPlayer;
@@ -73,6 +79,16 @@ public class ObjectManager {
             candelabroImgs[i] = imgCompletaCandelabro.getSubimage(i * anchoFrameCandelabro, 0, anchoFrameCandelabro, altoFrameCandelabro);
         }
 
+        try {
+            BufferedImage imgMar = utils.LoadSave.GetSpriteAtlas("mar.png");
+            marSprites = new BufferedImage[3];
+            for (int i = 0; i < 3; i++) {
+                marSprites[i] = imgMar.getSubimage(i * 100, 0, 100, 100);
+            }
+        } catch (Exception e) {
+            System.out.println("Aviso: No se encontró mar.png");
+        }
+
     }
 
     public void cargarObjetosDeNivel(int nivelActual) {
@@ -112,6 +128,9 @@ public class ObjectManager {
                         break;
                     case 5:
                         plataformas.add(new PlataformaMovil(xPos, yPos, PLATAFORMA, 200, true));
+                        break;
+                    case 8: // NUEVO: Valor AZUL = 8 para poner agua
+                        aguas.add(new java.awt.geom.Rectangle2D.Float(xPos, yPos, Juego.TILES_SIZE, Juego.TILES_SIZE));
                         break;
                     case 10:
                         candelabros.add(new Candelabro(xPos, yPos));
@@ -239,6 +258,15 @@ public class ObjectManager {
                     null);
             }
         }
+
+        if (marSprites != null) {
+            for (java.awt.geom.Rectangle2D.Float agua : aguas) {
+                g.drawImage(marSprites[marAniIndex], 
+                    (int) (agua.x - xLvlOffset), 
+                    (int) (agua.y - yLvlOffset), 
+                    Juego.TILES_SIZE, Juego.TILES_SIZE, null);
+            }
+        }
     }
 
     public void actualizarJugadorEnPlataforma(Jugador j) {
@@ -275,5 +303,17 @@ public class ObjectManager {
                 }
             }
         }
+    }
+
+    public boolean checkMuertePorAgua(java.awt.geom.Rectangle2D.Float hitboxJugador) {
+        for (java.awt.geom.Rectangle2D.Float agua : aguas) {
+            // Revisar si el centro del jugador toca el agua
+            int centerX = (int) (hitboxJugador.x + hitboxJugador.width / 2);
+            int centerY = (int) (hitboxJugador.y + hitboxJugador.height / 2);
+            if (agua.contains(centerX, centerY)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
