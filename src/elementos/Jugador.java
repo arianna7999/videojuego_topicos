@@ -74,13 +74,13 @@ public class Jugador extends Cascaron {
         return isDead;
     }
 
-    private int dañoAtaque = 150;
+    private int dañoAtaque = 1500;
     private int golpesAcertados = 0;
     private int enemigosDerrotados = 0;
 
     public Jugador(float x, float y, int w, int h, utils.AudioPlayer audioPlayer) {
         super(x, y, w, h);
-        this.audioPlayer = audioPlayer; // Guardamos el reproductor
+        this.audioPlayer = audioPlayer;
         this.spawnX = x;
         this.spawnY = y;
         loadAnimation();
