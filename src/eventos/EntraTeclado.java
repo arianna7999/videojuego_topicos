@@ -1,11 +1,7 @@
 package eventos;
 
-import static utils.Constantes.Direccion.*;
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-
-import elementos.JefeFinal;
 import juego.PanelJuego;
 
 public class EntraTeclado implements KeyListener {
@@ -16,17 +12,28 @@ public class EntraTeclado implements KeyListener {
   }
 
   @Override
-  public void keyTyped(KeyEvent e) {
-    // char c = e.getKeyChar();
-    // for (JefeFinal j : pan.getGame().getEnemyManager().getJefesFinales()) {
-    // if (j.isActivo() && Character.isDigit(c)) {
-    // j.agregarCaracter(c);
-    // }
-    // }
-  }
+  public void keyTyped(KeyEvent e) {}
 
   @Override
   public void keyPressed(KeyEvent e) {
+    // Pantalla de selección de personaje
+    if (pan.getGame().isEnSeleccion()) {
+      switch (e.getKeyCode()) {
+        case KeyEvent.VK_LEFT:
+        case KeyEvent.VK_A:
+          pan.getGame().moverSeleccion(-1);
+          return;
+        case KeyEvent.VK_RIGHT:
+        case KeyEvent.VK_D:
+          pan.getGame().moverSeleccion(1);
+          return;
+        case KeyEvent.VK_ENTER:
+          pan.getGame().confirmarSeleccion();
+          return;
+      }
+      return; // bloquear otras teclas en selección
+    }
+
     switch (e.getKeyCode()) {
       case KeyEvent.VK_ESCAPE:
         System.out.println("Juego pausado. Presiona ESC nuevamente para continuar.");
@@ -48,27 +55,19 @@ public class EntraTeclado implements KeyListener {
       case KeyEvent.VK_NUMPAD5:
         pan.getGame().getPlayer().setAttacking(true);
         break;
+
       case KeyEvent.VK_SPACE:
       case KeyEvent.VK_W:
         pan.getGame().getPlayer().setJump(true);
         break;
-      // case KeyEvent.VK_BACK_SPACE:
-      // for (JefeFinal j : pan.getGame().getEnemyManager().getJefesFinales()) {
-      // if (j.isActivo())
-      // j.borrarCaracter();
-      // }
-      // break;
+      case KeyEvent.VK_E:
+        // Activar habilidad especial del personaje
+        pan.getGame().getPlayer().usarHabilidad();
+        break;
       case KeyEvent.VK_ENTER:
         if (pan.getGame().isVictoria() || pan.getGame().isGameOver() || pan.getGame().isEnInicio()) {
           pan.getGame().reiniciarDesdePantalla();
         }
-
-        // else {
-        // for (JefeFinal j : pan.getGame().getEnemyManager().getJefesFinales()) {
-        // if (j.isActivo())
-        // j.confirmarRespuesta();
-        // }
-        // }
         break;
     }
   }
@@ -97,6 +96,7 @@ public class EntraTeclado implements KeyListener {
       case KeyEvent.VK_NUMPAD5:
         pan.getGame().getPlayer().setAttacking(false);
         break;
+
     }
   }
 }

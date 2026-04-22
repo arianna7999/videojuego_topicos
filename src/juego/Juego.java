@@ -57,6 +57,16 @@ public class Juego extends Thread {
     private java.awt.Color shadowColor;
 
     private boolean enInicio = true;
+    private boolean enSeleccion = false;
+    private int seleccionIndice = 0;
+
+    // Personajes disponibles: nombre, vida, vel, daño, salto, sprite, cols, filas, celdaW, celdaH, habilidad, drawOffX, drawOffY, tiempoParaCurar, cantCura
+    private final elementos.Personaje[] PERSONAJES = {
+        new elementos.Personaje("Hank",   120, 2.0f, 25, -2.25f, "Soldier.png", 9, 7, 100, 100, "golpe_brutal", 87f, 80f, 500, 3),
+        new elementos.Personaje("Frank",  200, 1.5f, 20, -2.0f,  "Frank.png",   9, 7, 100, 100, "coraza",       87f, 80f, 400, 4),
+        new elementos.Personaje("Saori",   70, 3.0f,  8, -2.6f,  "Saori.png",   9, 7, 100, 100, "robo_vida",    87f, 80f, 180, 6),
+        new elementos.Personaje("Lucerys", 80, 1.4f, 20, -2.4f,  "Lucerys.png", 9, 7, 100, 100, "lluvia",       87f, 80f, 400, 3)
+    };
 
     public boolean isResetRequerido() {
         return resetRequerido;
@@ -107,7 +117,9 @@ public class Juego extends Thread {
         calcularCameraOffset();
         player.loadLvlData(levelMan.currentLevel().getLvlData());
         objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
-        reproductorAudio.reproducirMusica("pista_cueva.wav");
+        enInicio    = false;
+        enSeleccion = true;
+        // La música se inicia al confirmar personaje
     }
 
     public void inicializarObjetos(){
@@ -216,6 +228,9 @@ public class Juego extends Thread {
         if (victoria || gameOver) {
             return;
         }
+        if (enSeleccion) {
+            return;
+        }
         if (enInicio) {
             if (player.isReadyToRestart()) {
                 enInicio = false;
@@ -310,6 +325,10 @@ public class Juego extends Thread {
         
         if (gameOver)  {
             dibujarGameOver(g);
+            return;
+        }
+        if (enSeleccion) {
+            dibujarSeleccion(g);
             return;
         }
         if (enInicio) {
@@ -412,10 +431,8 @@ public class Juego extends Thread {
     }
 
     public void reiniciarDesdePantalla() {
-        if (victoria || gameOver || enInicio) {
-            resetRequerido = true;
-            reproductorAudio.detenerMusica();
-            reproductorAudio.reproducirMusica("pista_cueva.wav");
+        if (victoria || gameOver || enInicio || enSeleccion) {
+            irASeleccion();
         }
     }
 
@@ -444,5 +461,144 @@ public class Juego extends Thread {
     }
     public boolean isEnInicio() {
         return enInicio;
+    }
+
+    public boolean isEnSeleccion() { return enSeleccion; }
+    public int getSeleccionIndice() { return seleccionIndice; }
+
+    public void moverSeleccion(int delta) {
+        seleccionIndice = (seleccionIndice + delta + PERSONAJES.length) % PERSONAJES.length;
+    }
+
+    public void confirmarSeleccion() {
+       
+        levelMan.resetToFirstLevel();
+        // 2. Aplicar el personaje elegido
+        player.setPersonaje(PERSONAJES[seleccionIndice]);
+        // 3. Resetear estado del jugador y enemigos
+        player.resetAll();
+        player.loadLvlData(levelMan.currentLevel().getLvlData());
+        calcularCameraOffset();
+        enemyManager.resetAllEnemies(levelMan.getLevelIndex());
+        objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
+        xLvlOffset = 0;
+        yLvlOffset = 0;
+        victoria   = false;
+        gameOver   = false;
+        enSeleccion = false;
+        enInicio    = false;
+        reproductorAudio.detenerMusica();
+        reproductorAudio.reproducirMusica("pista_cueva.wav");
+    }
+
+    public void irASeleccion() {
+        victoria    = false;
+        gameOver    = false;
+        enInicio    = false;
+        enSeleccion = true;
+        player.resetAll();
+        enemyManager.resetAllEnemies(levelMan.getLevelIndex());
+        levelMan.resetToFirstLevel();
+        player.loadLvlData(levelMan.currentLevel().getLvlData());
+        calcularCameraOffset();
+        objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
+        xLvlOffset = 0;
+        yLvlOffset = 0;
+        reproductorAudio.detenerMusica();
+    }
+
+    void dibujarSeleccion(Graphics g) {
+        g.setColor(java.awt.Color.BLACK);
+        g.fillRect(0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT);
+        java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
+        g2.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,
+                java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        java.awt.Font selTitleFont = customFont.deriveFont(java.awt.Font.BOLD, (int)(32 * Juego.SCALE));
+        java.awt.Font selNameFont  = customFont.deriveFont(java.awt.Font.BOLD, (int)(20 * Juego.SCALE));
+        java.awt.Font selStatFont  = customFont.deriveFont(java.awt.Font.PLAIN, (int)(11 * Juego.SCALE));
+        java.awt.Font selHintFont  = customFont.deriveFont(java.awt.Font.PLAIN, (int)(13 * Juego.SCALE));
+
+        g2.setFont(selTitleFont);
+        String titulo = "ELIGE TU PERSONAJE";
+        java.awt.FontMetrics fmT = g2.getFontMetrics();
+        g2.setColor(new java.awt.Color(212, 175, 55));
+        g2.drawString(titulo, (Juego.GAME_WIDTH - fmT.stringWidth(titulo)) / 2, (int)(60 * Juego.SCALE));
+
+        int cardW  = (int)(90 * Juego.SCALE);
+        int cardH  = (int)(110 * Juego.SCALE);
+        int gap    = (int)(20 * Juego.SCALE);
+        int totalW = PERSONAJES.length * cardW + (PERSONAJES.length - 1) * gap;
+        int startX = (Juego.GAME_WIDTH - totalW) / 2;
+        int cardY  = (int)(90 * Juego.SCALE);
+
+        int[][] stats = { {100,20,15,22}, {160,15,25,20}, {70,30,12,26}, {80,22,30,24} };
+        String[] roles = {"Guerrero", "Tanque", "Veloz", "Mago"};
+        java.awt.Color[] roleColors = {
+            new java.awt.Color(100,180,255), new java.awt.Color(100,220,100),
+            new java.awt.Color(255,180,60),  new java.awt.Color(200,100,255)
+        };
+
+        for (int i = 0; i < PERSONAJES.length; i++) {
+            int cx = startX + i * (cardW + gap);
+            boolean sel = (i == seleccionIndice);
+            if (sel) {
+                g2.setColor(new java.awt.Color(60, 50, 20));
+                g2.fillRoundRect(cx - 4, cardY - 4, cardW + 8, cardH + 8, 16, 16);
+                g2.setColor(goldColor);
+                g2.setStroke(new java.awt.BasicStroke(3));
+                g2.drawRoundRect(cx - 4, cardY - 4, cardW + 8, cardH + 8, 16, 16);
+            } else {
+                g2.setColor(new java.awt.Color(30, 30, 40));
+                g2.fillRoundRect(cx, cardY, cardW, cardH, 12, 12);
+                g2.setColor(new java.awt.Color(80, 80, 100));
+                g2.setStroke(new java.awt.BasicStroke(1.5f));
+                g2.drawRoundRect(cx, cardY, cardW, cardH, 12, 12);
+            }
+            g2.setFont(selNameFont);
+            java.awt.FontMetrics fmN = g2.getFontMetrics();
+            g2.setColor(sel ? goldColor : java.awt.Color.WHITE);
+            String nombre = PERSONAJES[i].nombre;
+            g2.drawString(nombre, cx + (cardW - fmN.stringWidth(nombre)) / 2, cardY + (int)(22 * Juego.SCALE));
+            g2.setFont(selStatFont);
+            java.awt.FontMetrics fmS = g2.getFontMetrics();
+            g2.setColor(roleColors[i]);
+            String rol = "[" + roles[i] + "]";
+            g2.drawString(rol, cx + (cardW - fmS.stringWidth(rol)) / 2, cardY + (int)(34 * Juego.SCALE));
+
+            String[] statLabels = {"VID","VEL","DAÑ","SAL"};
+            int[] statVals = stats[i];
+            int[] statMax  = {160,30,30,26};
+            java.awt.Color[] barColors = {
+                new java.awt.Color(220,80,80), new java.awt.Color(80,200,120),
+                new java.awt.Color(255,160,40), new java.awt.Color(80,160,255)
+            };
+            int barY = cardY + (int)(44 * Juego.SCALE);
+            int barAreaW  = cardW - (int)(20 * Juego.SCALE);
+            int barH2     = (int)(7 * Juego.SCALE);
+            int barSpacing = (int)(16 * Juego.SCALE);
+            for (int s = 0; s < 4; s++) {
+                int by = barY + s * barSpacing;
+                g2.setColor(new java.awt.Color(180,180,180));
+                g2.drawString(statLabels[s], cx + (int)(6 * Juego.SCALE), by + barH2);
+                int bx = cx + (int)(26 * Juego.SCALE);
+                int bw = barAreaW - (int)(20 * Juego.SCALE);
+                g2.setColor(new java.awt.Color(50,50,60));
+                g2.fillRoundRect(bx, by, bw, barH2, 4, 4);
+                int fill = (int)((float) statVals[s] / statMax[s] * bw);
+                g2.setColor(barColors[s]);
+                g2.fillRoundRect(bx, by, fill, barH2, 4, 4);
+            }
+        }
+        g2.setFont(selTitleFont);
+        g2.setColor(new java.awt.Color(212,175,55,180));
+        int arrowY = cardY + cardH / 2 + (int)(10 * Juego.SCALE);
+        g2.drawString("<", startX - (int)(30 * Juego.SCALE), arrowY);
+        g2.drawString(">", startX + totalW + (int)(10 * Juego.SCALE), arrowY);
+        g2.setFont(selHintFont);
+        java.awt.FontMetrics fmH = g2.getFontMetrics();
+        String hint = "LEFT/RIGHT para navegar    ENTER para confirmar";
+        g2.setColor(new java.awt.Color(180,180,180));
+        g2.drawString(hint, (Juego.GAME_WIDTH - fmH.stringWidth(hint)) / 2, cardY + cardH + (int)(30 * Juego.SCALE));
     }
 }

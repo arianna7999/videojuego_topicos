@@ -73,45 +73,79 @@ public class EnemyManager {
     }
 
     public void checkEnemyHit(java.awt.geom.Rectangle2D.Float attackBox, Jugador jugador) {
-        int dañoJugador = jugador.getDañoAtaque();
-        
+        int dañoJugador = jugador.getDañoActual(); // Golpe Brutal de Hank
+        boolean robó = false;
         for (Esqueleto e : esqueletos) {
             if (e.getEnemyState() != MUERTO && attackBox.intersects(e.getHitbox())) {
-                e.recibirDaño(jugador.getDañoAtaque());
+                e.recibirDaño(dañoJugador);
                 jugador.registrarGolpe();
                 crearTextoDaño(e.getHitbox(), dañoJugador);
+                if (!robó) { jugador.procesarRoboVida(dañoJugador); robó = true; }
                 if (e.getEnemyState() == MUERTO) jugador.registrarMuerte();
                 return;
             }
         }
-
         for (JefeFinal j : jefesFinales) {
             if (j.getEnemyState() != MUERTO && attackBox.intersects(j.getHitbox())) {
-                j.recibirDaño(jugador.getDañoAtaque());
+                j.recibirDaño(dañoJugador);
                 jugador.registrarGolpe();
                 crearTextoDaño(j.getHitbox(), dañoJugador);
+                if (!robó) { jugador.procesarRoboVida(dañoJugador); robó = true; }
                 if (j.getEnemyState() == MUERTO) jugador.registrarMuerte();
                 return;
             }
         }
-        
         for (Caballero c : caballeros) {
             if (c.getEnemyState() != MUERTO && attackBox.intersects(c.getHitbox())) {
-                c.recibirDaño(jugador.getDañoAtaque());
+                c.recibirDaño(dañoJugador);
                 jugador.registrarGolpe();
                 crearTextoDaño(c.getHitbox(), dañoJugador);
+                if (!robó) { jugador.procesarRoboVida(dañoJugador); robó = true; }
                 if (c.getEnemyState() == MUERTO) jugador.registrarMuerte();
                 return;
             }
         }
-        
         for (Orc o : orcos) {
             if (o.getEnemyState() != MUERTO && attackBox.intersects(o.getHitbox())) {
-                o.recibirDaño(jugador.getDañoAtaque());
+                o.recibirDaño(dañoJugador);
                 jugador.registrarGolpe();
                 crearTextoDaño(o.getHitbox(), dañoJugador);
+                if (!robó) { jugador.procesarRoboVida(dañoJugador); robó = true; }
                 if (o.getEnemyState() == MUERTO) jugador.registrarMuerte();
                 return;
+            }
+        }
+    }
+
+    /** Lluvia de Lucerys: daña a TODOS los enemigos dentro del área. */
+    public void checkEnemyHitArea(java.awt.geom.Rectangle2D.Float area, Jugador jugador) {
+        int dañoBase = jugador.getDañoAtaque();
+        for (Esqueleto e : esqueletos) {
+            if (e.getEnemyState() != MUERTO && area.intersects(e.getHitbox())) {
+                e.recibirDaño(dañoBase); jugador.registrarGolpe();
+                crearTextoDaño(e.getHitbox(), dañoBase);
+                if (e.getEnemyState() == MUERTO) jugador.registrarMuerte();
+            }
+        }
+        for (JefeFinal j : jefesFinales) {
+            if (j.getEnemyState() != MUERTO && area.intersects(j.getHitbox())) {
+                j.recibirDaño(dañoBase); jugador.registrarGolpe();
+                crearTextoDaño(j.getHitbox(), dañoBase);
+                if (j.getEnemyState() == MUERTO) jugador.registrarMuerte();
+            }
+        }
+        for (Caballero c : caballeros) {
+            if (c.getEnemyState() != MUERTO && area.intersects(c.getHitbox())) {
+                c.recibirDaño(dañoBase); jugador.registrarGolpe();
+                crearTextoDaño(c.getHitbox(), dañoBase);
+                if (c.getEnemyState() == MUERTO) jugador.registrarMuerte();
+            }
+        }
+        for (Orc o : orcos) {
+            if (o.getEnemyState() != MUERTO && area.intersects(o.getHitbox())) {
+                o.recibirDaño(dañoBase); jugador.registrarGolpe();
+                crearTextoDaño(o.getHitbox(), dañoBase);
+                if (o.getEnemyState() == MUERTO) jugador.registrarMuerte();
             }
         }
     }
