@@ -131,8 +131,14 @@ public class LoadSave {
             for (int i = 0; i < img.getWidth(); i++) {
                 Color color = new Color(img.getRGB(i, j));
                 int valor = color.getRed();
-                if (valor >= 48)
-                    valor = 0;
+                
+                // --- AQUÍ ESTÁ LA MAGIA DE LA PRIORIDAD ---
+                // Si el color Rojo coincide con un tile de tu 1.png (0 al 47), lo pone.
+                // Si pintas cualquier otra cosa, lo vuelve "Aire" (11).
+                if (valor >= 48) {
+                    valor = 11; // ¡CAMBIAR 0 POR 11!
+                }
+                
                 lvlData[j][i] = valor;
             }
         }

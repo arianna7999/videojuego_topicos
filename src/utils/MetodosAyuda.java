@@ -45,9 +45,11 @@ private static boolean IsTileSolid(int xIndex, int yIndex, int[][] lvlData) {
         if (valor >= 48 || valor < 0) return true;
         
         // Mantén los números así para que los picos sigan siendo sólidos
+       // Agregamos 8, 20 y 32 a la lista
         if (valor == 11 || valor == 4 || valor == 5 || 
             valor == 16 || valor == 17 || 
-            valor == 3 || valor == 15 || valor == 27) {
+            valor == 3 || valor == 15 || valor == 27 ||
+            valor == 8 || valor == 20 || valor == 32) {
             
             return false;
         }
@@ -119,5 +121,18 @@ public static float GetEntityXPosNextToWall(Rectangle2D.Float hitbox, float xSpe
                 hitbox.y + hitbox.height <= objHitbox.y + 10 &&
                 hitbox.x + hitbox.width > objHitbox.x &&
                 hitbox.x < objHitbox.x + objHitbox.width);
+    }
+
+    public static boolean IsEntityOnLadder(Rectangle2D.Float hitbox, int[][] lvlData) {
+        // Revisamos si el centro del jugador está tocando la escalera
+        int x = (int) (hitbox.x + hitbox.width / 2) / juego.Juego.TILES_SIZE;
+        int y = (int) (hitbox.y + hitbox.height / 2) / juego.Juego.TILES_SIZE;
+
+        if (x >= 0 && x < lvlData[0].length && y >= 0 && y < lvlData.length) {
+            int valor = lvlData[y][x];
+            // Aquí ponemos tus tiles 8, 20 y 32
+            return valor == 8 || valor == 20 || valor == 32;
+        }
+        return false;
     }
 }
