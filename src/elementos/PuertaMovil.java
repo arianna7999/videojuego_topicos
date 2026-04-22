@@ -4,7 +4,7 @@ import juego.Juego;
 
 public class PuertaMovil extends ObjetoJuego {
     private float yObjetivo;
-    private float velocidad = 1.0f * Juego.SCALE;
+    private float velocidad = .5f * Juego.SCALE;
     private boolean abriendo = false;
     private boolean abierta = false;
 

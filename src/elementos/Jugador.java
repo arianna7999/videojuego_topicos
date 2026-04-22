@@ -74,13 +74,13 @@ public class Jugador extends Cascaron {
         return isDead;
     }
 
-    private int dañoAtaque = 15;
+    private int dañoAtaque = 1500;
     private int golpesAcertados = 0;
     private int enemigosDerrotados = 0;
 
     public Jugador(float x, float y, int w, int h, utils.AudioPlayer audioPlayer) {
         super(x, y, w, h);
-        this.audioPlayer = audioPlayer; // Guardamos el reproductor
+        this.audioPlayer = audioPlayer;
         this.spawnX = x;
         this.spawnY = y;
         loadAnimation();
@@ -324,7 +324,8 @@ public class Jugador extends Cascaron {
         airSpeed = jumpSpeed;
     }
 
-    public void render(Graphics g, int LvlOffset) {
+// 1. Agregamos yLvlOffset a los parámetros del método
+    public void render(Graphics g, int xLvlOffset, int yLvlOffset) {
         int flipX = 0;
         int flipW = 1;
 
@@ -334,16 +335,18 @@ public class Jugador extends Cascaron {
         }
 
         g.drawImage(idLeAni[playerAction][animInd],
-                (int) (hitbox.x - xDrawOffset) - LvlOffset + flipX,
-                (int) (hitbox.y - yDrawOffset),
+                (int) (hitbox.x - xDrawOffset) - xLvlOffset + flipX, // El eje X usa xLvlOffset
+                (int) (hitbox.y - yDrawOffset) - yLvlOffset,         // 2. AQUI RESTAMOS EL yLvlOffset
                 w * flipW,
                 h, null);
-        drawHitbox(g, LvlOffset);
-        drawAttackBox(g, LvlOffset);
+                
+        // 3. Pasamos ambos offsets a los métodos de dibujo de cajas de colisión
+        drawHitbox(g, xLvlOffset, yLvlOffset); 
+        drawAttackBox(g, xLvlOffset, yLvlOffset);
     }
 
-    private void drawAttackBox(Graphics g, int LvlOffset) {
-        g.drawRect((int) attackBox.x - LvlOffset, (int) attackBox.y, (int) attackBox.width, (int) attackBox.height);
+    private void drawAttackBox(Graphics g, int xLvlOffset, int yLvlOffset) {
+        g.drawRect((int) attackBox.x - xLvlOffset, (int) attackBox.y - yLvlOffset, (int) attackBox.width, (int) attackBox.height);
     }
 
     private void loadAnimation() {
