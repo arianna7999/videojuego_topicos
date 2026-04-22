@@ -386,8 +386,8 @@ public class Juego extends Thread {
                 drawFondoLevel(g, new BufferedImage[]{fondo1_1, fondo1_2, fondo1_3});
                 drawObjetosRandom(g, 
                     new BufferedImage[]{posteDuenos}, 
-                    new float[]{270f},
-                    new float[]{127f}, 
+                    new float[]{170f},
+                    new float[]{190f}, 
                     new float[]{(float)(POSTE_DUENOS_HEIGHT * 0.15)},
                     new float[]{(float)(POSTE_DUENOS_HEIGHT * 0.15)}
                 );
