@@ -1,21 +1,20 @@
 package elementos;
 
-import static utils.Constantes.GetNoSprite;
-import static utils.Constantes.ConstantesJugador.ATACAR1;
-import static utils.Constantes.ConstantesJugador.CAYENDO;
-import static utils.Constantes.ConstantesJugador.CORRER;
-import static utils.Constantes.ConstantesJugador.INACTIVO;
-import static utils.Constantes.ConstantesJugador.MUERTO;
-import static utils.Constantes.ConstantesJugador.SALTAR;
-import static utils.Constantes.ConstantesJugador.ESCALAR;
-import static utils.MetodosAyuda.*;
-
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-
 import juego.Juego;
+import static utils.Constantes.ConstantesJugador.ARCO;
+import static utils.Constantes.ConstantesJugador.ATACAR1;
+import static utils.Constantes.ConstantesJugador.CAYENDO;
+import static utils.Constantes.ConstantesJugador.CORRER;
+import static utils.Constantes.ConstantesJugador.ESCALAR;
+import static utils.Constantes.ConstantesJugador.INACTIVO;
+import static utils.Constantes.ConstantesJugador.MUERTO;
+import static utils.Constantes.ConstantesJugador.SALTAR;
+import static utils.Constantes.GetNoSprite;
 import utils.LoadSave;
+import static utils.MetodosAyuda.*;
 
 public class Jugador extends Cascaron {
     private java.awt.geom.Rectangle2D.Float attackBox;
@@ -58,6 +57,10 @@ public class Jugador extends Cascaron {
     private boolean attacking = false;
     private boolean attackChecked = false;
 
+    // Disparo con arco (Lucerys)
+    private boolean shootingArrow = false;
+    private boolean arrowChecked = false;
+
     private int deadTimer = 0;
     private boolean readyToRestart = false;
     private float spawnX, spawnY;
@@ -68,26 +71,223 @@ public class Jugador extends Cascaron {
     private int invulnerableTimer = 0;
 
     private int healTimer = 0;
-    private int tiempoParaCurar = 400; 
+    private int tiempoParaCurar = 400;
     private int cantidadCuraAutomatica = 4;
 
-    public boolean isDead() {
-        return isDead;
-    }
+    public boolean isDead() { return isDead; }
 
-    private int dañoAtaque = 150;
+    private int dañoAtaque = 15;
     private int golpesAcertados = 0;
     private int enemigosDerrotados = 0;
 
+    private String personaje = "Hank";
+    private String habilidad = "golpe_brutal";
+
+    // ── Habilidades
+    private static final int MAX_USOS_HABILIDAD = 3;
+    private int usosHabilidadRestantes = MAX_USOS_HABILIDAD;
+
+    // Hank 
+    private boolean golpeBrutalActivo = false;
+
+    // Frank 
+    private boolean corazaActiva = false;
+    private int corazaTimer = 0;
+    private static final int CORAZA_DURACION = 300;
+
+    // Saori 
+    private boolean roboVidaActivo = false;
+
+    // Efectos visuales 
+    private BufferedImage[] efectoHabilidadFrames = null;
+    private int efectoAnimInd  = -1;
+    private int efectoAnimTick = 0;
+    private static final int EFECTO_ANIM_SPEED = 5;
+    private static final int EFECTO_COLS = 8;
+
+    // Lucerys ──────────────────────────────────────────────────────
+    private java.util.ArrayList<FlechaLluvia> flechasLluvia = new java.util.ArrayList<>();
+    private static final int NUM_FLECHAS   = 8;
+    private static final int DELAY_FLECHAS = 8;
+    private int flechaSpawnTimer   = 0;
+    private int flechasSpawneadas  = 0;
+    private boolean lluviaEnCurso  = false;
+    private float   lluviacentroX, lluviaRadioX, lluviaTargetY;
+    private boolean lluviaActivada = false;
+    public boolean isLluviaActivada() { return lluviaActivada; }
+
     public Jugador(float x, float y, int w, int h, utils.AudioPlayer audioPlayer) {
         super(x, y, w, h);
-        this.audioPlayer = audioPlayer; // Guardamos el reproductor
+        this.audioPlayer = audioPlayer;
         this.spawnX = x;
         this.spawnY = y;
         loadAnimation();
         initHitbox(x, y, 28 * Juego.SCALE, 31 * Juego.SCALE);
         attackBox = new java.awt.geom.Rectangle2D.Float(x, y, (int) (20 * Juego.SCALE), (int) (20 * Juego.SCALE));
     }
+
+   
+    public void setPersonaje(Personaje p) {
+        this.personaje              = p.nombre;
+        this.tiempoParaCurar        = p.tiempoParaCurar;
+        this.cantidadCuraAutomatica = p.cantidadCuraAutomatica;
+        this.vidaMaxima  = p.vida;
+        this.playerSpeed = p.velocidad;
+        this.dañoAtaque  = p.daño;
+        this.jumpSpeed   = p.salto * Juego.SCALE;
+        this.habilidad   = p.habilidad;
+        this.vidaActual  = vidaMaxima;
+        this.xDrawOffset = p.drawOffsetX * Juego.SCALE;
+        this.yDrawOffset = p.drawOffsetY * Juego.SCALE;
+        cargarSprite(p.sprite, p.spriteColumnas, p.spriteFilas, p.spriteCeldaW, p.spriteCeldaH);
+        cargarEfectoHabilidad();
+    }
+
+    private void cargarSprite(String ruta, int cols, int filas, int celdaW, int celdaH) {
+        BufferedImage img = utils.LoadSave.GetSpriteAtlas(ruta);
+        int filasUsar = Math.min(filas, 8);
+        int colsUsar  = Math.min(cols,  9);
+        idLeAni = new BufferedImage[8][9];
+        for (int j = 0; j < filasUsar; j++) {
+            for (int i = 0; i < colsUsar; i++) {
+                idLeAni[j][i] = img.getSubimage(i * celdaW, j * celdaH, celdaW, celdaH);
+            }
+            for (int i = colsUsar; i < 9; i++) {
+                idLeAni[j][i] = idLeAni[j][colsUsar - 1];
+            }
+        }
+        for (int j = filasUsar; j < 8; j++) {
+            for (int i = 0; i < 9; i++) {
+                idLeAni[j][i] = idLeAni[0][i];
+            }
+        }
+    }
+
+    private void cargarEfectoHabilidad() {
+        BufferedImage sheet = utils.LoadSave.GetSpriteAtlas("efecto_habilidad.png");
+        if (sheet == null) return;
+        int fila;
+        switch (personaje) {
+            case "Hank":    fila = 0; break;
+            case "Saori":   fila = 1; break;
+            case "Frank":   fila = 2; break;
+            case "Lucerys": fila = 3; break;
+            default:        fila = 0; break;
+        }
+        int celdaSize = 64;
+        efectoHabilidadFrames = new BufferedImage[EFECTO_COLS];
+        for (int i = 0; i < EFECTO_COLS; i++) {
+            efectoHabilidadFrames[i] = sheet.getSubimage(i * celdaSize, fila * celdaSize, celdaSize, celdaSize);
+        }
+    }
+
+    private void dispararEfectoVisual() {
+        efectoAnimInd  = 0;
+        efectoAnimTick = 0;
+    }
+
+    private void updateHabilidades() {
+        if (corazaActiva) {
+            corazaTimer--;
+            if (corazaTimer <= 0) {
+                corazaActiva = false;
+                corazaTimer  = 0;
+            }
+        }
+        if (efectoAnimInd >= 0 && efectoHabilidadFrames != null) {
+            efectoAnimTick++;
+            if (efectoAnimTick >= EFECTO_ANIM_SPEED) {
+                efectoAnimTick = 0;
+                efectoAnimInd++;
+                if (efectoAnimInd >= EFECTO_COLS) {
+                    efectoAnimInd = -1;
+                }
+            }
+        }
+    }
+
+    public void usarHabilidad() {
+        if (habilidad == null) return;
+        if (usosHabilidadRestantes <= 0) return;
+        usosHabilidadRestantes--;
+        dispararEfectoVisual();
+        switch (habilidad) {
+            case "golpe_brutal":
+                golpeBrutalActivo = true;
+                break;
+            case "coraza":
+                corazaActiva = true;
+                corazaTimer  = CORAZA_DURACION;
+                break;
+            case "robo_vida":
+                roboVidaActivo = true;
+                break;
+            case "lluvia":
+                lluviaActivada = true;
+                break;
+        }
+    }
+
+    public void ejecutarLluvia(EnemyManager enemyMan) {
+        if (!lluviaActivada) return;
+        lluviaActivada    = false;
+        lluviaEnCurso     = true;
+        flechasSpawneadas = 0;
+        flechaSpawnTimer  = 0;
+        lluviacentroX = hitbox.x + hitbox.width / 2;
+        lluviaRadioX  = 220 * Juego.SCALE;
+        lluviaTargetY = Juego.GAME_HEIGHT - 10 * Juego.SCALE;
+    }
+
+    private void updateLluvia(EnemyManager enemyMan) {
+        if (!lluviaEnCurso && flechasLluvia.isEmpty()) return;
+
+        if (lluviaEnCurso && flechasSpawneadas < NUM_FLECHAS) {
+            flechaSpawnTimer++;
+            if (flechaSpawnTimer >= DELAY_FLECHAS) {
+                flechaSpawnTimer = 0;
+                float rx = (float)(Math.random() * 2 - 1) * lluviaRadioX;
+                float startY = -60 * Juego.SCALE;
+                flechasLluvia.add(new FlechaLluvia(
+                    lluviacentroX + rx, startY, lluviaTargetY, dañoAtaque));
+                flechasSpawneadas++;
+            }
+            if (flechasSpawneadas >= NUM_FLECHAS) lluviaEnCurso = false;
+        }
+
+        java.util.Iterator<FlechaLluvia> it = flechasLluvia.iterator();
+        while (it.hasNext()) {
+            FlechaLluvia f = it.next();
+            f.update();
+            if (f.isAplicaDaño()) {
+                enemyMan.checkEnemyHitArea(f.getHitbox(), this);
+                f.consumirDaño();
+            }
+            if (f.isMuerta()) it.remove();
+        }
+    }
+
+    public String getPersonaje() { return personaje; }
+
+    public int getDañoActual() {
+        if (golpeBrutalActivo) {
+            golpeBrutalActivo = false;
+            return dañoAtaque * 3;
+        }
+        return dañoAtaque;
+    }
+
+    public void procesarRoboVida(int dañoHecho) {
+        if (roboVidaActivo) {
+            roboVidaActivo = false;
+            curarVida(dañoHecho);
+        }
+    }
+
+    public int getUsosHabilidadRestantes() { return usosHabilidadRestantes; }
+    public int getMaxUsosHabilidad()       { return MAX_USOS_HABILIDAD; }
+    public boolean isRoboVidaActivo()      { return roboVidaActivo; }
+    public boolean isCorazaActiva()        { return corazaActiva; }
 
     public void update(EnemyManager enemyMan, ObjectManager objectMan) {
         if (invulnerableTimer > 0)
@@ -101,13 +301,16 @@ public class Jugador extends Cascaron {
         revisarPicos();
         revisarCaidaVacio();
         revisarAgua(objectMan);
+        updateHabilidades();
+        if (lluviaActivada) ejecutarLluvia(enemyMan);
+        updateLluvia(enemyMan);
     }
 
     public void loadLvlData(int[][] getLevelData) {
         this.lvlData = getLevelData;
         if (!utils.MetodosAyuda.IsEntityOnFloor(hitbox, lvlData) && !enPlataforma) {
-        inAir = true;
-}
+            inAir = true;
+        }
     }
 
     private void colocarAnim() {
@@ -115,14 +318,11 @@ public class Jugador extends Cascaron {
             playerAction = MUERTO;
             return;
         }
-
         int startAnim = playerAction;
-
         if (moving)
             playerAction = CORRER;
         else
             playerAction = INACTIVO;
-            
         if (inAir) {
             if (airSpeed < 0)
                 playerAction = SALTAR;
@@ -132,11 +332,14 @@ public class Jugador extends Cascaron {
         if (onLadder && (up || down)) {
             playerAction = ESCALAR;
         }
-
         if (attacking) {
-            playerAction = ATACAR1;
+            
+            if ("Lucerys".equals(personaje)) {
+                playerAction = ARCO;
+            } else {
+                playerAction = ATACAR1;
+            }
         }
-
         if (startAnim != playerAction)
             resetAnimTick();
     }
@@ -164,11 +367,8 @@ public class Jugador extends Cascaron {
             if (playerAction == MUERTO) {
                 if (animInd >= GetNoSprite(MUERTO) - 1) {
                     animInd = GetNoSprite(MUERTO) - 1;
-
                     deadTimer++;
-                    if (deadTimer >= 40) {
-                        readyToRestart = true;
-                    }
+                    if (deadTimer >= 40) readyToRestart = true;
                 }
                 return;
             }
@@ -180,156 +380,107 @@ public class Jugador extends Cascaron {
                 attackChecked = true;
             }
 
+            
+            if (playerAction == ARCO && animInd == 5 && !arrowChecked) {
+                audioPlayer.reproducirEfecto("sonido-golpe.wav");
+                float savedX = attackBox.x;
+                float savedW = attackBox.width;
+                attackBox.width = 400 * Juego.SCALE;
+                if (playerDirec == 1)
+                    attackBox.x = hitbox.x + hitbox.width;
+                else
+                    attackBox.x = hitbox.x - attackBox.width;
+                enemyMan.checkEnemyHit(attackBox, this);
+                attackBox.x = savedX;
+                attackBox.width = savedW;
+                arrowChecked = true;
+            }
+
             if (animInd >= GetNoSprite(playerAction)) {
                 animInd = 0;
                 attacking = false;
                 attackChecked = false;
+                arrowChecked = false;
             }
         }
     }
 
-    public int getPlayerDirec() {
-        return playerDirec;
-    }
+    public int getPlayerDirec() { return playerDirec; }
+    public void setPlayerDirec(int playerDirec) { this.playerDirec = playerDirec; }
+    public boolean isMoving() { return moving; }
+    public void setMoving(boolean moving) { this.moving = moving; }
+    public boolean isAttacking() { return attacking; }
+    public void setAttacking(boolean attacking) { this.attacking = attacking; }
+    public boolean isShootingArrow() { return shootingArrow; }
+    public void setShootingArrow(boolean shootingArrow) { this.shootingArrow = shootingArrow; }
+    public boolean isUp() { return up; }
+    public void setUp(boolean up) { this.up = up; }
+    public boolean isDown() { return down; }
+    public void setDown(boolean down) { this.down = down; }
+    public boolean isLeft() { return left; }
+    public void setLeft(boolean left) { this.left = left; }
+    public boolean isRight() { return right; }
+    public void setRight(boolean right) { this.right = right; }
 
-    public void setPlayerDirec(int playerDirec) {
-        this.playerDirec = playerDirec;
-    }
-
-    public boolean isMoving() {
-        return moving;
-    }
-
-    public void setMoving(boolean moving) {
-        this.moving = moving;
-    }
-
-    public boolean isAttacking() {
-        return attacking;
-    }
-
-    public void setAttacking(boolean attacking) {
-        System.out.println("atacando " + attacking);
-        this.attacking = attacking;
-    }
-
-    public boolean isUp() {
-        return up;
-    }
-
-    public void setUp(boolean up) {
-        this.up = up;
-    }
-
-    public boolean isDown() {
-        return down;
-    }
-
-    public void setDown(boolean down) {
-        this.down = down;
-        System.out.println("abajo " + moving);
-    }
-
-    public boolean isLeft() {
-        return left;
-    }
-
-    public void setLeft(boolean left) {
-        this.left = left;
-    }
-
-    public boolean isRight() {
-        return right;
-    }
-
-    public void setRight(boolean right) {
-        this.right = right;
-    }
-
-   public void ActuPosicion() {
-        if (isDead)
-            return;
-
+    public void ActuPosicion() {
+        if (isDead) return;
         moving = false;
-        if (jump)
-            jump();
-
+        if (jump) jump();
         float xSpeed = 0;
-        float ySpeed = 0; // NUEVA VARIABLE PARA MOVERSE ARRIBA/ABAJO
+        float ySpeed = 0;
 
         if (inKnockback) {
             xSpeed = knockbackDir * knockbackSpeed;
-            if (!inAir && airSpeed >= 0) {
-                inKnockback = false;
-            }
+            if (!inAir && airSpeed >= 0) inKnockback = false;
         } else {
-            if (left) { xSpeed -= playerSpeed; playerDirec = -1; }
-            if (right) { xSpeed += playerSpeed; playerDirec = 1; }
+            if (left)  { xSpeed -= playerSpeed; playerDirec = -1; }
+            if (right) { xSpeed += playerSpeed; playerDirec =  1; }
         }
 
-        // --- INICIO LÓGICA DE ESCALERAS ---
+    
         if (onLadder) {
-            inAir = false; // Anulamos la gravedad
+            inAir = false;
             airSpeed = 0;
-
-            if (up) {
-                ySpeed = -playerSpeed;
-                moving = true;
-            } else if (down) {
-                ySpeed = playerSpeed;
-                moving = true;
-            }
-
+            if (up)   { ySpeed = -playerSpeed; moving = true; }
+            else if (down) { ySpeed = playerSpeed; moving = true; }
             if (ySpeed != 0) {
-                if (CanMoveHere(hitbox.x, hitbox.y + ySpeed, (int) hitbox.width, (int) hitbox.height, lvlData)) {
+                if (CanMoveHere(hitbox.x, hitbox.y + ySpeed, (int) hitbox.width, (int) hitbox.height, lvlData))
                     hitbox.y += ySpeed;
-                }
             }
-            updateXPos(xSpeed); // Permitir que se mueva a los lados en la escalera
+            updateXPos(xSpeed);
             if (xSpeed != 0 || ySpeed != 0) moving = true;
-            return; // Salimos de la función para que NO aplique la gravedad de abajo
-        }
-        // --- FIN LÓGICA DE ESCALERAS ---
-
-        if (!left && !right && !inAir && !inKnockback)
             return;
+        }
+
+        if (!left && !right && !inAir && !inKnockback) return;
 
         if (!inAir && !IsEntityOnFloor(hitbox, lvlData) && !enPlataforma)
             inAir = true;
 
         if (inAir) {
-            if (CanMoveHere(hitbox.x, hitbox.y + airSpeed,
-                    (int) hitbox.width, (int) hitbox.height , lvlData)) {
+            if (CanMoveHere(hitbox.x, hitbox.y + airSpeed, (int) hitbox.width, (int) hitbox.height, lvlData)) {
                 hitbox.y += airSpeed;
                 airSpeed += gravity;
                 updateXPos(xSpeed);
             } else {
                 hitbox.y = GetEntityYPosUnderRoofOrAboveFloor(hitbox, airSpeed);
-                if (airSpeed > 0)
-                    resetInAir();
-                else
-                    airSpeed = fallSpeedAfterCollision;
+                if (airSpeed > 0) resetInAir();
+                else airSpeed = fallSpeedAfterCollision;
                 updateXPos(xSpeed);
             }
-        } else
+        } else {
             updateXPos(xSpeed);
+        }
 
         if (xSpeed != 0) moving = true;
     }
 
     private void updateXPos(float xSpeed) {
-        if (isDead)
-            return;
-        if (CanMoveHere(hitbox.x + xSpeed, hitbox.y ,
-                (int) hitbox.width, (int) hitbox.height, lvlData))
+        if (isDead) return;
+        if (CanMoveHere(hitbox.x + xSpeed, hitbox.y, (int) hitbox.width, (int) hitbox.height, lvlData))
             hitbox.x += xSpeed;
-        else {
+        else
             hitbox.x = GetEntityXPosNextToWall(hitbox, xSpeed);
-            /*
-             * if(airSpeed>0)
-             * resetInAir();
-             */
-        }
     }
 
     private void resetInAir() {
@@ -337,85 +488,95 @@ public class Jugador extends Cascaron {
         airSpeed = 0;
     }
 
-    public void setJump(boolean jump) {
-        this.jump = jump;
-    }
+    public void setJump(boolean jump) { this.jump = jump; }
 
     private void jump() {
-        if (inAir)
-            return;
+        if (inAir) return;
         inAir = true;
         airSpeed = jumpSpeed;
     }
 
-// 1. Agregamos yLvlOffset a los parámetros del método
+   
     public void render(Graphics g, int xLvlOffset, int yLvlOffset) {
         int flipX = 0;
         int flipW = 1;
-
-        if (playerDirec == -1) {
-            flipX = w;
-            flipW = -1;
-        }
+        if (playerDirec == -1) { flipX = w; flipW = -1; }
 
         g.drawImage(idLeAni[playerAction][animInd],
-                (int) (hitbox.x - xDrawOffset) - xLvlOffset + flipX, // El eje X usa xLvlOffset
-                (int) (hitbox.y - yDrawOffset) - yLvlOffset,         // 2. AQUI RESTAMOS EL yLvlOffset
-                w * flipW,
-                h, null);
-                
-        // 3. Pasamos ambos offsets a los métodos de dibujo de cajas de colisión
-        drawHitbox(g, xLvlOffset, yLvlOffset); 
+                (int) (hitbox.x - xDrawOffset) - xLvlOffset + flipX,
+                (int) (hitbox.y - yDrawOffset) - yLvlOffset,
+                w * flipW, h, null);
+
+     
+        if (corazaActiva) {
+            java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
+            int cx = (int)(hitbox.x + hitbox.width/2) - xLvlOffset;
+            int cy = (int)(hitbox.y + hitbox.height/2) - yLvlOffset;
+            int radio = (int)(30 * Juego.SCALE);
+            g2.setColor(new java.awt.Color(50, 120, 255, 80));
+            g2.fillOval(cx - radio, cy - radio, radio * 2, radio * 2);
+            g2.setColor(new java.awt.Color(100, 180, 255, 180));
+            g2.setStroke(new java.awt.BasicStroke(3));
+            g2.drawOval(cx - radio, cy - radio, radio * 2, radio * 2);
+            g2.setStroke(new java.awt.BasicStroke(1));
+        }
+
+       
+        if (efectoAnimInd >= 0 && efectoHabilidadFrames != null) {
+            int efSize = (int)(96 * Juego.SCALE);
+            int ex = (int)(hitbox.x + hitbox.width/2 - efSize/2) - xLvlOffset;
+            int ey = (int)(hitbox.y + hitbox.height/2 - efSize/2) - yLvlOffset;
+            g.drawImage(efectoHabilidadFrames[efectoAnimInd], ex, ey, efSize, efSize, null);
+        }
+
+      
+        for (FlechaLluvia f : flechasLluvia) {
+            f.render(g, xLvlOffset, yLvlOffset);
+        }
+
+        drawHitbox(g, xLvlOffset, yLvlOffset);
         drawAttackBox(g, xLvlOffset, yLvlOffset);
     }
 
     private void drawAttackBox(Graphics g, int xLvlOffset, int yLvlOffset) {
-        g.drawRect((int) attackBox.x - xLvlOffset, (int) attackBox.y - yLvlOffset, (int) attackBox.width, (int) attackBox.height);
+        g.drawRect((int) attackBox.x - xLvlOffset, (int) attackBox.y - yLvlOffset,
+                   (int) attackBox.width, (int) attackBox.height);
     }
 
     private void loadAnimation() {
         healthBarEmpty = LoadSave.GetSpriteAtlas(LoadSave.HEALTH_BAR_EMPTY);
-        healthBarFull = LoadSave.GetSpriteAtlas(LoadSave.HEALTH_BAR_FULL);
+        healthBarFull  = LoadSave.GetSpriteAtlas(LoadSave.HEALTH_BAR_FULL);
         BufferedImage heartSheet = LoadSave.GetSpriteAtlas(LoadSave.HEART_SPRITESHEET);
         heartFrames = new BufferedImage[2];
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++)
             heartFrames[i] = heartSheet.getSubimage(i * 90, 0, 90, 28);
-        }
-        
+
         BufferedImage img = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS);
-        
-        // ¡ESTE ES EL CAMBIO CLAVE! Cambiamos el 7 por un 8
-        idLeAni = new BufferedImage[8][9]; 
-        
-        for (int j = 0; j < idLeAni.length; j++) {
-            for (int i = 0; i < idLeAni[j].length; i++) {
+        idLeAni = new BufferedImage[8][9];
+        for (int j = 0; j < idLeAni.length; j++)
+            for (int i = 0; i < idLeAni[j].length; i++)
                 idLeAni[j][i] = img.getSubimage(i * 100, j * 100, 100, 100);
-            }
-        }
+
+        cargarEfectoHabilidad();
     }
 
-    public void resetDirBoolean() {
-        left = right = up = down = false;
+    public void resetDirBoolean() { left = right = up = down = false; }
+
+    public void recibirDaño(int cantidad, int dirEnemigo) {
+        recibirDaño(cantidad, dirEnemigo, true);
     }
 
- public void recibirDaño(int cantidad, int dirEnemigo) {
-        // Llama al método de abajo diciéndole que SÍ haga ruido (true)
-        recibirDaño(cantidad, dirEnemigo, true); 
-    }
-
-    // 2. Nuevo método que acepta la variable 'hacerRuido'
     public void recibirDaño(int cantidad, int dirEnemigo, boolean hacerRuido) {
-        if (isDead || invulnerableTimer > 0)
-            return;
+        if (isDead || invulnerableTimer > 0) return;
 
-        // Solo reproduce el sonido si 'hacerRuido' es true
-        if (hacerRuido && audioPlayer != null) {
+     
+        if (corazaActiva) cantidad = Math.max(1, cantidad / 2);
+
+        if (hacerRuido && audioPlayer != null)
             audioPlayer.reproducirEfecto("sonido-dano.wav");
-        }
 
         vidaActual -= cantidad;
         invulnerableTimer = 80;
-
         healTimer = -600;
 
         if (vidaActual <= 0) {
@@ -428,28 +589,17 @@ public class Jugador extends Cascaron {
             airSpeed = -1.0f * Juego.SCALE;
         }
     }
-    
 
     public void curarVida(int cantidad) {
         vidaActual += cantidad;
-        if (vidaActual > vidaMaxima) {
-            vidaActual = vidaMaxima;
-        }
+        if (vidaActual > vidaMaxima) vidaActual = vidaMaxima;
     }
 
     private void revisarPicos() {
         if (utils.MetodosAyuda.tocandoPicos(hitbox, lvlData)) {
-            
-            // Verificamos que no esté muerto y que no sea invulnerable AHORA MISMO.
-            // Así el sonido solo se dispara 1 sola vez cuando realmente le baja vida.
-            if (!isDead && invulnerableTimer == 0) {
-                if (audioPlayer != null) {
-                    audioPlayer.reproducirEfecto("sonido-dano.wav");
-                }
-            }
-            
-            // Llamamos al método original, el cual bajará la vida y pondrá el invulnerableTimer en 80
-            recibirDaño(20, -playerDirec); 
+            if (!isDead && invulnerableTimer == 0)
+                if (audioPlayer != null) audioPlayer.reproducirEfecto("sonido-dano.wav");
+            recibirDaño(20, -playerDirec);
         }
     }
 
@@ -461,23 +611,20 @@ public class Jugador extends Cascaron {
         }
     }
 
-    public void setDead(boolean isDead) {
-        this.isDead = isDead;
-    }
+    public void setDead(boolean isDead) { this.isDead = isDead; }
 
     public void drawUI(Graphics g) {
         int heartW = (int) (90 * 3 * Juego.SCALE);
         int heartH = (int) (28 * 3 * Juego.SCALE);
-        int xHeart = 10;
-        int yHeart = 10;
+        int xHeart = 10, yHeart = 10;
 
         int barStartX = xHeart + (int) (27.0 / 90.0 * heartW);
-        int barW = (int) (60.0 / 90.0 * heartW);
+        int barW      = (int) (60.0 / 90.0 * heartW);
         int barStartY = yHeart + (int) (7.0 / 28.0 * heartH);
-        int barH = (int) (18.0 / 28.0 * heartH);
+        int barH      = (int) (18.0 / 28.0 * heartH);
 
-        float porcentajeVida = (float) vidaActual / vidaMaxima;
-        int anchoVidaActual = (int) (porcentajeVida * barW);
+        float porcentajeVida   = (float) vidaActual / vidaMaxima;
+        int   anchoVidaActual  = (int) (porcentajeVida * barW);
 
         g.drawImage(healthBarEmpty, xHeart, yHeart, heartW, heartH, null);
 
@@ -495,15 +642,54 @@ public class Jugador extends Cascaron {
             }
             g.drawImage(heartFrames[heartAnimInd], xHeart, yHeart, heartW, heartH, null);
         }
+
+        dibujarIndicadorHabilidad(g2d, xHeart, yHeart + heartH + (int)(4 * Juego.SCALE));
+        dibujarUsosHabilidad(g2d, xHeart, yHeart + heartH + (int)(22 * Juego.SCALE));
     }
 
-    public int getDañoAtaque() {
-        return dañoAtaque;
+    private void dibujarIndicadorHabilidad(java.awt.Graphics2D g2d, int x, int y) {
+        String textoHab = null;
+        java.awt.Color colorHab = java.awt.Color.WHITE;
+        if (golpeBrutalActivo) {
+            textoHab = "GOLPE BRUTAL"; colorHab = new java.awt.Color(255, 80, 30);
+        } else if (corazaActiva) {
+            int segs = (int) Math.ceil(corazaTimer / 60.0);
+            textoHab = "CORAZA (" + segs + "s)"; colorHab = new java.awt.Color(80, 160, 255);
+        } else if (roboVidaActivo) {
+            textoHab = "ROBO DE VIDA"; colorHab = new java.awt.Color(180, 50, 200);
+        }
+        if (textoHab != null) {
+            java.awt.Font fnt = new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(11 * Juego.SCALE));
+            g2d.setFont(fnt);
+            g2d.setColor(new java.awt.Color(0, 0, 0, 180));
+            g2d.drawString(textoHab, x + 2, y + (int)(13 * Juego.SCALE) + 2);
+            g2d.setColor(colorHab);
+            g2d.drawString(textoHab, x, y + (int)(13 * Juego.SCALE));
+        }
     }
 
-    public void registrarGolpe() {
-        golpesAcertados++;
+    private void dibujarUsosHabilidad(java.awt.Graphics2D g2d, int x, int y) {
+        int tamCirculo = (int)(8 * Juego.SCALE);
+        int gap        = (int)(4 * Juego.SCALE);
+        for (int i = 0; i < MAX_USOS_HABILIDAD; i++) {
+            int cx = x + i * (tamCirculo + gap);
+            if (i < usosHabilidadRestantes) {
+                g2d.setColor(new java.awt.Color(255, 220, 50, 220));
+                g2d.fillOval(cx, y, tamCirculo, tamCirculo);
+                g2d.setColor(new java.awt.Color(180, 140, 0, 255));
+                g2d.drawOval(cx, y, tamCirculo, tamCirculo);
+            } else {
+                g2d.setColor(new java.awt.Color(80, 80, 80, 180));
+                g2d.fillOval(cx, y, tamCirculo, tamCirculo);
+                g2d.setColor(new java.awt.Color(50, 50, 50, 200));
+                g2d.drawOval(cx, y, tamCirculo, tamCirculo);
+            }
+        }
     }
+
+    public int getDañoAtaque() { return dañoAtaque; }
+
+    public void registrarGolpe() { golpesAcertados++; }
 
     public void registrarMuerte() {
         enemigosDerrotados++;
@@ -512,45 +698,48 @@ public class Jugador extends Cascaron {
 
     private void calcularMejoraDaño() {
         float proporcion = (float) golpesAcertados / enemigosDerrotados;
-
-        if (proporcion <= 4.5f) {
-            dañoAtaque += 3;
-        } else {
-            dañoAtaque += 1;
-        }
+        if (proporcion <= 4.5f) dañoAtaque += 3;
+        else dañoAtaque += 1;
     }
 
-    public boolean isReadyToRestart() {
-        return readyToRestart;
-    }
+    public boolean isReadyToRestart() { return readyToRestart; }
 
     public void resetAll() {
         resetDirBoolean();
         inAir = false;
         isDead = false;
         attacking = false;
+        shootingArrow = false;
+        arrowChecked = false;
         moving = false;
         inKnockback = false;
         playerAction = INACTIVO;
         vidaActual = vidaMaxima;
 
+        golpeBrutalActivo = false;
+        corazaActiva      = false;
+        corazaTimer       = 0;
+        roboVidaActivo    = false;
+        lluviaActivada    = false;
+        lluviaEnCurso     = false;
+        flechasLluvia.clear();
+        flechasSpawneadas = 0;
+        efectoAnimInd     = -1;
+        efectoAnimTick    = 0;
+        usosHabilidadRestantes = MAX_USOS_HABILIDAD;
+
         hitbox.x = spawnX;
         hitbox.y = spawnY;
-
         deadTimer = 0;
         readyToRestart = false;
 
-        if (!utils.MetodosAyuda.IsEntityOnFloor(hitbox, lvlData)) {
+        if (!utils.MetodosAyuda.IsEntityOnFloor(hitbox, lvlData))
             inAir = true;
-        }
     }
+
     private void autoCurar() {
-        if (isDead || vidaActual >= vidaMaxima) {
-            healTimer = 0;
-            return;
-        }
+        if (isDead || vidaActual >= vidaMaxima) { healTimer = 0; return; }
         healTimer++;
-        
         if (healTimer >= tiempoParaCurar && playerAction == INACTIVO) {
             curarVida(cantidadCuraAutomatica);
             healTimer = 0;
@@ -558,34 +747,21 @@ public class Jugador extends Cascaron {
     }
 
     public void setEnPlataforma(boolean b) {
-    this.enPlataforma = b;
-    if(b) {
-        inAir = false; // Detiene la caída
+        this.enPlataforma = b;
+        if (b) inAir = false;
     }
-}
 
-public void recogerLlave() {
-    this.tieneLlave = true;
-}
+    public void recogerLlave() { this.tieneLlave = true; }
+    public boolean getTieneLlave() { return tieneLlave; }
+    public float getAirSpeed() { return airSpeed; }
 
-public boolean getTieneLlave() {
-    return tieneLlave;
-}
-
-// Necesario para el salto desde plataformas que vimos antes
-public float getAirSpeed() {
-    return airSpeed;
-}
-private void revisarAgua(ObjectManager objectMan) {
+    private void revisarAgua(ObjectManager objectMan) {
         if (objectMan.checkMuertePorAgua(hitbox)) {
             if (!isDead) {
-                if (audioPlayer != null) {
-                    audioPlayer.reproducirEfecto("sonido-dano.wav");
-                }
+                if (audioPlayer != null) audioPlayer.reproducirEfecto("sonido-dano.wav");
                 vidaActual = 0;
                 setDead(true);
             }
         }
     }
-    
 }
