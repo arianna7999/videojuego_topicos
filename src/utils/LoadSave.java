@@ -27,7 +27,7 @@ public class LoadSave {
     public static final String LEVEL_FOUR_LONG = "mapa4.png";
 
     // --- MAPAS (VERDE = ENEMIGOS, AZUL = OBJETOS) ---
-    public static final String LEVEL_ONE_OBJECTS = "objetosm1.png";
+    public static final String LEVEL_ONE_OBJECTS = "objetosm12.png";
     public static final String LEVEL_TWO_OBJECTS = "objetosm2.png";
     public static final String LEVEL_THREE_OBJECTS = "objetosm3.png";
     public static final String LEVEL_FOUR_OBJECTS = "objetosm4.png";
@@ -135,7 +135,7 @@ public class LoadSave {
                 // --- AQUÍ ESTÁ LA MAGIA DE LA PRIORIDAD ---
                 // Si el color Rojo coincide con un tile de tu 1.png (0 al 47), lo pone.
                 // Si pintas cualquier otra cosa, lo vuelve "Aire" (11).
-                if (valor >= 48) {
+                if (valor >= 255) {
                     valor = 11; // ¡CAMBIAR 0 POR 11!
                 }
                 
