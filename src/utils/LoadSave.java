@@ -86,6 +86,9 @@ public class LoadSave {
         }
 
         BufferedImage img = GetSpriteAtlas(mapName);
+        if (img == null) {
+            System.out.println("Error: No se pudo cargar la imagen de objetos para el nivel " + levelNumber);
+        }
         int[][] objData = new int[img.getHeight()][img.getWidth()];
         
         for (int j = 0; j < img.getHeight(); j++) {
@@ -103,6 +106,7 @@ public class LoadSave {
         try {
             img = ImageIO.read(is);
         } catch (IOException e) {
+            System.out.println("Error al cargar la imagen: " + name);
             Logger.getLogger(PanelJuego.class.getName()).log(Level.SEVERE, null, e);
         } finally {
             try {
