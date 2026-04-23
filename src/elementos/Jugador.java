@@ -116,6 +116,27 @@ public class Jugador extends Cascaron {
     private boolean lluviaActivada = false;
     public boolean isLluviaActivada() { return lluviaActivada; }
 
+    // Colores para la coraza de Frank
+    private static final java.awt.Color COLOR_CORAZA_FONDO = new java.awt.Color(50, 120, 255, 80);
+    private static final java.awt.Color COLOR_CORAZA_BORDE = new java.awt.Color(100, 180, 255, 180);
+    private static final java.awt.BasicStroke STROKE_CORAZA = new java.awt.BasicStroke(3);
+    private static final java.awt.BasicStroke STROKE_NORMAL = new java.awt.BasicStroke(1);
+
+    // Colores para indicadores de habilidades
+    private static final java.awt.Color COLOR_HAB_BRUTAL = new java.awt.Color(255, 80, 30);
+    private static final java.awt.Color COLOR_HAB_CORAZA = new java.awt.Color(80, 160, 255);
+    private static final java.awt.Color COLOR_HAB_ROBO = new java.awt.Color(180, 50, 200);
+    private static final java.awt.Color COLOR_SOMBRA_TEXTO = new java.awt.Color(0, 0, 0, 180);
+
+    // Colores para los usos de habilidades (los circulitos)
+    private static final java.awt.Color COLOR_USO_ACTIVO_FONDO = new java.awt.Color(255, 220, 50, 220);
+    private static final java.awt.Color COLOR_USO_ACTIVO_BORDE = new java.awt.Color(180, 140, 0, 255);
+    private static final java.awt.Color COLOR_USO_INACTIVO_FONDO = new java.awt.Color(80, 80, 80, 180);
+    private static final java.awt.Color COLOR_USO_INACTIVO_BORDE = new java.awt.Color(50, 50, 50, 200);
+
+    // Fuente de la UI
+    private java.awt.Font fuenteHabilidad;
+
     public Jugador(float x, float y, int w, int h, utils.AudioPlayer audioPlayer) {
         super(x, y, w, h);
         this.audioPlayer = audioPlayer;
@@ -124,6 +145,7 @@ public class Jugador extends Cascaron {
         loadAnimation();
         initHitbox(x, y, 28 * Juego.SCALE, 31 * Juego.SCALE);
         attackBox = new java.awt.geom.Rectangle2D.Float(x, y, (int) (20 * Juego.SCALE), (int) (20 * Juego.SCALE));
+        fuenteHabilidad = new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(11 * Juego.SCALE));
     }
 
    
@@ -513,12 +535,14 @@ public class Jugador extends Cascaron {
             int cx = (int)(hitbox.x + hitbox.width/2) - xLvlOffset;
             int cy = (int)(hitbox.y + hitbox.height/2) - yLvlOffset;
             int radio = (int)(30 * Juego.SCALE);
-            g2.setColor(new java.awt.Color(50, 120, 255, 80));
+            
+            g2.setColor(COLOR_CORAZA_FONDO);
             g2.fillOval(cx - radio, cy - radio, radio * 2, radio * 2);
-            g2.setColor(new java.awt.Color(100, 180, 255, 180));
-            g2.setStroke(new java.awt.BasicStroke(3));
+            
+            g2.setColor(COLOR_CORAZA_BORDE);
+            g2.setStroke(STROKE_CORAZA);
             g2.drawOval(cx - radio, cy - radio, radio * 2, radio * 2);
-            g2.setStroke(new java.awt.BasicStroke(1));
+            g2.setStroke(STROKE_NORMAL);
         }
 
        
@@ -650,18 +674,22 @@ public class Jugador extends Cascaron {
     private void dibujarIndicadorHabilidad(java.awt.Graphics2D g2d, int x, int y) {
         String textoHab = null;
         java.awt.Color colorHab = java.awt.Color.WHITE;
+        
         if (golpeBrutalActivo) {
-            textoHab = "GOLPE BRUTAL"; colorHab = new java.awt.Color(255, 80, 30);
+            textoHab = "GOLPE BRUTAL"; 
+            colorHab = COLOR_HAB_BRUTAL;
         } else if (corazaActiva) {
             int segs = (int) Math.ceil(corazaTimer / 60.0);
-            textoHab = "CORAZA (" + segs + "s)"; colorHab = new java.awt.Color(80, 160, 255);
+            textoHab = "CORAZA (" + segs + "s)"; 
+            colorHab = COLOR_HAB_CORAZA;
         } else if (roboVidaActivo) {
-            textoHab = "ROBO DE VIDA"; colorHab = new java.awt.Color(180, 50, 200);
+            textoHab = "ROBO DE VIDA"; 
+            colorHab = COLOR_HAB_ROBO;
         }
+        
         if (textoHab != null) {
-            java.awt.Font fnt = new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(11 * Juego.SCALE));
-            g2d.setFont(fnt);
-            g2d.setColor(new java.awt.Color(0, 0, 0, 180));
+            g2d.setFont(fuenteHabilidad);
+            g2d.setColor(COLOR_SOMBRA_TEXTO);
             g2d.drawString(textoHab, x + 2, y + (int)(13 * Juego.SCALE) + 2);
             g2d.setColor(colorHab);
             g2d.drawString(textoHab, x, y + (int)(13 * Juego.SCALE));
@@ -671,17 +699,18 @@ public class Jugador extends Cascaron {
     private void dibujarUsosHabilidad(java.awt.Graphics2D g2d, int x, int y) {
         int tamCirculo = (int)(8 * Juego.SCALE);
         int gap        = (int)(4 * Juego.SCALE);
+        
         for (int i = 0; i < MAX_USOS_HABILIDAD; i++) {
             int cx = x + i * (tamCirculo + gap);
             if (i < usosHabilidadRestantes) {
-                g2d.setColor(new java.awt.Color(255, 220, 50, 220));
+                g2d.setColor(COLOR_USO_ACTIVO_FONDO);
                 g2d.fillOval(cx, y, tamCirculo, tamCirculo);
-                g2d.setColor(new java.awt.Color(180, 140, 0, 255));
+                g2d.setColor(COLOR_USO_ACTIVO_BORDE);
                 g2d.drawOval(cx, y, tamCirculo, tamCirculo);
             } else {
-                g2d.setColor(new java.awt.Color(80, 80, 80, 180));
+                g2d.setColor(COLOR_USO_INACTIVO_FONDO);
                 g2d.fillOval(cx, y, tamCirculo, tamCirculo);
-                g2d.setColor(new java.awt.Color(50, 50, 50, 200));
+                g2d.setColor(COLOR_USO_INACTIVO_BORDE);
                 g2d.drawOval(cx, y, tamCirculo, tamCirculo);
             }
         }

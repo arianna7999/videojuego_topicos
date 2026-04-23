@@ -11,6 +11,7 @@ import static utils.MetodosAyuda.GetEntityYPosUnderRoofOrAboveFloor;
 import static utils.MetodosAyuda.IsEntityOnFloor;
 
 import juego.Juego;
+import java.awt.Graphics;
 
 public abstract class Enemigo extends Cascaron {
     protected java.awt.geom.Rectangle2D.Float attackBox;
@@ -31,10 +32,30 @@ public abstract class Enemigo extends Cascaron {
     protected int visionRange = (int) (Juego.TILES_SIZE * 5);
     protected int attackRange = (int) (Juego.TILES_SIZE * 1);
 
+    private static final java.awt.Color COLOR_FONDO_BARRA = new java.awt.Color(30, 30, 30);
+    private static final java.awt.Color COLOR_FONDO_VIDA = new java.awt.Color(220, 220, 220);
+    private static final java.awt.Color COLOR_VIDA_ALTA = new java.awt.Color(34, 177, 76);
+    private static final java.awt.Color COLOR_VIDA_MEDIA = new java.awt.Color(220, 120, 20);
+    private static final java.awt.Color COLOR_VIDA_BAJA = new java.awt.Color(180, 30, 30);
+    private static final java.awt.Color COLOR_BRILLO_BARRA = new java.awt.Color(255, 255, 255, 120);
+    private static final java.awt.Color COLOR_CORAZON_BASE = new java.awt.Color(200, 20, 20);
+    private static final java.awt.Color COLOR_CORAZON_BRILLO = new java.awt.Color(255, 120, 120);
+
+    private static final int[][] HEART_PIXELS = {
+        {0,1,1,0,1,1,0},
+        {1,1,1,1,1,1,1},
+        {1,1,1,1,1,1,1},
+        {0,1,1,1,1,1,0},
+        {0,0,1,1,1,0,0},
+        {0,0,0,1,0,0,0}
+    };
+
     public Enemigo(float x, float y, int width, int height) {
         super(x, y, width, height);
         initHitbox(x, y, width, height);
     }
+
+    public abstract void render(Graphics g, int xLvlOffset, int yLvlOffset);
 
     protected void initAttackBox() {
         attackBox = new java.awt.geom.Rectangle2D.Float(x, y, (int) (20 * Juego.SCALE), (int) (20 * Juego.SCALE));
@@ -61,7 +82,6 @@ public abstract class Enemigo extends Cascaron {
         }
     }
 
-    // --- MODIFICADO: Añadido yLvlOffset ---
     protected void drawAttackBox(java.awt.Graphics g, int xLvlOffset, int yLvlOffset) {
         g.setColor(java.awt.Color.BLUE);
         g.drawRect((int) attackBox.x - xLvlOffset, (int) attackBox.y - yLvlOffset, (int) attackBox.width, (int) attackBox.height);
@@ -92,19 +112,15 @@ public abstract class Enemigo extends Cascaron {
                 case INACTIVO:
                     enemyState = CORRER;
                     break;
-
                 case CORRER:
                     if (esJugadorEnRangoVision(jugador)) {
                         mirarHaciaJugador(jugador);
-
                         if (esJugadorEnRangoAtaque(jugador)) {
                             enemyState = ATACAR;
                             break;
                         }
                     }
-
                     float xSpeed = walkDir * walkSpeed;
-
                     if (CanMoveHere(hitbox.x + xSpeed, hitbox.y, (int) hitbox.width, (int) hitbox.height, lvlData)
                             && EsSueloSolido(hitbox.x, hitbox.y, hitbox.width, hitbox.height, xSpeed, lvlData)) {
                         hitbox.x += xSpeed;
@@ -112,7 +128,6 @@ public abstract class Enemigo extends Cascaron {
                         walkDir *= -1;
                     }
                     break;
-
                 case ATACAR:
                     if (!esJugadorEnRangoAtaque(jugador)) {
                         enemyState = CORRER;
@@ -133,7 +148,6 @@ public abstract class Enemigo extends Cascaron {
             float centroJugadorX = jugador.hitbox.x + (jugador.hitbox.width / 2);
             float centroEnemigoX = hitbox.x + (hitbox.width / 2);
             int distanciaCentroACentro = (int) Math.abs(centroJugadorX - centroEnemigoX);
-
             return distanciaCentroACentro <= visionRange;
         }
         return false;
@@ -167,65 +181,55 @@ public abstract class Enemigo extends Cascaron {
         }
     }
 
-    public int getEnemyState() {
-        return enemyState;
-    }
+    public int getEnemyState() { return enemyState; }
     
-    public boolean isActivo() {
-        return activo;
-    }
+    public boolean isActivo() { return activo; }
 
-    // --- MODIFICADO: Añadido yLvlOffset y restado a las variables "Y" ---
     public void drawHealthBar(java.awt.Graphics g, int xLvlOffset, int yLvlOffset) {
         if (enemyState == MUERTO) return;
 
         int barW = (int)(40 * Juego.SCALE);
         int barH = (int)(5 * Juego.SCALE);
         int barX = (int)(hitbox.x + hitbox.width / 2 - barW / 2) - xLvlOffset;
-        int barY = (int)(hitbox.y - 10 * Juego.SCALE) - yLvlOffset; // Restado aquí
+        int barY = (int)(hitbox.y - 10 * Juego.SCALE) - yLvlOffset;
 
-        g.setColor(new java.awt.Color(30, 30, 30));
+        g.setColor(COLOR_FONDO_BARRA);
         g.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
 
-        g.setColor(new java.awt.Color(220, 220, 220));
+        g.setColor(COLOR_FONDO_VIDA);
         g.fillRect(barX, barY, barW, barH);
 
         float pct = (float) vidaActual / vidaMaxima;
         int vidaW = (int)(pct * barW);
+        
         java.awt.Color barColor;
         if (pct > 0.5f) {
-            barColor = new java.awt.Color(34, 177, 76);
+            barColor = COLOR_VIDA_ALTA;
         } else if (pct > 0.25f) {
-            barColor = new java.awt.Color(220, 120, 20);
+            barColor = COLOR_VIDA_MEDIA;
         } else {
-            barColor = new java.awt.Color(180, 30, 30);
+            barColor = COLOR_VIDA_BAJA;
         }
+        
         g.setColor(barColor);
         g.fillRect(barX, barY, vidaW, barH);
 
-        g.setColor(new java.awt.Color(255, 255, 255, 120));
+        g.setColor(COLOR_BRILLO_BARRA);
         g.fillRect(barX, barY, vidaW, (int) Math.max(1, barH * 0.35f));
 
         int hx = barX - (int)(10 * Juego.SCALE) - 1;
         int hy = barY - (int)(2 * Juego.SCALE);
         int px = (int) Math.max(1, Juego.SCALE);
-        int[][] heart = {
-            {0,1,1,0,1,1,0},
-            {1,1,1,1,1,1,1},
-            {1,1,1,1,1,1,1},
-            {0,1,1,1,1,1,0},
-            {0,0,1,1,1,0,0},
-            {0,0,0,1,0,0,0}
-        };
-        for (int row = 0; row < heart.length; row++) {
-            for (int col = 0; col < heart[row].length; col++) {
-                if (heart[row][col] == 1) {
-                    g.setColor(new java.awt.Color(200, 20, 20));
+        
+        for (int row = 0; row < HEART_PIXELS.length; row++) {
+            for (int col = 0; col < HEART_PIXELS[row].length; col++) {
+                if (HEART_PIXELS[row][col] == 1) {
+                    g.setColor(COLOR_CORAZON_BASE);
                     g.fillRect(hx + col * px, hy + row * px, px, px);
                 }
             }
         }
-        g.setColor(new java.awt.Color(255, 120, 120));
+        g.setColor(COLOR_CORAZON_BRILLO);
         g.fillRect(hx + px, hy, px, px);
         g.fillRect(hx + 4*px, hy, px, px);
     }
