@@ -40,7 +40,7 @@ public class Juego extends Thread {
     public final static int TILES_SIZE = (int) (TILES_DEF_SIZE * SCALE);
     public final static int GAME_WIDTH = TILES_SIZE * TILES_WIDTH;
     public final static int GAME_HEIGHT = TILES_SIZE * TILES_HEIGHT;
-    private BufferedImage bgImg, fondo1_1, fondo1_2, fondo1_3, posteInicio, posteDuenos, fondo2_1, fondo2_2;
+    private BufferedImage bgImg, fondo1_1, fondo1_2, fondo1_3, posteInicio, posteDuenos, fondo2_1, fondo2_2,fondo3_1,fondo3_2,fondo3_3;
     private int[] fondoArbolesPos;
     private Random rnd = new Random();
     private boolean victoria = false;
@@ -92,15 +92,9 @@ public class Juego extends Thread {
     }
 
    private void inicializar() {
-        bgImg = LoadSave.GetSpriteAtlas(LoadSave.PLAYING_BG_IMG);
-        fondo1_1 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_ARBOLES_IMG);
-        fondo1_2 = LoadSave.GetSpriteAtlas(LoadSave.FONDO2_ARBOLES_IMG);
+        inicializarFondosDeMundos();
         fondoArbolesPos = new int[8];
-        fondo1_3 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_PIEDRAS_IMG);
-        fondo2_1 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_CASTLE_IMG_1);
-        fondo2_2 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_CASTLE_IMG_2);
         inicializarObjetos();
-        
         titleFont = customFont.deriveFont(java.awt.Font.BOLD, (int) (48 * Juego.SCALE));
         subFont = customFont.deriveFont(java.awt.Font.PLAIN, (int) (16 * Juego.SCALE));
         redColor = new java.awt.Color(200, 50, 50);
@@ -128,6 +122,23 @@ public class Juego extends Thread {
 
     private void comenzarJuego() {
         start();
+    }
+    private void inicializarFondosDeMundos(){
+        //mundo 1
+        bgImg = LoadSave.GetSpriteAtlas(LoadSave.PLAYING_BG_IMG);
+        fondo1_1 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_ARBOLES_IMG);
+        fondo1_2 = LoadSave.GetSpriteAtlas(LoadSave.FONDO2_ARBOLES_IMG);
+        fondo1_3 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_PIEDRAS_IMG);
+        
+        //mundo 2
+        fondo2_1 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_CASTLE_IMG_1);
+        fondo2_2 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_CASTLE_IMG_2);
+       
+        //mundo3
+         fondo3_1 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_MUNDO_3_CIELO);
+         fondo3_2 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_MUNDO_3_MONTANAS);
+         fondo3_3 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_MUNDO_3_PIEDRAS);
+
     }
 
     private void checkCloseToBorder() {
@@ -395,6 +406,8 @@ public class Juego extends Thread {
             case 1:
                 drawFondoLevel(g, new BufferedImage[]{fondo2_1, fondo2_2});
                 break;
+            case 2:
+                drawFondoLevel(g, new BufferedImage[]{fondo3_1, fondo3_2,fondo3_3});    
             default:
                 break;
         }
