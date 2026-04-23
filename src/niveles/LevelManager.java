@@ -23,11 +23,12 @@ public class LevelManager {
         levels = new ArrayList<>();
         levels.add(new Level(LoadSave.GetLevelData(1)));
         levels.add(new Level(LoadSave.GetLevelData(2)));
+        levels.add(new Level(LoadSave.GetLevelData(3)));
     }
 
 
     public void loadSpritesForCurrentLevel() {
-        String atlasName = (lvlIndex == 0) ? LoadSave.LEVEL_ATLAS : LoadSave.LEVEL_ATLAS_2;
+        String atlasName = (lvlIndex == 0) ? LoadSave.LEVEL_ATLAS : (lvlIndex == 1) ? LoadSave.LEVEL_ATLAS_2 : LoadSave.LEVEL_ATLAS_3;
         BufferedImage img = LoadSave.GetSpriteAtlas(atlasName);
 
         int tileW = 32;
@@ -90,7 +91,7 @@ public class LevelManager {
     public void update(){}
 
     public void resetToFirstLevel() {
-        lvlIndex = 0;
+        lvlIndex = 2;
         loadSpritesForCurrentLevel();
     }
 
