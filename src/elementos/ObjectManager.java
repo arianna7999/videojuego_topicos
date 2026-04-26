@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import juego.Juego;
+import utils.Constantes;
 import utils.LoadSave;
 
 public class ObjectManager {
@@ -16,11 +17,13 @@ public class ObjectManager {
     private ArrayList<PlataformaMovil> plataformas = new ArrayList<>();
     private ArrayList<PuertaMovil> puertas = new ArrayList<>();
     private ArrayList<Candelabro> candelabros = new ArrayList<>();
+private ArrayList<Aguila> aguilas = new ArrayList<>();
 
     private utils.AudioPlayer audioPlayer;
 
     private BufferedImage plataformaImg;
     private BufferedImage puertaImg;
+    private BufferedImage[] aguilaImgs;
     private BufferedImage[] barrilImgs;
     private BufferedImage[] cofreImgs;
     private BufferedImage[] corazonImgs;
@@ -43,6 +46,19 @@ public class ObjectManager {
         BufferedImage img = LoadSave.GetSpriteAtlas("objetos-sprite.png");
         barrilImgs = new BufferedImage[8];
         cofreImgs = new BufferedImage[8];
+        BufferedImage temp = LoadSave.GetSpriteAtlas(LoadSave.AGUILA_SPRITE);
+        aguilaImgs = new BufferedImage[6]; // 6 fotogramas
+        for (int i = 0; i < aguilaImgs.length; i++) {
+    // Cortamos la imagen (1 fila x 6 columnas)
+    // Asegúrate de que Constantes.Ambiente.AGUILA_WIDTH_DEFAULT sea el tamaño correcto
+        aguilaImgs[i] = temp.getSubimage(i * Constantes.Ambiente.AGUILA_WIDTH_DEFAULT, 0, 
+                                     Constantes.Ambiente.AGUILA_WIDTH_DEFAULT, 
+                                     Constantes.Ambiente.AGUILA_HEIGHT_DEFAULT);
+}
+
+// Agregamos un par de águilas al mapa (coordenadas x, y en el cielo)
+    aguilas.add(new Aguila(100, 50)); 
+    aguilas.add(new Aguila(150, 120));
         for (int frame = 0; frame < 8; frame++) {
             cofreImgs[frame] = img.getSubimage(frame * 40, 0, 40, 30);
             barrilImgs[frame] = img.getSubimage(frame * 40, 30, 40, 30);
@@ -196,7 +212,15 @@ public class ObjectManager {
         for (PlataformaMovil p : plataformas) p.update();
         for (PuertaMovil p : puertas) p.update();
         for (Candelabro c : candelabros) if (c.isActivo()) c.updateAnimation(); 
-    }
+        for (Aguila a : aguilas) {
+            a.update(); 
+            if (a.getX() > 4000) { 
+                a.resetPocision(-100); 
+            }
+        }
+}       
+
+    
 
     public void draw(Graphics g, int xLvlOffset, int yLvlOffset) {
         // 1. Contenedores y explosiones
@@ -267,6 +291,18 @@ public class ObjectManager {
                     Juego.TILES_SIZE, Juego.TILES_SIZE, null);
             }
         }
+
+        //aguila
+        for (Aguila a : aguilas) {
+         // Restamos el xLvlOffset si quieres que el águila se mueva con la cámara
+    // Si quieres que sea parte del "fondo lejano", puedes no restarle el offset o restarle una fracción (efecto parallax)
+           g.drawImage(aguilaImgs[a.getAniIndex()], 
+           (int)a.getX()- xLvlOffset, // <-- Ahora solo usa su propia coordenada X
+           (int)a.getY(), (int)
+           (Constantes.Ambiente.AGUILA_WIDTH*.07),(int)( 
+           Constantes.Ambiente.AGUILA_HEIGHT*.07), 
+           null);
+}
     }
 
     public void actualizarJugadorEnPlataforma(Jugador j) {

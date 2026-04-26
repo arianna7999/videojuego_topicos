@@ -38,16 +38,21 @@ public class LoadSave {
     public static final String FINAL_BOSS_SPRITE = "Lancer.png";
     public static final String KNIGHT_SPRITE = "Knight.png";
     public static final String ORC_SPRITE = "Orc.png";
+    public static final String ARMORED_ORC = "Armored_orc.png";
+    public static final String WEREBEAR = "Werebear.png";
+    public static final String SLIME = "Slime.png";
+    public static final String WEREWOLF = "Werewolf.png";
+
     public static final String PLAYING_BG_IMG ="fondo1.png";
     public static final String FONDO_ARBOLES_IMG="fondo2.png";
     public static final String FONDO2_ARBOLES_IMG="fondo2.2.png";
     public static final String FONDO_PIEDRAS_IMG="fondo3.png";
     public static final String FONDO_CASTLE_IMG_1="layer_1.png";
     public static final String FONDO_CASTLE_IMG_2="layer_2.png";
-
     public static final String FONDO_MUNDO_3_CIELO="mundo3_cielo.png";
     public static final String FONDO_MUNDO_3_PIEDRAS="mundo3_piedras.png";
-    public static final String FONDO_MUNDO_3_MONTANAS="mundo3_montañas.png";
+    public static final String FONDO_MUNDO_3_MONTANAS="mundo3_montanas.png";
+    public static final String FONDO_MUNDO_3_SOMBRA="sombra.png";
 
     public static final String HEALTH_BAR_EMPTY = "health_bar_empty.png";
     public static final String HEALTH_BAR_FULL = "health_bar_full.png";
@@ -56,7 +61,8 @@ public class LoadSave {
     public static final String VICTORY_SCREEN = "win.png";
     public static final String POSTE_DUENOS = "poste-duenos.png";
     public static final String PLATAFORMA_MOVIBLE = "plataforma-movible.png";
-    public static final String CANDELABRO_SPRITE = "candelabro_1.png";
+    public static final String CANDELABRO_SPRITE = "candelabro.png";
+    public static final String AGUILA_SPRITE = "aguila.png";
 
     public static int[][] GetEnemyData(int levelNumber) {
         String mapName = LEVEL_ONE_OBJECTS;
@@ -137,11 +143,8 @@ public class LoadSave {
                 Color color = new Color(img.getRGB(i, j));
                 int valor = color.getRed();
                 
-                // --- AQUÍ ESTÁ LA MAGIA DE LA PRIORIDAD ---
-                // Si el color Rojo coincide con un tile de tu 1.png (0 al 47), lo pone.
-                // Si pintas cualquier otra cosa, lo vuelve "Aire" (11).
                 if (valor >= 255) {
-                    valor = 11; // ¡CAMBIAR 0 POR 11!
+                    valor = 11;
                 }
                 
                 lvlData[j][i] = valor;

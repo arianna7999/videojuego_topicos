@@ -29,13 +29,13 @@ public class EnemyManager {
 
                 switch (valorVerde) {
                     case 0:
-                        enemigos.add(new Esqueleto(xPos, yPos));
+                        enemigos.add(new Enemy1(xPos, yPos, nivelActual));
                         break;
                     case 1:
                         enemigos.add(new Caballero(xPos, yPos));
                         break;
                     case 2:
-                        enemigos.add(new Orc(xPos, yPos));
+                        enemigos.add(new Enemy2(xPos, yPos, nivelActual));
                         break;
                     case 3:
                         enemigos.add(new JefeFinal(xPos, yPos));
@@ -95,6 +95,23 @@ public class EnemyManager {
                 }
             }
         }
+    }
+
+    // Versión para proyectiles: aplica daño con el valor dado y retorna true si golpeó algo
+    public boolean checkEnemyHitAreaFlecha(java.awt.geom.Rectangle2D.Float area, Jugador jugador, int daño) {
+        boolean golpeo = false;
+        for (Enemigo e : enemigos) {
+            if (e.getEnemyState() != MUERTO && area.intersects(e.getHitbox())) {
+                e.recibirDaño(daño);
+                jugador.registrarGolpe();
+                crearTextoDaño(e.getHitbox(), daño);
+                if (e.getEnemyState() == MUERTO) {
+                    jugador.registrarMuerte();
+                }
+                golpeo = true;
+            }
+        }
+        return golpeo;
     }
 
     public java.util.ArrayList<JefeFinal> getJefesFinales() {
