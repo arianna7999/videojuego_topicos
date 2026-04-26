@@ -3,7 +3,6 @@ package niveles;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-
 import juego.Juego;
 import utils.LoadSave;
 
@@ -91,7 +90,7 @@ public class LevelManager {
     public void update(){}
 
     public void resetToFirstLevel() {
-        lvlIndex = 2;
+        lvlIndex = 1;
         loadSpritesForCurrentLevel();
     }
 

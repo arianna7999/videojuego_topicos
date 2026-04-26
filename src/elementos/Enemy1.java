@@ -6,9 +6,11 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import juego.Juego;
+import utils.Constantes.ConstantesEnemigos;
+import utils.Constantes;
 import utils.LoadSave;
 
-public class Esqueleto extends Enemigo {
+public class Enemy1 extends Enemigo {
 
     private BufferedImage[][] animaciones;
     private int aniTick, aniIndex, aniSpeed = 25, deadTimer = 0;
@@ -16,10 +18,11 @@ public class Esqueleto extends Enemigo {
     private float yDrawOffset = 52 * Juego.SCALE;
     private static final int SKELETON_DRAW_WIDTH = 130;
     private static final int SKELETON_DRAW_HEIGHT = 130;
+    private int tipoEnemigo; 
 
-    public Esqueleto(float x, float y) {
+    public Enemy1(float x, float y, int levelNumber) {
         super(x, y, (int) (22 * Juego.SCALE), (int) (19 * Juego.SCALE));
-        cargarAnimaciones();
+        cargarAnimaciones(levelNumber);
         this.attackRange = (int) (Juego.TILES_SIZE * 0.5f);
         this.damage = 10;
         this.vidaMaxima = 50;
@@ -45,11 +48,12 @@ public class Esqueleto extends Enemigo {
                 }
             }
 
-            if (aniIndex >= GetSpriteAmount(ESQUELETO, enemyState)) {
+            // 2. CORRECCIÓN: Usamos la variable dinámica 'tipoEnemigo' en lugar de 'ESQUELETO'
+            if (aniIndex >= GetSpriteAmount(tipoEnemigo, enemyState)) {
 
                 if (enemyState == MUERTO) {
-        
-                    aniIndex = GetSpriteAmount(ESQUELETO, MUERTO) - 1;
+                    // Mantenemos el último frame de muerte
+                    aniIndex = GetSpriteAmount(tipoEnemigo, MUERTO) - 1;
                 } else {
                     aniIndex = 0;
 
@@ -60,7 +64,9 @@ public class Esqueleto extends Enemigo {
                 }
             }
         }
-        if (enemyState == MUERTO && aniIndex == GetSpriteAmount(ESQUELETO, MUERTO) - 1) {
+        
+        // 3. CORRECCIÓN: Usamos 'tipoEnemigo' aquí también
+        if (enemyState == MUERTO && aniIndex == GetSpriteAmount(tipoEnemigo, MUERTO) - 1) {
             deadTimer++;
             if (deadTimer >= 800) {
                 activo = false;
@@ -82,7 +88,7 @@ public class Esqueleto extends Enemigo {
 
         g.drawImage(animaciones[enemyState][aniIndex],
                 (int) (hitbox.x - xDrawOffset) - xLvlOffset + flipX,
-                (int) (hitbox.y - yDrawOffset) - yLvlOffset, // 2. AQUI RESTAMOS yLvlOffset
+                (int) (hitbox.y - yDrawOffset) - yLvlOffset, 
                 drawWidth * flipW,
                 drawHeight, null);
 
@@ -91,13 +97,43 @@ public class Esqueleto extends Enemigo {
         drawHealthBar(g, xLvlOffset, yLvlOffset);
     }
 
-    private void cargarAnimaciones() {
-        BufferedImage img = LoadSave.GetSpriteAtlas(LoadSave.SKELETON_SPRITE);
-        animaciones = new BufferedImage[7][8];
+    private void cargarAnimaciones(int levelNumber) {
+        BufferedImage img = null;
+        switch (levelNumber) {
+            case 0:
+                img = LoadSave.GetSpriteAtlas(LoadSave.SKELETON_SPRITE);
+                tipoEnemigo = ConstantesEnemigos.ESQUELETO;
+                break;
+            case 1:
+                img = LoadSave.GetSpriteAtlas(LoadSave.SLIME);
+                tipoEnemigo = ConstantesEnemigos.SLIME;
+                break;
+            case 2:
+                img = LoadSave.GetSpriteAtlas(LoadSave.WEREWOLF);
+                tipoEnemigo = ConstantesEnemigos.WEREWOLF;
+                damage = 15;
+                break;
+            default:
+                break;
+        }
+
+        animaciones = new BufferedImage[7][12];
 
         for (int j = 0; j < animaciones.length; j++) {
-            for (int i = 0; i < animaciones[j].length; i++) {
-                animaciones[j][i] = img.getSubimage(i * 100, j * 100, 100, 100);
+            int cantidadFrames = ConstantesEnemigos.GetSpriteAmount(tipoEnemigo, j);
+            if (cantidadFrames == 0) {
+                continue;
+            }
+
+            int filaY = j;
+            if (j == ConstantesEnemigos.RECIBIR_GOLPE) {
+                filaY = 3; 
+            } else if (j == ConstantesEnemigos.MUERTO) {
+                filaY = 4; 
+            }
+
+            for (int i = 0; i < cantidadFrames; i++) {
+                animaciones[j][i] = img.getSubimage(i * 100, filaY * 100, 100, 100);
             }
         }
     }

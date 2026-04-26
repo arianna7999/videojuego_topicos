@@ -93,10 +93,12 @@ public class Jugador extends Cascaron {
     // Frank 
     private boolean corazaActiva = false;
     private int corazaTimer = 0;
-    private static final int CORAZA_DURACION = 300;
+    private static final int CORAZA_DURACION = 3000;
 
     // Saori 
     private boolean roboVidaActivo = false;
+    private static final int MAX_ROBOS_POR_USO = 4;
+    private int robosRestantes = 0;
 
     // Efectos visuales 
     private BufferedImage[] efectoHabilidadFrames = null;
@@ -106,7 +108,8 @@ public class Jugador extends Cascaron {
     private static final int EFECTO_COLS = 8;
 
     // Lucerys ──────────────────────────────────────────────────────
-    private java.util.ArrayList<FlechaLluvia> flechasLluvia = new java.util.ArrayList<>();
+    private java.util.ArrayList<FlechaLluvia> flechasLluvia  = new java.util.ArrayList<>();
+    private java.util.ArrayList<FlechaRecta>  flechasRectas  = new java.util.ArrayList<>();
     private static final int NUM_FLECHAS   = 8;
     private static final int DELAY_FLECHAS = 8;
     private int flechaSpawnTimer   = 0;
@@ -168,18 +171,18 @@ public class Jugador extends Cascaron {
     private void cargarSprite(String ruta, int cols, int filas, int celdaW, int celdaH) {
         BufferedImage img = utils.LoadSave.GetSpriteAtlas(ruta);
         int filasUsar = Math.min(filas, 8);
-        int colsUsar  = Math.min(cols,  9);
-        idLeAni = new BufferedImage[8][9];
+        int colsUsar  = Math.min(cols, 13);
+        idLeAni = new BufferedImage[8][13];
         for (int j = 0; j < filasUsar; j++) {
             for (int i = 0; i < colsUsar; i++) {
                 idLeAni[j][i] = img.getSubimage(i * celdaW, j * celdaH, celdaW, celdaH);
             }
-            for (int i = colsUsar; i < 9; i++) {
+            for (int i = colsUsar; i < 13; i++) {
                 idLeAni[j][i] = idLeAni[j][colsUsar - 1];
             }
         }
         for (int j = filasUsar; j < 8; j++) {
-            for (int i = 0; i < 9; i++) {
+            for (int i = 0; i < 13; i++) {
                 idLeAni[j][i] = idLeAni[0][i];
             }
         }
@@ -243,6 +246,7 @@ public class Jugador extends Cascaron {
                 break;
             case "robo_vida":
                 roboVidaActivo = true;
+                robosRestantes = MAX_ROBOS_POR_USO;
                 break;
             case "lluvia":
                 lluviaActivada = true;
@@ -289,6 +293,19 @@ public class Jugador extends Cascaron {
         }
     }
 
+    private void updateFlechasRectas(EnemyManager enemyMan) {
+        java.util.Iterator<FlechaRecta> it = flechasRectas.iterator();
+        while (it.hasNext()) {
+            FlechaRecta f = it.next();
+            f.update(lvlData);
+            if (!f.isMuerta()) {
+                boolean golpeo = enemyMan.checkEnemyHitAreaFlecha(f.getHitbox(), this, f.getDaño());
+                if (golpeo) f.matar();
+            }
+            if (f.isMuerta()) it.remove();
+        }
+    }
+
     public String getPersonaje() { return personaje; }
 
     public int getDañoActual() {
@@ -300,9 +317,12 @@ public class Jugador extends Cascaron {
     }
 
     public void procesarRoboVida(int dañoHecho) {
-        if (roboVidaActivo) {
-            roboVidaActivo = false;
+        if (roboVidaActivo && robosRestantes > 0) {
             curarVida(dañoHecho);
+            robosRestantes--;
+            if (robosRestantes <= 0) {
+                roboVidaActivo = false;
+            }
         }
     }
 
@@ -326,6 +346,7 @@ public class Jugador extends Cascaron {
         updateHabilidades();
         if (lluviaActivada) ejecutarLluvia(enemyMan);
         updateLluvia(enemyMan);
+        updateFlechasRectas(enemyMan);
     }
 
     public void loadLvlData(int[][] getLevelData) {
@@ -403,18 +424,14 @@ public class Jugador extends Cascaron {
             }
 
             
-            if (playerAction == ARCO && animInd == 5 && !arrowChecked) {
+            if (playerAction == ARCO && animInd == 8 && !arrowChecked) {
                 audioPlayer.reproducirEfecto("sonido-golpe.wav");
-                float savedX = attackBox.x;
-                float savedW = attackBox.width;
-                attackBox.width = 400 * Juego.SCALE;
-                if (playerDirec == 1)
-                    attackBox.x = hitbox.x + hitbox.width;
-                else
-                    attackBox.x = hitbox.x - attackBox.width;
-                enemyMan.checkEnemyHit(attackBox, this);
-                attackBox.x = savedX;
-                attackBox.width = savedW;
+                // Spawn flecha visible desde el hitbox del jugador
+                float flechaX = (playerDirec == 1)
+                    ? hitbox.x + hitbox.width + 5 * Juego.SCALE
+                    : hitbox.x - 5 * Juego.SCALE;
+                float flechaY = hitbox.y + hitbox.height * 0.4f;
+                flechasRectas.add(new FlechaRecta(flechaX, flechaY, playerDirec, dañoAtaque));
                 arrowChecked = true;
             }
 
@@ -557,6 +574,9 @@ public class Jugador extends Cascaron {
         for (FlechaLluvia f : flechasLluvia) {
             f.render(g, xLvlOffset, yLvlOffset);
         }
+        for (FlechaRecta f : flechasRectas) {
+            f.render(g, xLvlOffset, yLvlOffset);
+        }
 
         drawHitbox(g, xLvlOffset, yLvlOffset);
         drawAttackBox(g, xLvlOffset, yLvlOffset);
@@ -576,9 +596,9 @@ public class Jugador extends Cascaron {
             heartFrames[i] = heartSheet.getSubimage(i * 90, 0, 90, 28);
 
         BufferedImage img = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS);
-        idLeAni = new BufferedImage[8][9];
+        idLeAni = new BufferedImage[8][13];
         for (int j = 0; j < idLeAni.length; j++)
-            for (int i = 0; i < idLeAni[j].length; i++)
+            for (int i = 0; i < 9; i++)
                 idLeAni[j][i] = img.getSubimage(i * 100, j * 100, 100, 100);
 
         cargarEfectoHabilidad();
@@ -683,7 +703,7 @@ public class Jugador extends Cascaron {
             textoHab = "CORAZA (" + segs + "s)"; 
             colorHab = COLOR_HAB_CORAZA;
         } else if (roboVidaActivo) {
-            textoHab = "ROBO DE VIDA"; 
+            textoHab = "ROBO DE VIDA (" + robosRestantes + ")"; 
             colorHab = COLOR_HAB_ROBO;
         }
         
@@ -749,9 +769,11 @@ public class Jugador extends Cascaron {
         corazaActiva      = false;
         corazaTimer       = 0;
         roboVidaActivo    = false;
+        robosRestantes    = 0;
         lluviaActivada    = false;
         lluviaEnCurso     = false;
         flechasLluvia.clear();
+        flechasRectas.clear();
         flechasSpawneadas = 0;
         efectoAnimInd     = -1;
         efectoAnimTick    = 0;

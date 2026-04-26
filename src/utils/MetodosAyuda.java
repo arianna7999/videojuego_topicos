@@ -56,7 +56,7 @@ private static boolean IsTileSolid(int xIndex, int yIndex, int[][] lvlData) {
         return true;
     }
 
-    private static boolean IsSolid(float x, float y, int[][] lvlData) {
+    public static boolean IsSolid(float x, float y, int[][] lvlData) {
         return IsTileSolid((int) (x / Juego.TILES_SIZE), (int) (y / Juego.TILES_SIZE), lvlData);
     }
 
