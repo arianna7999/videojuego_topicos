@@ -30,8 +30,8 @@ public class Enemy1 extends Enemigo {
         initAttackBox();
     }
 
-    public void update(int[][] lvlData, Jugador jugador) {
-        super.update(lvlData, jugador);
+    public void update(int[][] lvlData, Jugador jugador, int levelIndex) {
+        super.update(lvlData, jugador, levelIndex);
         updateAttackBox();
         actualizarAnimacion(jugador);
     }

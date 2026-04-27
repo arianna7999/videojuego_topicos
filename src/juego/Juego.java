@@ -134,7 +134,7 @@ public class Juego extends Thread {
 
         levelMan = new LevelManager(this);
         calcularCameraOffset();
-        player.loadLvlData(levelMan.currentLevel().getLvlData());
+        player.loadLvlData(levelMan.currentLevel().getLvlData(), levelMan.getLevelIndex());
         objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
         enInicio = false;
         enSeleccion = true;
@@ -284,9 +284,9 @@ public class Juego extends Thread {
             cargarSiguienteNivel();
             return;
         }
-        player.update(enemyManager, objectManager);
+        player.update(enemyManager, objectManager, levelMan.getLevelIndex());
         levelMan.update();
-        enemyManager.update(levelMan.currentLevel().getLvlData(), player);
+        enemyManager.update(levelMan.currentLevel().getLvlData(), player, levelMan.getLevelIndex());
         objectManager.update();
         objectManager.actualizarJugadorEnPlataforma(player);
         objectManager.checkPuertaInteraccion(player);
@@ -492,7 +492,7 @@ public class Juego extends Thread {
     }
 
     private void reiniciarJuego() {
-        player.resetAll();
+        player.resetAll(levelMan.getLevelIndex());
         enemyManager.resetAllEnemies(levelMan.getLevelIndex());
         objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
         xLvlOffset = 0;
@@ -540,9 +540,9 @@ public class Juego extends Thread {
             victoria = true;
             cargarPista(4);
         } else {
-            player.loadLvlData(levelMan.currentLevel().getLvlData());
+            player.loadLvlData(levelMan.currentLevel().getLvlData(), levelMan.getLevelIndex());
             calcularCameraOffset();
-            player.resetAll();
+            player.resetAll(levelMan.getLevelIndex());
             xLvlOffset = 0;
             yLvlOffset = 0;
             cargarPista(levelMan.getLevelIndex());
@@ -581,8 +581,8 @@ public class Juego extends Thread {
         // 2. Aplicar el personaje elegido
         player.setPersonaje(PERSONAJES[seleccionIndice]);
         // 3. Resetear estado del jugador y enemigos
-        player.resetAll();
-        player.loadLvlData(levelMan.currentLevel().getLvlData());
+        player.resetAll(levelMan.getLevelIndex());
+        player.loadLvlData(levelMan.currentLevel().getLvlData(), levelMan.getLevelIndex());
         calcularCameraOffset();
         enemyManager.resetAllEnemies(levelMan.getLevelIndex());
         objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
@@ -601,10 +601,10 @@ public class Juego extends Thread {
         gameOver = false;
         enInicio = false;
         enSeleccion = true;
-        player.resetAll();
+        player.resetAll(levelMan.getLevelIndex());
         enemyManager.resetAllEnemies(levelMan.getLevelIndex());
         levelMan.resetToFirstLevel();
-        player.loadLvlData(levelMan.currentLevel().getLvlData());
+        player.loadLvlData(levelMan.currentLevel().getLvlData(), levelMan.getLevelIndex());
         calcularCameraOffset();
         objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
         xLvlOffset = 0;
