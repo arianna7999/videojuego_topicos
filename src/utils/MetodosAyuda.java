@@ -36,20 +36,20 @@ public class MetodosAyuda {
     }
 
 private static boolean IsTileSolid(int xIndex, int yIndex, int[][] lvlData) {
-        if (xIndex < 0 || xIndex >= lvlData[0].length) return true; // Lados sólidos
-        if (yIndex < 0) return true; // Techo sólido
-        if (yIndex >= lvlData.length) return false; // ¡El vacío ahora es aire para que puedas caer!
+        if (xIndex < 0 || xIndex >= lvlData[0].length) return true;
+        if (yIndex < 0) return true;
+        if (yIndex >= lvlData.length) return false; 
         
         int valor = lvlData[yIndex][xIndex];
         
-        if (valor >= 48 || valor < 0) return true;
+        // if (valor >= 48 || valor < 0) return true;
         
-        // Mantén los números así para que los picos sigan siendo sólidos
-       // Agregamos 8, 20 y 32 a la lista
-        if (valor == 11 || valor == 4 || valor == 5 || 
-            valor == 16 || valor == 17 || 
-            valor == 3 || valor == 15 || valor == 27 ||
-            valor == 8 || valor == 20 || valor == 32) {
+        if (valor == 11 )
+            // || valor == 4 || valor == 5 || 
+            // valor == 16 || valor == 17 || 
+            // valor == 3 || valor == 15 || valor == 27 ||
+            // valor == 8 || valor == 20 || valor == 32)
+             {
             
             return false;
         }
@@ -72,12 +72,11 @@ public static float GetEntityXPosNextToWall(Rectangle2D.Float hitbox, float xSpe
     }
 
     public static float GetEntityYPosUnderRoofOrAboveFloor(Rectangle2D.Float hitbox, float airSpeed) {
-        if (airSpeed > 0) { // Cayendo
+        if (airSpeed > 0) {
             int bottomTile = (int) ((hitbox.y + hitbox.height + airSpeed) / Juego.TILES_SIZE);
             return bottomTile * Juego.TILES_SIZE - hitbox.height - 1;
-        } else { // Saltando o rebotando por daño
+        } else {
             int topTile = (int) ((hitbox.y + airSpeed) / Juego.TILES_SIZE);
-            // Agregamos un + 1 aquí para evitar que la cabeza se atore
             return (topTile + 1) * Juego.TILES_SIZE + 1; 
         }
     }
@@ -91,32 +90,7 @@ public static float GetEntityXPosNextToWall(Rectangle2D.Float hitbox, float xSpe
         }
     }
 
-    public static boolean tocandoPicos(java.awt.geom.Rectangle2D.Float hitbox, int[][] lvlData) {
-        // Calculamos las celdas que ocupa el jugador, más un pixel hacia abajo para detectar el suelo
-        int leftCol = (int) (hitbox.x / Juego.TILES_SIZE);
-        int rightCol = (int) ((hitbox.x + hitbox.width - 1) / Juego.TILES_SIZE);
-        int topRow = (int) (hitbox.y / Juego.TILES_SIZE);
-        int bottomRow = (int) ((hitbox.y + hitbox.height + 1) / Juego.TILES_SIZE); 
-
-        // Recorremos los tiles cercanos al jugador
-        for (int c = leftCol; c <= rightCol; c++) {
-            for (int r = topRow; r <= bottomRow; r++) {
-                // Evitar salirnos del mapa
-                if (c >= 0 && c < lvlData[0].length && r >= 0 && r < lvlData.length) {
-                    int valor = lvlData[r][c];
-                    // Si toca alguno de los sprites de picos (42, 43, 44, 45)
-                    if (valor == 42 || valor == 43 || valor == 44 || valor == 45) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     public static boolean IsEntityOnGameObject(java.awt.geom.Rectangle2D.Float hitbox, java.awt.geom.Rectangle2D.Float objHitbox) {
-        // Cambiamos el + 1 por un + 10 para aumentar el rango de detección hacia abajo.
-        // Así el jugador detectará la plataforma incluso si esta acaba de bajar.
         return (hitbox.y + hitbox.height + 10 >= objHitbox.y &&
                 hitbox.y + hitbox.height <= objHitbox.y + 10 &&
                 hitbox.x + hitbox.width > objHitbox.x &&
@@ -124,13 +98,11 @@ public static float GetEntityXPosNextToWall(Rectangle2D.Float hitbox, float xSpe
     }
 
     public static boolean IsEntityOnLadder(Rectangle2D.Float hitbox, int[][] lvlData) {
-        // Revisamos si el centro del jugador está tocando la escalera
         int x = (int) (hitbox.x + hitbox.width / 2) / juego.Juego.TILES_SIZE;
         int y = (int) (hitbox.y + hitbox.height / 2) / juego.Juego.TILES_SIZE;
 
         if (x >= 0 && x < lvlData[0].length && y >= 0 && y < lvlData.length) {
             int valor = lvlData[y][x];
-            // Aquí ponemos tus tiles 8, 20 y 32
             return valor == 8 || valor == 20 || valor == 32;
         }
         return false;

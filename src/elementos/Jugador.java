@@ -339,8 +339,8 @@ public class Jugador extends Cascaron {
         actualizarAnim(enemyMan, objectMan);
         colocarAnim();
         ActuPosicion();
+        revisarPicos(objectMan);
         autoCurar();
-        revisarPicos();
         revisarCaidaVacio();
         revisarAgua(objectMan);
         updateHabilidades();
@@ -639,11 +639,14 @@ public class Jugador extends Cascaron {
         if (vidaActual > vidaMaxima) vidaActual = vidaMaxima;
     }
 
-    private void revisarPicos() {
-        if (utils.MetodosAyuda.tocandoPicos(hitbox, lvlData)) {
-            if (!isDead && invulnerableTimer == 0)
-                if (audioPlayer != null) audioPlayer.reproducirEfecto("sonido-dano.wav");
-            recibirDaño(20, -playerDirec);
+    private void revisarPicos(ObjectManager objectMan) {
+        if (objectMan.checkDañoPorPicos(this)) {
+            if (!isDead && invulnerableTimer == 0) {
+                if (audioPlayer != null) {
+                    audioPlayer.reproducirEfecto("sonido-dano.wav");
+                }
+                recibirDaño(20, -playerDirec);
+            }
         }
     }
 
