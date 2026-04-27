@@ -49,6 +49,7 @@ public class LoadSave {
     public static final String FONDO_PIEDRAS_IMG="fondo3.png";
     public static final String FONDO_CASTLE_IMG_1="layer_1.png";
     public static final String FONDO_CASTLE_IMG_2="layer_2.png";
+    public static final String FONDO_CASTLE_IMG_3="layer_3.png";
     public static final String FONDO_MUNDO_3_CIELO="mundo3_cielo.png";
     public static final String FONDO_MUNDO_3_PIEDRAS="mundo3_piedras.png";
     public static final String FONDO_MUNDO_3_MONTANAS="mundo3_montanas.png";
