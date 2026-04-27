@@ -87,20 +87,20 @@ public abstract class Enemigo extends Cascaron {
         g.drawRect((int) attackBox.x - xLvlOffset, (int) attackBox.y - yLvlOffset, (int) attackBox.width, (int) attackBox.height);
     }
 
-    public void update(int[][] lvlData, Jugador jugador) {
-        actualizarComportamiento(lvlData, jugador);
+    public void update(int[][] lvlData, Jugador jugador, int levelIndex) {
+        actualizarComportamiento(lvlData, jugador, levelIndex);
     }
 
-    private void actualizarComportamiento(int[][] lvlData, Jugador jugador) {
+    private void actualizarComportamiento(int[][] lvlData, Jugador jugador, int levelIndex) {
         if (firstUpdate) {
-            if (!IsEntityOnFloor(hitbox, lvlData)) {
+            if (!IsEntityOnFloor(hitbox, lvlData, levelIndex)) {
                 inAir = true;
             }
             firstUpdate = false;
         }
 
         if (inAir) {
-            if (CanMoveHere(hitbox.x, hitbox.y + fallSpeed, (int) hitbox.width, (int) hitbox.height, lvlData)) {
+            if (CanMoveHere(hitbox.x, hitbox.y + fallSpeed, (int) hitbox.width, (int) hitbox.height, lvlData, levelIndex)) {
                 hitbox.y += fallSpeed;
                 fallSpeed += gravity;
             } else {
@@ -121,8 +121,8 @@ public abstract class Enemigo extends Cascaron {
                         }
                     }
                     float xSpeed = walkDir * walkSpeed;
-                    if (CanMoveHere(hitbox.x + xSpeed, hitbox.y, (int) hitbox.width, (int) hitbox.height, lvlData)
-                            && EsSueloSolido(hitbox.x, hitbox.y, hitbox.width, hitbox.height, xSpeed, lvlData)) {
+                    if (CanMoveHere(hitbox.x + xSpeed, hitbox.y, (int) hitbox.width, (int) hitbox.height, lvlData, levelIndex)
+                            && EsSueloSolido(hitbox.x, hitbox.y, hitbox.width, hitbox.height, xSpeed, lvlData, levelIndex)) {
                         hitbox.x += xSpeed;
                     } else {
                         walkDir *= -1;

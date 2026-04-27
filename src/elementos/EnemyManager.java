@@ -46,10 +46,10 @@ public class EnemyManager {
         }
     }
 
-    public void update(int[][] lvlData, Jugador jugador) {
+    public void update(int[][] lvlData, Jugador jugador, int levelIndex) {
         enemigos.removeIf(enemigo -> !enemigo.isActivo());
         textosDaño.removeIf(td -> !td.isActivo());
-        for (Enemigo e : enemigos) e.update(lvlData, jugador);
+        for (Enemigo e : enemigos) e.update(lvlData, jugador, levelIndex);
         for (TextoDaño td : textosDaño) td.update();
     }
 

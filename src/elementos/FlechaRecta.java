@@ -42,7 +42,7 @@ public class FlechaRecta {
         g2.dispose();
     }
 
-    public void update(int[][] lvlData) {
+    public void update(int[][] lvlData, int levelIndex) {
         if (muerta) return;
 
         x += SPEED * direccion;
@@ -54,7 +54,7 @@ public class FlechaRecta {
         }
 
     
-        if (utils.MetodosAyuda.IsSolid(x, y, lvlData)) {
+        if (utils.MetodosAyuda.IsSolid(x, y, lvlData , levelIndex)) {
             muerta = true;
         }
     }

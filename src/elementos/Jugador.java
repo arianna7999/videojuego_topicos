@@ -293,11 +293,11 @@ public class Jugador extends Cascaron {
         }
     }
 
-    private void updateFlechasRectas(EnemyManager enemyMan) {
+    private void updateFlechasRectas(EnemyManager enemyMan, int levelIndex) {
         java.util.Iterator<FlechaRecta> it = flechasRectas.iterator();
         while (it.hasNext()) {
             FlechaRecta f = it.next();
-            f.update(lvlData);
+            f.update(lvlData, levelIndex);
             if (!f.isMuerta()) {
                 boolean golpeo = enemyMan.checkEnemyHitAreaFlecha(f.getHitbox(), this, f.getDaño());
                 if (golpeo) f.matar();
@@ -331,14 +331,14 @@ public class Jugador extends Cascaron {
     public boolean isRoboVidaActivo()      { return roboVidaActivo; }
     public boolean isCorazaActiva()        { return corazaActiva; }
 
-    public void update(EnemyManager enemyMan, ObjectManager objectMan) {
+    public void update(EnemyManager enemyMan, ObjectManager objectMan, int levelIndex) {
         if (invulnerableTimer > 0)
             invulnerableTimer--;
         onLadder = utils.MetodosAyuda.IsEntityOnLadder(hitbox, lvlData);
         updateAttackBox();
         actualizarAnim(enemyMan, objectMan);
         colocarAnim();
-        ActuPosicion();
+        ActuPosicion(levelIndex);
         revisarPicos(objectMan);
         autoCurar();
         revisarCaidaVacio();
@@ -346,12 +346,13 @@ public class Jugador extends Cascaron {
         updateHabilidades();
         if (lluviaActivada) ejecutarLluvia(enemyMan);
         updateLluvia(enemyMan);
-        updateFlechasRectas(enemyMan);
+        updateFlechasRectas(enemyMan, levelIndex);
     }
 
-    public void loadLvlData(int[][] getLevelData) {
+    public void loadLvlData(int[][] getLevelData, int levelIndex) {
         this.lvlData = getLevelData;
-        if (!utils.MetodosAyuda.IsEntityOnFloor(hitbox, lvlData) && !enPlataforma) {
+
+        if (!utils.MetodosAyuda.IsEntityOnFloor(hitbox, lvlData, levelIndex) && !enPlataforma) {
             inAir = true;
         }
     }
@@ -461,7 +462,7 @@ public class Jugador extends Cascaron {
     public boolean isRight() { return right; }
     public void setRight(boolean right) { this.right = right; }
 
-    public void ActuPosicion() {
+    public void ActuPosicion(int levelIndex) {
         if (isDead) return;
         moving = false;
         if (jump) jump();
@@ -483,40 +484,40 @@ public class Jugador extends Cascaron {
             if (up)   { ySpeed = -playerSpeed; moving = true; }
             else if (down) { ySpeed = playerSpeed; moving = true; }
             if (ySpeed != 0) {
-                if (CanMoveHere(hitbox.x, hitbox.y + ySpeed, (int) hitbox.width, (int) hitbox.height, lvlData))
+                if (CanMoveHere(hitbox.x, hitbox.y + ySpeed, (int) hitbox.width, (int) hitbox.height, lvlData, levelIndex))
                     hitbox.y += ySpeed;
             }
-            updateXPos(xSpeed);
+            updateXPos(xSpeed, levelIndex);
             if (xSpeed != 0 || ySpeed != 0) moving = true;
             return;
         }
 
         if (!left && !right && !inAir && !inKnockback) return;
 
-        if (!inAir && !IsEntityOnFloor(hitbox, lvlData) && !enPlataforma)
+        if (!inAir && !IsEntityOnFloor(hitbox, lvlData, levelIndex) && !enPlataforma)
             inAir = true;
 
         if (inAir) {
-            if (CanMoveHere(hitbox.x, hitbox.y + airSpeed, (int) hitbox.width, (int) hitbox.height, lvlData)) {
+            if (CanMoveHere(hitbox.x, hitbox.y + airSpeed, (int) hitbox.width, (int) hitbox.height, lvlData, levelIndex)) {
                 hitbox.y += airSpeed;
                 airSpeed += gravity;
-                updateXPos(xSpeed);
+                updateXPos(xSpeed, levelIndex);
             } else {
                 hitbox.y = GetEntityYPosUnderRoofOrAboveFloor(hitbox, airSpeed);
                 if (airSpeed > 0) resetInAir();
                 else airSpeed = fallSpeedAfterCollision;
-                updateXPos(xSpeed);
+                updateXPos(xSpeed, levelIndex);
             }
         } else {
-            updateXPos(xSpeed);
+            updateXPos(xSpeed, levelIndex);
         }
 
         if (xSpeed != 0) moving = true;
     }
 
-    private void updateXPos(float xSpeed) {
+    private void updateXPos(float xSpeed, int levelIndex) {
         if (isDead) return;
-        if (CanMoveHere(hitbox.x + xSpeed, hitbox.y, (int) hitbox.width, (int) hitbox.height, lvlData))
+        if (CanMoveHere(hitbox.x + xSpeed, hitbox.y, (int) hitbox.width, (int) hitbox.height, lvlData, levelIndex))
             hitbox.x += xSpeed;
         else
             hitbox.x = GetEntityXPosNextToWall(hitbox, xSpeed);
@@ -756,7 +757,7 @@ public class Jugador extends Cascaron {
 
     public boolean isReadyToRestart() { return readyToRestart; }
 
-    public void resetAll() {
+    public void resetAll(int levelIndex) {
         resetDirBoolean();
         inAir = false;
         isDead = false;
@@ -787,7 +788,7 @@ public class Jugador extends Cascaron {
         deadTimer = 0;
         readyToRestart = false;
 
-        if (!utils.MetodosAyuda.IsEntityOnFloor(hitbox, lvlData))
+        if (!utils.MetodosAyuda.IsEntityOnFloor(hitbox, lvlData, levelIndex))
             inAir = true;
     }
 
