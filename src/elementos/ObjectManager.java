@@ -18,11 +18,15 @@ public class ObjectManager {
     private ArrayList<PuertaMovil> puertas = new ArrayList<>();
     private ArrayList<Candelabro> candelabros = new ArrayList<>();
     private ArrayList<Aguila> aguilas = new ArrayList<>();
+private java.util.ArrayList<MaquinaGolpeable> maquinas = new java.util.ArrayList<>();
+    private java.awt.image.BufferedImage[][] maquinaSprites;
+    private java.util.ArrayList<BotonGolpeable> botones = new java.util.ArrayList<>();
+    private java.awt.image.BufferedImage botonImg;
 
     private utils.AudioPlayer audioPlayer;
 
     private BufferedImage plataformaImg;
-    private BufferedImage puertaImg;
+    private BufferedImage puertaImg,piramides;
     private BufferedImage[] aguilaImgs;
     private BufferedImage[] barrilImgs;
     private BufferedImage[] cofreImgs;
@@ -30,11 +34,13 @@ public class ObjectManager {
     private BufferedImage[] explosionImgs;
     private BufferedImage[] llaveImgs;
     private BufferedImage[] candelabroImgs;
+    private BufferedImage[] marFuegoSprites;
 
     private ArrayList<java.awt.geom.Rectangle2D.Float> aguas = new ArrayList<>();
     private ArrayList<java.awt.geom.Rectangle2D.Float> picos = new ArrayList<>();
 
     private BufferedImage[] marSprites;
+    private BufferedImage plataformaDesiertoImg;
     private int marAniTick = 0;
     private int marAniIndex = 0;
     private int marAniSpeed = 30;
@@ -50,6 +56,7 @@ public class ObjectManager {
         cofreImgs = new BufferedImage[8];
         BufferedImage temp = LoadSave.GetSpriteAtlas(LoadSave.AGUILA_SPRITE);
         aguilaImgs = new BufferedImage[6]; // 6 fotogramas
+        piramides = utils.LoadSave.GetSpriteAtlas("piramide.png");
         for (int i = 0; i < aguilaImgs.length; i++) {
             // Cortamos la imagen (1 fila x 6 columnas)
             // Asegúrate de que Constantes.Ambiente.AGUILA_WIDTH_DEFAULT sea el tamaño
@@ -57,6 +64,11 @@ public class ObjectManager {
             aguilaImgs[i] = temp.getSubimage(i * Constantes.Ambiente.AGUILA_WIDTH_DEFAULT, 0,
                     Constantes.Ambiente.AGUILA_WIDTH_DEFAULT,
                     Constantes.Ambiente.AGUILA_HEIGHT_DEFAULT);
+        }
+        try {
+            botonImg = utils.LoadSave.GetSpriteAtlas("imagen_boton.png");
+        } catch (Exception e) {
+            System.out.println("No se encontró imagen_boton.png");
         }
 
         aguilas.add(new Aguila(100, 50));
@@ -67,6 +79,7 @@ public class ObjectManager {
         }
 
         plataformaImg = LoadSave.GetSpriteAtlas("plataforma-movible.png");
+        plataformaDesiertoImg = LoadSave.GetSpriteAtlas("plataformaDesierto.png");
         puertaImg = utils.LoadSave.GetSpriteAtlas("pared-abrir.png");
 
         BufferedImage imgCorazon = LoadSave.GetSpriteAtlas("sprite-corazon.png");
@@ -102,13 +115,34 @@ public class ObjectManager {
         try {
             BufferedImage imgMar = utils.LoadSave.GetSpriteAtlas("mar.png");
             marSprites = new BufferedImage[3];
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 4; i++) {
+                marSprites[i] = imgMar.getSubimage(i * 100, 0, 100, 100);
+            }
+        } catch (Exception e) {
+            System.out.println("Aviso: No se encontró mar.png");
+        }
+         try {
+            BufferedImage imgMar = utils.LoadSave.GetSpriteAtlas("marFuego.png");
+            marFuegoSprites = new BufferedImage[4];
+            for (int i = 0; i < 4; i++) {
                 marSprites[i] = imgMar.getSubimage(i * 100, 0, 100, 100);
             }
         } catch (Exception e) {
             System.out.println("Aviso: No se encontró mar.png");
         }
 
+        // Dentro de cargarSprites() en ObjectManager.java
+try {
+            java.awt.image.BufferedImage imgM = utils.LoadSave.GetSpriteAtlas("maquinas.png");
+            maquinaSprites = new java.awt.image.BufferedImage[3][3];
+            for (int fila = 0; fila < 3; fila++) {
+                for (int col = 0; col < 3; col++) {
+                    maquinaSprites[fila][col] = imgM.getSubimage(col * 333, fila * 341, 333, 341);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("No se encontró la imagen de las máquinas");
+        }
     }
 
     public void cargarObjetosDeNivel(int nivelActual) {
@@ -118,6 +152,8 @@ public class ObjectManager {
         puertas.clear();
         picos.clear();
         candelabros.clear();
+        aguas.clear();
+        maquinas.clear();
 
         int[][] datosObjetos = LoadSave.GetObjectData(nivelActual + 1);
 
@@ -159,6 +195,21 @@ public class ObjectManager {
                         break;
                     case 10:
                         candelabros.add(new Candelabro(xPos, yPos));
+                        break; 
+                    case 11: 
+                        recompensas.add(new Recompensas(xPos, yPos, PIRAMIDE)); 
+                        break;
+                        case 12: // Máquina de Esferas
+                        if (nivelActual == 2) maquinas.add(new MaquinaGolpeable(xPos, yPos, 0));
+                        break;
+                    case 13: // Máquina de Cuadrados
+                        if (nivelActual == 2) maquinas.add(new MaquinaGolpeable(xPos, yPos, 1));
+                        break;
+                    case 14: // Máquina de Triángulos
+                        if (nivelActual == 2) maquinas.add(new MaquinaGolpeable(xPos, yPos, 2));
+                        break;
+                        case 15: // Botón del puzzle
+                        if (nivelActual == 2) botones.add(new BotonGolpeable(xPos, yPos));
                         break;
                 }
             }
@@ -186,6 +237,8 @@ public class ObjectManager {
     }
 
     public void checkObjectHit(java.awt.geom.Rectangle2D.Float attackBox) {
+        
+        // 1. Revisar los contenedores (cofres y barriles)
         for (Contenedor c : contenedores) {
             if (c.isActivo() && c.getEstado() == INACTIVO && attackBox.intersects(c.getHitbox())) {
                 c.recibirGolpe();
@@ -197,7 +250,46 @@ public class ObjectManager {
                 if (c.getTipoObjeto() == COFRE) {
                     recompensas.add(new Recompensas((int) c.getHitbox().x, (int) c.getHitbox().y, CORAZON));
                 }
-                return;
+            } // <--- ESTA LLAVE CIERRA EL IF DEL COFRE
+        } // <--- ESTA LLAVE CIERRA EL FOR DE LOS CONTENEDORES
+
+        // 2. Revisar las máquinas (Completamente AFUERA de lo anterior)
+        for (MaquinaGolpeable m : maquinas) {
+            if (attackBox.intersects(m.getHitbox())) {
+                m.golpear(); // Cambia el color
+                audioPlayer.reproducirEfecto("sonido-golpe.wav"); // Suena el golpe
+                return; // Salimos para solo golpear una a la vez
+            }
+        }
+        for (BotonGolpeable b : botones) {
+            if (attackBox.intersects(b.getHitbox())) {
+                
+                // Comprobamos si las 3 máquinas están en la posición correcta
+                boolean m1OK = false, m2OK = false, m3OK = false;
+                
+                for (MaquinaGolpeable m : maquinas) {
+                    // Tipo 0 (Esferas) en la primera imagen (Color 0)
+                    if (m.getTipoMaquina() == 0 && m.getColorActual() == 0) m1OK = true; 
+                    // Tipo 1 (Cuadrados) en la segunda imagen (Color 1)
+                    if (m.getTipoMaquina() == 1 && m.getColorActual() == 1) m2OK = true; 
+                    // Tipo 2 (Triángulos) en la tercera imagen (Color 2)
+                    if (m.getTipoMaquina() == 2 && m.getColorActual() == 2) m3OK = true; 
+                }
+                
+                // Si las 3 están bien...
+                if (m1OK && m2OK && m3OK) {
+                    System.out.println("¡PUZZLE RESUELTO!");
+                    audioPlayer.reproducirEfecto("sonido-acertado.wav"); // Sonido especial de éxito
+                    
+                    // (Opcional) ¡Aquí puedes hacer que aparezca una llave o se abra una puerta!
+                    // recompensas.add(new Recompensas((int) b.getX(), (int) b.getY() - 50, LLAVE));
+                    
+                } else {
+                    // Si te equivocaste en alguna máquina...
+                    audioPlayer.reproducirEfecto("sonido-incorrecto.wav"); // Sonido de error normal
+                }
+                
+                return; // Salimos para no golpear otra cosa al mismo tiempo
             }
         }
     }
@@ -216,7 +308,8 @@ public class ObjectManager {
         }
     }
 
-    public void update() {
+    public void update(int levelIndex) {
+            updateMar(); // Actualiza la animación del mar
         for (Contenedor c : contenedores)
             if (c.isActivo())
                 c.update();
@@ -230,15 +323,17 @@ public class ObjectManager {
         for (Candelabro c : candelabros)
             if (c.isActivo())
                 c.updateAnimation();
+        if (levelIndex == 2) { 
         for (Aguila a : aguilas) {
             a.update();
             if (a.getX() > 4000) {
                 a.resetPocision(-100);
             }
         }
+        }
     }
 
-    public void draw(Graphics g, int xLvlOffset, int yLvlOffset) {
+    public void draw(Graphics g, int xLvlOffset, int yLvlOffset, int levelIndex) {
         // 1. Contenedores y explosiones
         for (Contenedor c : contenedores) {
             if (c.isActivo()) {
@@ -257,7 +352,10 @@ public class ObjectManager {
         // 2. Plataformas móviles
         for (PlataformaMovil p : plataformas) {
             if (p.isActivo()) {
-                g.drawImage(plataformaImg,
+                // Selecciona la imagen: si el nivel es 2 (Mundo 3), usa la del desierto. Si no, usa la normal.
+                BufferedImage imgActual = (levelIndex == 2) ? plataformaDesiertoImg : plataformaImg;
+                
+                g.drawImage(imgActual,
                         (int) (p.getHitbox().x - xLvlOffset),
                         (int) (p.getHitbox().y - yLvlOffset),
                         Juego.TILES_SIZE * 3, Juego.TILES_SIZE, null);
@@ -301,10 +399,14 @@ public class ObjectManager {
                         null);
             }
         }
-
+        // agua mar
         if (marSprites != null) {
             for (java.awt.geom.Rectangle2D.Float agua : aguas) {
-                g.drawImage(marSprites[marAniIndex],
+                
+                // Cambiamos a levelIndex == 1 para que sea en el Segundo Mundo
+                BufferedImage[] spritesActuales = (levelIndex == 1 && marFuegoSprites != null) ? marFuegoSprites : marSprites;
+                
+                g.drawImage(spritesActuales[marAniIndex],
                         (int) (agua.x - xLvlOffset),
                         (int) (agua.y - yLvlOffset),
                         Juego.TILES_SIZE, Juego.TILES_SIZE, null);
@@ -312,19 +414,54 @@ public class ObjectManager {
         }
 
         // aguila
+       if (levelIndex == 2) {
         for (Aguila a : aguilas) {
-            // Restamos el xLvlOffset si quieres que el águila se mueva con la cámara
-            // Si quieres que sea parte del "fondo lejano", puedes no restarle el offset o
-            // restarle una fracción (efecto parallax)
             g.drawImage(aguilaImgs[a.getAniIndex()],
-                    (int) a.getX() - xLvlOffset, // <-- Ahora solo usa su propia coordenada X
-                    (int) a.getY(), (int) (Constantes.Ambiente.AGUILA_WIDTH * .07),
-                    (int) (Constantes.Ambiente.AGUILA_HEIGHT * .07),
+                    (int) a.getX() - xLvlOffset, 
+                    (int) a.getY(), 
+                    (int) (utils.Constantes.Ambiente.AGUILA_WIDTH * .07),
+                    (int) (utils.Constantes.Ambiente.AGUILA_HEIGHT * .07),
                     null);
         }
+        
+    }
+    for (Recompensas r : recompensas) {
+            if (r.isActivo()) {
+                // ... (otros if de pociones o llaves)
+                if (r.getTipoObjeto() == PIRAMIDE) {
+                    g.drawImage(piramides, 
+                        (int) (r.getHitbox().x - xLvlOffset-(45 * Juego.SCALE)), 
+                        (int) (r.getHitbox().y - yLvlOffset-(90 * Juego.SCALE)), 
+                        250, 200, null);
+                }
+            }
     }
 
-    public void actualizarJugadorEnPlataforma(Jugador j) {
+    if (maquinaSprites != null) {
+            for (MaquinaGolpeable m : maquinas) {
+                java.awt.image.BufferedImage imgActual = maquinaSprites[m.getTipoMaquina()][m.getColorActual()];
+                
+                // Usamos el ancho y alto directamente de la hitbox que ya agrandamos
+                int ancho = (int) m.getHitbox().width;
+                int alto = (int) m.getHitbox().height;
+                
+                g.drawImage(imgActual, 
+                        (int) (m.getHitbox().x - xLvlOffset), 
+                        (int) (m.getHitbox().y - yLvlOffset), 
+                        ancho, alto, // <--- Aquí aplicamos el nuevo tamaño
+                        null);
+            }
+        }
+        if (botonImg != null) {
+            for (BotonGolpeable b : botones) {
+                g.drawImage(botonImg, 
+                        (int) (b.getHitbox().x - xLvlOffset), 
+                        (int) (b.getHitbox().y - yLvlOffset), 
+                        Juego.TILES_SIZE, Juego.TILES_SIZE, null);
+            }
+        }
+}
+   public void actualizarJugadorEnPlataforma(Jugador j) {
         if (j.getAirSpeed() < 0) {
             j.setEnPlataforma(false);
             return;
@@ -342,7 +479,6 @@ public class ObjectManager {
         }
         j.setEnPlataforma(false);
     }
-
     public void checkPuertaInteraccion(Jugador j) {
         for (PuertaMovil p : puertas) {
             if (j.getHitbox().intersects(p.getHitbox())) {
@@ -379,4 +515,19 @@ public class ObjectManager {
         }
         return false;
     }
+
+    private void updateMar() {
+        marAniTick++;
+        
+        if (marAniTick >= marAniSpeed) {
+            marAniTick = 0;
+            marAniIndex++; 
+            
+            if (marAniIndex >= 3) { 
+                marAniIndex = 0;
+            }
+        }
+    }
+
+    
 }

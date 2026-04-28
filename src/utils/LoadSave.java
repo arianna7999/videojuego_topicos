@@ -115,12 +115,15 @@ public class LoadSave {
         try {
             img = ImageIO.read(is);
         } catch (IOException e) {
+            System.out.println("Error al cargar la imagen: " + name);
             Logger.getLogger(PanelJuego.class.getName()).log(Level.SEVERE, null, e);
         } finally {
             try {
+                System.out.println("Cerrando InputStream para: " + name);
                 if (is != null) is.close();
             } catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("Error al cerrar el InputStream: " + name);
             }
         }
         return img;
