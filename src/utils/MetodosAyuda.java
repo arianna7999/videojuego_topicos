@@ -34,38 +34,47 @@ public class MetodosAyuda {
         }
         return false;
     }
-
-    private static boolean IsTileSolid(int xIndex, int yIndex, int[][] lvlData, int levelIndex) {
-        if (xIndex < 0 || xIndex >= lvlData[0].length)
-            return true;
-        if (yIndex < 0)
-            return true;
-        if (yIndex >= lvlData.length)
-            return false;
-
-        int valor = lvlData[yIndex][xIndex];
-
-        switch (levelIndex) {
-            case 0:
-                if (valor == 11 || valor == 4 || valor == 5 ||
-                        valor == 16 || valor == 17 ||
-                        valor == 3 || valor == 15 || valor == 27 ||
-                        valor == 8 || valor == 20 || valor == 32) {
-                    return false; // no sólido
-                }
-                break;
-
-            default:
-                if (valor == 11) {
+        private static boolean IsTileSolid(int xIndex, int yIndex, int[][] lvlData, int levelIndex) {
+                if (xIndex < 0 || xIndex >= lvlData[0].length)
+                    return true;
+                if (yIndex < 0)
+                    return true;
+                if (yIndex >= lvlData.length)
                     return false;
+
+                int valor = lvlData[yIndex][xIndex];
+
+                switch (levelIndex) {
+                    case 0: // Mundo 1
+                        if (valor == 11 || valor == 4 || valor == 5 ||
+                                valor == 16 || valor == 17 ||
+                                valor == 3 || valor == 15 || valor == 27 ||
+                                valor == 8 || valor == 20 || valor == 32) {
+                            return false; 
+                        }
+                        break;
+
+                    case 2: // Mundo 3 (NUEVO)
+                        // Aquí agregamos el 20 y cualquier otro bloque decorativo del Mundo 3
+                          if (valor == 11 || valor == 4 || valor == 5 ||
+                                valor == 16 || valor == 17 ||
+                                valor == 3 || valor == 15 || valor == 27 ||
+                                valor == 8 || valor == 20 || valor == 32|| valor==45) {
+                            return false; 
+                        }
+                        break;
+
+
+                    default:
+                        if (valor == 11) {
+                            return false;
+                        }
+                        break;
                 }
-                break;
-        }
 
-        // Si no entró en ninguna condición de "no sólido", entonces es sólido
-        return true;
-    }
-
+                return true;
+            }
+        
     public static boolean IsSolid(float x, float y, int[][] lvlData, int levelIndex) {
         return IsTileSolid((int) (x / Juego.TILES_SIZE), (int) (y / Juego.TILES_SIZE), lvlData, levelIndex);
     }

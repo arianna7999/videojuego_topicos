@@ -983,7 +983,7 @@ public class Jugador extends Cascaron {
                 break;
             case 1:
                 spawnX = 100;
-                spawnY = 1500;
+                spawnY = 1100;
                 break;
             case 2:
                 spawnX = 100;
@@ -997,11 +997,6 @@ public class Jugador extends Cascaron {
                 spawnX = 100;
                 spawnY = 200;
                 break;
-        }
-        
-        if (hitbox != null) {
-            hitbox.x = spawnX;
-            hitbox.y = spawnY;
         }
     }
 }
