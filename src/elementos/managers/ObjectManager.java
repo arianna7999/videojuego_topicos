@@ -35,7 +35,7 @@ public class ObjectManager {
     private utils.AudioPlayer audioPlayer;
 
     private BufferedImage plataformaImg;
-    private BufferedImage puertaImg, piramides;
+    private BufferedImage puertaImg,piramides,craneoSimpleImg, craneoCuernosImg;
     private BufferedImage[] aguilaImgs;
     private BufferedImage[] barrilImgs;
     private BufferedImage[] cofreImgs;
@@ -152,6 +152,9 @@ public class ObjectManager {
         } catch (Exception e) {
             System.out.println("No se encontró la imagen de las máquinas");
         }
+
+        craneoSimpleImg = utils.LoadSave.GetSpriteAtlas("craneoHueso.png"); //
+        craneoCuernosImg = utils.LoadSave.GetSpriteAtlas("coyoteHueso.png");
     }
 
     public void cargarObjetosDeNivel(int nivelActual) {
@@ -220,6 +223,15 @@ public class ObjectManager {
                         if (nivelActual == 2)
                             maquinas.add(new MaquinaGolpeable(xPos, yPos, 2));
                         break;
+                        case 15: // Botón del puzzle
+                        if (nivelActual == 2) botones.add(new BotonGolpeable(xPos, yPos));
+                        break;
+                        case 16: 
+                            recompensas.add(new Recompensas(xPos, yPos, CRANEO_SIMPLE)); //
+                            break;
+                        case 17:
+                            recompensas.add(new Recompensas(xPos, yPos, CRANEO_CUERNOS)); //
+                            break;
                     case 15: // Botón del puzzle
                         if (nivelActual == 2)
                             botones.add(new BotonGolpeable(xPos, yPos));
@@ -302,7 +314,7 @@ public class ObjectManager {
 
                 } else {
                     // Si te equivocaste en alguna máquina...
-                    audioPlayer.reproducirEfecto("sonido-incorrecto.wav"); // Sonido de error normal
+                    audioPlayer.reproducirEfecto("sonido incorrecto.wav"); // Sonido de error normal
                 }
 
                 return; // Salimos para no golpear otra cosa al mismo tiempo
@@ -393,6 +405,17 @@ public class ObjectManager {
                             (int) (24 * Juego.SCALE), (int) (24 * Juego.SCALE), null);
                 }
             }
+            if (r.getTipoObjeto() == CRANEO_SIMPLE) {
+            g.drawImage(craneoSimpleImg, 
+                (int) (r.getHitbox().x - xLvlOffset), 
+                (int) (r.getHitbox().y - yLvlOffset), 
+                (int)(32 * Juego.SCALE), (int)(32 * Juego.SCALE), null);
+         } else if (r.getTipoObjeto() == CRANEO_CUERNOS) {
+            g.drawImage(craneoCuernosImg, 
+                (int) (r.getHitbox().x - xLvlOffset), 
+                (int) (r.getHitbox().y - yLvlOffset), 
+                (int)(32 * Juego.SCALE), (int)(32 * Juego.SCALE), null);
+        }
         }
 
         // 4. Puertas
@@ -550,4 +573,5 @@ public class ObjectManager {
         }
     }
 
+    
 }
