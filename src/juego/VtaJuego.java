@@ -1,22 +1,35 @@
 package juego;
 
+import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import elementos.MenuPrincipal;
 
-public class VtaJuego {
+public class VtaJuego extends JFrame {
+
+    private JFrame vta;
+    private JPanel contenedor;
+    private CardLayout cardLayout;
 
     public VtaJuego(PanelJuego n) {
-        JFrame vta = new JFrame();
+        vta = new JFrame();
         vta.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        vta.add(n);
-        vta.setResizable(true);
+        vta.setUndecorated(true); // 1. Quitar bordes primero
+
         vta.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        vta.setUndecorated(true);
-        vta.pack();
-        vta.setLocationRelativeTo(null);
+        cardLayout = new CardLayout();
+        contenedor = new JPanel(cardLayout);
+        MenuPrincipal menu = new MenuPrincipal(this);
+        contenedor.add(menu, "MENU");
+        contenedor.add(n, "JUEGO");
+
+        vta.add(contenedor);
         vta.setVisible(true);
-        
+
+        vta.revalidate();
+        vta.repaint();
         vta.addWindowFocusListener(new WindowFocusListener() {
             @Override
             public void windowGainedFocus(WindowEvent e) {
@@ -25,7 +38,18 @@ public class VtaJuego {
             @Override
             public void windowLostFocus(WindowEvent e) {
                 n.getGame().windowFocusLost();
-            }            
+            }
         });
     }
+
+    public void mostrarMenu() {
+        cardLayout.show(contenedor, "MENU");
+        contenedor.getComponent(0).requestFocusInWindow();
+    }
+
+    public void mostrarJuego() {
+        cardLayout.show(contenedor, "JUEGO");
+        contenedor.getComponent(1).requestFocusInWindow();
+    }
+
 }
