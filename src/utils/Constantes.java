@@ -195,6 +195,8 @@ public class Constantes {
         public static final int PUERTA = 6;
         public static final int CANDELABRO = 7;
         public static final int PIRAMIDE = 11;
+        public static final int CRANEO_SIMPLE = 12; // Nuevo ID
+        public static final int CRANEO_CUERNOS = 13;
 
         public static final int INACTIVO = 0;
         public static final int ANIMACION = 1;
