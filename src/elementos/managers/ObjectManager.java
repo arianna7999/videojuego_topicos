@@ -35,7 +35,7 @@ public class ObjectManager {
     private utils.AudioPlayer audioPlayer;
 
     private BufferedImage plataformaImg;
-    private BufferedImage puertaImg,piramides,craneoSimpleImg, craneoCuernosImg;
+    private BufferedImage puertaImg, piramides, craneoSimpleImg, craneoCuernosImg;
     private BufferedImage[] aguilaImgs;
     private BufferedImage[] barrilImgs;
     private BufferedImage[] cofreImgs;
@@ -223,19 +223,18 @@ public class ObjectManager {
                         if (nivelActual == 2)
                             maquinas.add(new MaquinaGolpeable(xPos, yPos, 2));
                         break;
-                        case 15: // Botón del puzzle
-                        if (nivelActual == 2) botones.add(new BotonGolpeable(xPos, yPos));
-                        break;
-                        case 16: 
-                            recompensas.add(new Recompensas(xPos, yPos, CRANEO_SIMPLE)); //
-                            break;
-                        case 17:
-                            recompensas.add(new Recompensas(xPos, yPos, CRANEO_CUERNOS)); //
-                            break;
                     case 15: // Botón del puzzle
                         if (nivelActual == 2)
                             botones.add(new BotonGolpeable(xPos, yPos));
                         break;
+                    case 16:
+                        recompensas.add(new Recompensas(xPos, yPos, CRANEO_SIMPLE)); //
+                        break;
+                    case 17:
+                        recompensas.add(new Recompensas(xPos, yPos, CRANEO_CUERNOS)); //
+                        break;
+                    default:
+                        System.out.println("Valor desconocido en datosObjetos: " + valorAzul);
                 }
             }
         }
@@ -406,16 +405,16 @@ public class ObjectManager {
                 }
             }
             if (r.getTipoObjeto() == CRANEO_SIMPLE) {
-            g.drawImage(craneoSimpleImg, 
-                (int) (r.getHitbox().x - xLvlOffset), 
-                (int) (r.getHitbox().y - yLvlOffset), 
-                (int)(32 * Juego.SCALE), (int)(32 * Juego.SCALE), null);
-         } else if (r.getTipoObjeto() == CRANEO_CUERNOS) {
-            g.drawImage(craneoCuernosImg, 
-                (int) (r.getHitbox().x - xLvlOffset), 
-                (int) (r.getHitbox().y - yLvlOffset), 
-                (int)(32 * Juego.SCALE), (int)(32 * Juego.SCALE), null);
-        }
+                g.drawImage(craneoSimpleImg,
+                        (int) (r.getHitbox().x - xLvlOffset),
+                        (int) (r.getHitbox().y - yLvlOffset),
+                        (int) (32 * Juego.SCALE), (int) (32 * Juego.SCALE), null);
+            } else if (r.getTipoObjeto() == CRANEO_CUERNOS) {
+                g.drawImage(craneoCuernosImg,
+                        (int) (r.getHitbox().x - xLvlOffset),
+                        (int) (r.getHitbox().y - yLvlOffset),
+                        (int) (32 * Juego.SCALE), (int) (32 * Juego.SCALE), null);
+            }
         }
 
         // 4. Puertas
@@ -573,5 +572,4 @@ public class ObjectManager {
         }
     }
 
-    
 }
