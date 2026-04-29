@@ -1,4 +1,4 @@
-package elementos;
+package elementos.objetos;
 
 public class Aguila {
     private float x, y;

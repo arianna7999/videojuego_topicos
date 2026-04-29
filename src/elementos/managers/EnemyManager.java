@@ -1,8 +1,15 @@
-package elementos;
+package elementos.managers;
 
 import static utils.Constantes.ConstantesEnemigos.*;
 import java.awt.Graphics;
 import java.util.ArrayList;
+
+import elementos.enemigos.Caballero;
+import elementos.enemigos.Enemigo;
+import elementos.enemigos.Enemy1;
+import elementos.enemigos.Enemy2;
+import elementos.enemigos.JefeFinal;
+import elementos.jugador.Jugador;
 
 public class EnemyManager {
     private ArrayList<Enemigo> enemigos = new ArrayList<>();

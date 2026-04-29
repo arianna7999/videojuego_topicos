@@ -1,4 +1,4 @@
-package elementos;
+package elementos.jugador;
 
 public class Personaje {
 

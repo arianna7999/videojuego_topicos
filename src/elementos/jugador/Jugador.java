@@ -1,8 +1,15 @@
-package elementos;
+package elementos.jugador;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+
+import elementos.enemigos.Cascaron;
+import elementos.enemigos.FlechaLluvia;
+import elementos.enemigos.FlechaRecta;
+import elementos.managers.EnemyManager;
+import elementos.managers.ObjectManager;
+import elementos.objetos.PlataformaMovil;
 import juego.Juego;
 import static utils.Constantes.ConstantesJugador.ARCO;
 import static utils.Constantes.ConstantesJugador.ATACAR1;

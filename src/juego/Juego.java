@@ -1,10 +1,10 @@
 package juego;
 
-import elementos.EnemyManager;
-import elementos.Jugador;
-import elementos.MenuSeleccion;
-import elementos.ObjectManager;
-import elementos.PantallaVictoria;
+import elementos.jugador.Jugador;
+import elementos.managers.EnemyManager;
+import elementos.managers.ObjectManager;
+import elementos.pantallas.MenuSeleccion;
+import elementos.pantallas.PantallaVictoria;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -443,7 +443,7 @@ public class Juego extends Thread {
         }
     }
 
-    public elementos.EnemyManager getEnemyManager() {
+    public elementos.managers.EnemyManager getEnemyManager() {
         return enemyManager;
     }
 
@@ -551,7 +551,7 @@ public class Juego extends Thread {
         cargarPista(5);
     }
 
-    public void aplicarPersonajeElegido(elementos.Personaje personajeElegido) {
+    public void aplicarPersonajeElegido(elementos.jugador.Personaje personajeElegido) {
         levelMan.resetToFirstLevel();
 
         player.setPersonaje(personajeElegido);

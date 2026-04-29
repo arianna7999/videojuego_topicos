@@ -1,4 +1,4 @@
-package elementos;
+package elementos.objetos;
 
 import juego.Juego;
 

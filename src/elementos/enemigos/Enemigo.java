@@ -1,4 +1,4 @@
-package elementos;
+package elementos.enemigos;
 
 import static utils.Constantes.ConstantesEnemigos.ATACAR;
 import static utils.Constantes.ConstantesEnemigos.CORRER;
@@ -12,6 +12,8 @@ import static utils.MetodosAyuda.IsEntityOnFloor;
 
 import juego.Juego;
 import java.awt.Graphics;
+
+import elementos.jugador.Jugador;
 
 public abstract class Enemigo extends Cascaron {
     protected java.awt.geom.Rectangle2D.Float attackBox;
