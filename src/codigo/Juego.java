@@ -1,8 +1,9 @@
 package juego;
 
-import elementos.EnemyManager;
-import elementos.Jugador;
-import elementos.ObjectManager;
+import elementos.jugador.Jugador;
+import elementos.managers.EnemyManager;
+import elementos.managers.ObjectManager;
+
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -67,14 +68,14 @@ public class Juego extends Thread {
 
     // Personajes disponibles: nombre, vida, vel, daño, salto, sprite, cols, filas,
     // celdaW, celdaH, habilidad, drawOffX, drawOffY, tiempoParaCurar, cantCura
-    private final elementos.Personaje[] PERSONAJES = {
-            new elementos.Personaje("Hank", 120, 2.5f, 25, -2.25f, "Soldier.png", 9, 7, 100, 100, "golpe_brutal", 87f,
+    private final elementos.jugador.Personaje[] PERSONAJES = {
+            new elementos.jugador.Personaje("Hank", 120, 2.5f, 25, -2.25f, "Soldier.png", 9, 7, 100, 100, "golpe_brutal", 87f,
                     80f, 500, 3),
-            new elementos.Personaje("Frank", 200, 2f, 20, -2.25f, "Frank.png", 9, 7, 100, 100, "coraza", 87f, 80f, 400,
+            new elementos.jugador.Personaje("Frank", 200, 2f, 20, -2.25f, "Frank.png", 9, 7, 100, 100, "coraza", 87f, 80f, 400,
                     2),
-            new elementos.Personaje("Saori", 180, 2.8f, 20, -2.6f, "Saori.png", 13, 8, 100, 100, "robo_vida", 87f, 80f,
+            new elementos.jugador.Personaje("Saori", 180, 2.8f, 20, -2.6f, "Saori.png", 13, 8, 100, 100, "robo_vida", 87f, 80f,
                     200, 5),
-            new elementos.Personaje("Lucerys", 180, 2.5f, 18, -2.4f, "Lucerys.png", 13, 8, 100, 100, "lluvia", 87f, 80f,
+            new elementos.jugador.Personaje("Lucerys", 180, 2.5f, 18, -2.4f, "Lucerys.png", 13, 8, 100, 100, "lluvia", 87f, 80f,
                     400, 3)
     };
 
@@ -479,7 +480,7 @@ public class Juego extends Thread {
         }
     }
 
-    public elementos.EnemyManager getEnemyManager() {
+    public elementos.managers.EnemyManager getEnemyManager() {
         return enemyManager;
     }
 

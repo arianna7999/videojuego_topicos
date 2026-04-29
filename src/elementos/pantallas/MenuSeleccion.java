@@ -1,4 +1,4 @@
-package elementos;
+package elementos.pantallas;
 
 import juego.Juego;
 import java.awt.Graphics;
@@ -12,6 +12,9 @@ import java.awt.BasicStroke;
 import java.awt.RenderingHints;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
+
+import elementos.jugador.Personaje;
+
 import java.awt.image.BufferedImage;
 
 public class MenuSeleccion {

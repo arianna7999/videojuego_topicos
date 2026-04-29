@@ -5,7 +5,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import elementos.MenuPrincipal;
+
+import elementos.pantallas.MenuPrincipal;
 
 public class VtaJuego extends JFrame {
 
@@ -44,7 +45,7 @@ public class VtaJuego extends JFrame {
 
     public void mostrarMenu() {
         this.getContentPane().removeAll();
-        elementos.MenuPrincipal menu = new elementos.MenuPrincipal(this);
+        elementos.pantallas.MenuPrincipal menu = new elementos.pantallas.MenuPrincipal(this);
         this.add(menu);
         this.revalidate();
         this.repaint();

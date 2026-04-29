@@ -1,4 +1,4 @@
-package elementos;
+package elementos.enemigos;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;

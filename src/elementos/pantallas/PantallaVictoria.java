@@ -1,4 +1,4 @@
-package elementos;
+package elementos.pantallas;
 
 import juego.Juego;
 import java.awt.Color;

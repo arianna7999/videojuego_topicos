@@ -1,10 +1,11 @@
-package elementos;
+package elementos.enemigos;
 
 import static utils.Constantes.ConstantesEnemigos.*;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import elementos.jugador.Jugador;
 import juego.Juego;
 import utils.LoadSave;
 

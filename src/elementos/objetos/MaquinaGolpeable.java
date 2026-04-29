@@ -1,4 +1,4 @@
-package elementos;
+package elementos.objetos;
 
 import java.awt.geom.Rectangle2D;
 import juego.Juego;
