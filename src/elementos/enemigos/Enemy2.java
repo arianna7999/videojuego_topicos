@@ -133,6 +133,16 @@ public class Enemy2 extends Enemigo {
                 for (int i = 0; i < 4; i++)
                     animaciones[MUERTO][i] = img.getSubimage(i * 100, 600, 100, 100);
                 break;
+            case 3:
+                img = LoadSave.GetSpriteAtlas(LoadSave.ELITE_ORC);
+                tipoEnemigo = ConstantesEnemigos.ELITE_ORC;
+                for (int i = 0; i < 11; i++)
+                    animaciones[ATACAR][i] = img.getSubimage(i * 100, 300, 100, 100);
+                for (int i = 0; i < 4; i++)
+                    animaciones[RECIBIR_GOLPE][i] = img.getSubimage(i * 100, 500, 100, 100);
+                for (int i = 0; i < 4; i++)
+                    animaciones[MUERTO][i] = img.getSubimage(i * 100, 600, 100, 100);
+                break;
             default:
                 break;
         }

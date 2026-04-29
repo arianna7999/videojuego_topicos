@@ -33,6 +33,7 @@ public class ObjectManager {
     private java.awt.image.BufferedImage botonImg;
 
     private utils.AudioPlayer audioPlayer;
+    private int nivelActual;
 
     private BufferedImage plataformaImg;
     private BufferedImage puertaImg, piramides, craneoSimpleImg, craneoCuernosImg;
@@ -44,6 +45,8 @@ public class ObjectManager {
     private BufferedImage[] llaveImgs;
     private BufferedImage[] candelabroImgs;
     private BufferedImage[] marFuegoSprites;
+    private BufferedImage marcoM3;
+    private BufferedImage[] rejasM3;
 
     private ArrayList<java.awt.geom.Rectangle2D.Float> aguas = new ArrayList<>();
     private ArrayList<java.awt.geom.Rectangle2D.Float> picos = new ArrayList<>();
@@ -78,6 +81,15 @@ public class ObjectManager {
             botonImg = utils.LoadSave.GetSpriteAtlas("imagen_boton.png");
         } catch (Exception e) {
             System.out.println("No se encontró imagen_boton.png");
+        }
+
+        // Dentro de cargarSprites()
+        marcoM3 = LoadSave.GetSpriteAtlas("MARCODESIERTO.png");
+        BufferedImage tempRejas = LoadSave.GetSpriteAtlas("REJAS.png");
+        rejasM3 = new BufferedImage[5];
+        int anchoFrameReja = tempRejas.getWidth() / 5;
+        for (int i = 0; i < rejasM3.length; i++) {
+            rejasM3[i] = tempRejas.getSubimage(i * anchoFrameReja, 0, anchoFrameReja, tempRejas.getHeight());
         }
 
         aguilas.add(new Aguila(100, 50));
@@ -166,6 +178,7 @@ public class ObjectManager {
         candelabros.clear();
         aguas.clear();
         maquinas.clear();
+        this.nivelActual = nivelActual; // <-- Agrega esta línea para guardar el nivel
 
         int[][] datosObjetos = LoadSave.GetObjectData(nivelActual + 1);
 
@@ -285,40 +298,66 @@ public class ObjectManager {
                 return; // Salimos para solo golpear una a la vez
             }
         }
+        // En src/elementos/ObjectManager.java dentro de checkObjectHit
+
+        // En src/elementos/ObjectManager.java dentro de checkObjectHit
+
         for (BotonGolpeable b : botones) {
             if (attackBox.intersects(b.getHitbox())) {
 
-                // Comprobamos si las 3 máquinas están en la posición correcta
+                // Detenemos a Dua inmediatamente al presionar el botón
+                audioPlayer.detenerCancionDua();
+
                 boolean m1OK = false, m2OK = false, m3OK = false;
 
                 for (MaquinaGolpeable m : maquinas) {
-                    // Tipo 0 (Esferas) en la primera imagen (Color 0)
+                    // Máquina 1 (Esferas) en la Imagen 1 (índice 0)
                     if (m.getTipoMaquina() == 0 && m.getColorActual() == 0)
                         m1OK = true;
-                    // Tipo 1 (Cuadrados) en la segunda imagen (Color 1)
-                    if (m.getTipoMaquina() == 1 && m.getColorActual() == 1)
+
+                    // Máquina 2 (Cuadrados) en la Imagen 3 (índice 2)
+                    if (m.getTipoMaquina() == 1 && m.getColorActual() == 2)
                         m2OK = true;
-                    // Tipo 2 (Triángulos) en la tercera imagen (Color 2)
+
+                    // Máquina 3 (Triángulos) en la Imagen 3 (índice 2)
                     if (m.getTipoMaquina() == 2 && m.getColorActual() == 2)
                         m3OK = true;
                 }
 
-                // Si las 3 están bien...
                 if (m1OK && m2OK && m3OK) {
                     System.out.println("¡PUZZLE RESUELTO!");
-                    audioPlayer.reproducirEfecto("sonido-acertado.wav"); // Sonido especial de éxito
+                    audioPlayer.reproducirEfecto("sonido-acertado.wav");
 
-                    // (Opcional) ¡Aquí puedes hacer que aparezca una llave o se abra una puerta!
-                    // recompensas.add(new Recompensas((int) b.getX(), (int) b.getY() - 50, LLAVE));
+                    // --- NUEVO: Abre la puerta al resolver el puzzle ---
+                    for (PuertaMovil p : puertas) {
+                        if (!p.estaAbierta() && !p.estaAbriendo()) {
+                            p.abrir();
+                            audioPlayer.reproducirEfecto("sonido-abertura.wav");
+                        }
+                    }
 
                 } else {
-                    // Si te equivocaste en alguna máquina...
-                    audioPlayer.reproducirEfecto("sonido incorrecto.wav"); // Sonido de error normal
-                }
+                    boolean m2EnImagenDua = false;
+                    for (MaquinaGolpeable m : maquinas) {
+                        if (m.getTipoMaquina() == 1 && m.getColorActual() == 1) {
+                            m2EnImagenDua = true;
+                            break;
+                        }
+                    }
 
-                return; // Salimos para no golpear otra cosa al mismo tiempo
+                    if (m2EnImagenDua) {
+                        // Si la máquina 2 está en la imagen 2, suena Dua
+                        audioPlayer.reproducirCancionErrorDua();
+                    } else {
+                        // Error normal para cualquier otra combinación incorrecta
+                        audioPlayer.reproducirEfecto("sonido incorrecto.wav");
+                    }
+
+                    return;
+                }
             }
         }
+
     }
 
     public void checkPicking(Jugador j) {
@@ -420,10 +459,38 @@ public class ObjectManager {
         // 4. Puertas
         for (PuertaMovil p : puertas) {
             if (p.isActivo()) {
-                g.drawImage(puertaImg,
-                        (int) (p.getHitbox().x - xLvlOffset),
-                        (int) (p.getHitbox().y - yLvlOffset),
-                        (int) (32 * Juego.SCALE), (int) (96 * Juego.SCALE), null);
+
+                // Si estamos en el Mundo 3 (El Desierto)
+                if (levelIndex == 2) {
+
+                    // --- AQUÍ MODIFICAS EL TAMAÑO SOLO PARA EL MUNDO 3 ---
+                    int anchoMundo3 = (int) (100 * Juego.SCALE); // Ejemplo: el doble de ancha
+                    int altoMundo3 = (int) (100 * Juego.SCALE); // Ejemplo: mucho más alta
+
+                    int ajusteX = 0; // Cambia este número para moverla a la izquierda o derecha
+                    int ajusteY = -100; // Cambia este número para subirla o bajarla
+
+                    // Capa 1: El Marco fijo
+                    g.drawImage(marcoM3,
+                            (int) (p.getHitbox().x - xLvlOffset) + ajusteX,
+                            (int) (p.getHitbox().y - yLvlOffset) + ajusteY,
+                            anchoMundo3, altoMundo3, null);
+
+                    // Capa 2: Las Rejas animadas
+                    g.drawImage(rejasM3[p.getAnimInd()],
+                            (int) (p.getHitbox().x - xLvlOffset) + ajusteX,
+                            (int) (p.getHitbox().y - yLvlOffset) + ajusteY,
+                            anchoMundo3, altoMundo3, null);
+
+                } else {
+
+                    // Si estamos en CUALQUIER OTRO MUNDO (Bosque, Castillo, etc.)
+                    // Mantenemos las medidas originales intactas (32 y 96)
+                    g.drawImage(puertaImg,
+                            (int) (p.getHitbox().x - xLvlOffset),
+                            (int) (p.getHitbox().y - yLvlOffset),
+                            (int) (32 * Juego.SCALE), (int) (96 * Juego.SCALE), null);
+                }
             }
         }
 
@@ -524,11 +591,17 @@ public class ObjectManager {
     public void checkPuertaInteraccion(Jugador j) {
         for (PuertaMovil p : puertas) {
             if (j.getHitbox().intersects(p.getHitbox())) {
-                if (j.getTieneLlave() && !p.estaAbierta() && !p.estaAbriendo()) {
-                    p.abrir();
-                    audioPlayer.reproducirEfecto("sonido-abertura.wav");
+
+                // --- AJUSTE: Solo permite abrir con llave si NO es el Mundo 3 ---
+                if (nivelActual != 2) {
+                    if (j.getTieneLlave() && !p.estaAbierta() && !p.estaAbriendo()) {
+                        p.abrir();
+                        audioPlayer.reproducirEfecto("sonido-abertura.wav");
+                    }
                 }
 
+                // La lógica de colisión (empujar al jugador) debe quedar FUERA del if anterior
+                // para que el jugador no atraviese la puerta cerrada en el Mundo 3.
                 if (j.getHitbox().x < p.getHitbox().x) {
                     j.getHitbox().x = p.getHitbox().x - j.getHitbox().width - 1;
                 } else {

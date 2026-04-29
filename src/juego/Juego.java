@@ -1,6 +1,7 @@
 package juego;
 
 import elementos.jugador.Jugador;
+import elementos.componentes.*;
 import elementos.managers.EnemyManager;
 import elementos.managers.ObjectManager;
 import elementos.pantallas.MenuSeleccion;
@@ -22,6 +23,7 @@ public class Juego extends Thread {
     private LevelManager levelMan;
     private EnemyManager enemyManager;
     private ObjectManager objectManager;
+    private Iluminacion iluminacion;
     private MenuSeleccion menuSeleccion;
     private PantallaVictoria pantallaVictoria;
 
@@ -48,6 +50,7 @@ public class Juego extends Thread {
     private BufferedImage bgImg, fondo1_1, fondo1_2, fondo1_3, posteInicio, posteDuenos, fondo2_1, fondo2_2, fondo2_3,
             fondo3_2, fondo3_3, fondo3_4;
     private int[] fondoArbolesPos;
+    private BufferedImage[] capasBosque;
     private BufferedImage fondo3_1;
     private Random rnd = new Random();
     private boolean victoria = false;
@@ -95,26 +98,13 @@ public class Juego extends Thread {
         inicializarObjetos();
         menuSeleccion = new MenuSeleccion(this);
         pantallaVictoria = new PantallaVictoria(this);
+        iluminacion = new Iluminacion();
 
         titleFont = customFont.deriveFont(java.awt.Font.BOLD, (int) (48 * Juego.SCALE));
         subFont = customFont.deriveFont(java.awt.Font.PLAIN, (int) (16 * Juego.SCALE));
         redColor = new java.awt.Color(200, 50, 50);
         goldColor = new java.awt.Color(212, 175, 55);
         shadowColor = java.awt.Color.DARK_GRAY;
-
-        // Cargar imágenes de portada de personajes
-        // String[] portadaArchivos = { "hank_portada.png", "frank_portada.png", "saori_portada.png",
-        //         "lucerys_portada.png" };
-        // portadasPersonajes = new java.awt.image.BufferedImage[portadaArchivos.length];
-        // for (int i = 0; i < portadaArchivos.length; i++) {
-        //     try {
-        //         java.io.InputStream is = getClass().getResourceAsStream("/res/" + portadaArchivos[i]);
-        //         if (is != null)
-        //             portadasPersonajes[i] = javax.imageio.ImageIO.read(is);
-        //     } catch (Exception e) {
-        //         portadasPersonajes[i] = null;
-        //     }
-        // }
 
         reproductorAudio = new utils.AudioPlayer();
         player = new Jugador(250, 200, (int) (200 * SCALE), (int) (200 * SCALE), reproductorAudio);
@@ -153,10 +143,22 @@ public class Juego extends Thread {
 
         // mundo3
         // mundo3
-        fondo3_1 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_MUNDO_3_CIELO); // <-- Faltaba esto
+        fondo3_1 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_MUNDO_3_CIELO);
         fondo3_2 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_MUNDO_3_MONTANAS);
         fondo3_4 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_MUNDO_3_SOMBRA);
         fondo3_3 = LoadSave.GetSpriteAtlas(LoadSave.FONDO_MUNDO_3_PIEDRAS);
+
+        capasBosque = new BufferedImage[4];
+        capasBosque[0] = LoadSave.GetSpriteAtlas(LoadSave.BOSQUE_FONDO1);
+        capasBosque[1] = LoadSave.GetSpriteAtlas(LoadSave.BOSQUE_FONDO2);
+        capasBosque[2] = LoadSave.GetSpriteAtlas(LoadSave.BOSQUE_FONDO4);
+        capasBosque[3] = LoadSave.GetSpriteAtlas(LoadSave.BOSQUE_FONDO3);
+
+        System.out.println("=== CAPAS BOSQUE ===");
+        for (int i = 0; i < capasBosque.length; i++) {
+            System.out.println("capa " + i + ": "
+                    + (capasBosque[i] == null ? "NULL" : capasBosque[i].getWidth() + "x" + capasBosque[i].getHeight()));
+        }
 
     }
 
@@ -316,46 +318,24 @@ public class Juego extends Thread {
         g2.drawString(subText, xSub, ySub);
     }
 
-    // void dibujarInicio(Graphics g) {
-    //     g.setColor(java.awt.Color.BLACK);
-    //     g.fillRect(0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT);
-    //     java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
-    //     g2.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,
-    //             java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-    //     String tituloText = "¡LIMPIA LA CUEVA!";
-    //     String subText = "[Presiona ENTER para comenzar]";
-
-    //     g2.setFont(titleFont);
-    //     java.awt.FontMetrics metricsTitle = g2.getFontMetrics(titleFont);
-    //     int xTitle = (Juego.GAME_WIDTH - metricsTitle.stringWidth(tituloText)) / 2;
-    //     int yTitle = (Juego.GAME_HEIGHT / 2) - (metricsTitle.getHeight() / 2);
-
-    //     g2.setFont(subFont);
-    //     java.awt.FontMetrics metricsSub = g2.getFontMetrics(subFont);
-    //     int xSub = (Juego.GAME_WIDTH - metricsSub.stringWidth(subText)) / 2;
-    //     int ySub = yTitle + metricsTitle.getHeight() + (int) (20 * Juego.SCALE);
-
-    //     g2.setFont(titleFont);
-    //     g2.setColor(shadowColor);
-    //     g2.drawString(tituloText, xTitle + 3, yTitle + 3);
-    //     g2.setColor(goldColor);
-    //     g2.drawString(tituloText, xTitle, yTitle);
-
-    //     g2.setFont(subFont);
-    //     g2.setColor(java.awt.Color.WHITE);
-    //     g2.drawString(subText, xSub, ySub);
-    // }
-
     void render(Graphics g) {
         g.drawImage(bgImg, 0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT, null);
         drawFondoMundo3_Cielo(g);
-        drawFondos(g);
+        
+        if (levelMan.getLevelIndex() == 3) {
+            drawFondoNivel4(g);
+        } else {
+            drawFondos(g);
+        }
+
         levelMan.draw(g, xLvlOffset, yLvlOffset);
         objectManager.draw(g, xLvlOffset, yLvlOffset, levelMan.getLevelIndex());
         player.render(g, xLvlOffset, yLvlOffset);
         enemyManager.draw(g, xLvlOffset, yLvlOffset);
-        player.drawUI(g);
+
+        if (levelMan.getLevelIndex() == 1) {
+            iluminacion.draw(g, player, xLvlOffset, yLvlOffset);
+        }
 
         if (gameOver) {
             dibujarGameOver(g);
@@ -365,15 +345,11 @@ public class Juego extends Thread {
             menuSeleccion.dibujar(g);
             return;
         }
-        // if (enInicio) {
-        //     dibujarInicio(g);
-        //     return;
-        // }
-
         if (victoria) {
             pantallaVictoria.dibujar(g);
             return;
         }
+        player.drawUI(g);
     }
 
     private void drawObjetosRandom(Graphics g, BufferedImage[] objetos, float[] posicionesX, float[] posicionesY,
@@ -433,13 +409,60 @@ public class Juego extends Thread {
         int anchoCielo = Juego.GAME_WIDTH;
         int altoCielo = Juego.GAME_HEIGHT;
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             g.drawImage(fondo3_1,
                     anchoCielo * i - (int) (xLvlOffset * 0.6),
                     0,
                     anchoCielo,
                     altoCielo,
                     null);
+        }
+    }
+
+    private void drawFondoNivel4(Graphics g) {
+        int W = Juego.GAME_WIDTH;
+        int H = Juego.GAME_HEIGHT;
+
+        // Si por alguna razon capasBosque es null, poner fondo verde oscuro
+        if (capasBosque == null) {
+            g.setColor(new java.awt.Color(20, 40, 20));
+            g.fillRect(0, 0, W, H);
+            return;
+        }
+
+        // Capa 0: cielo - estatico, sin parallax
+        if (capasBosque[0] != null) {
+            g.drawImage(capasBosque[0], 0, 0, W, H, null);
+        } else {
+            g.setColor(new java.awt.Color(15, 10, 30));
+            g.fillRect(0, 0, W, H);
+        }
+
+        // Capa 1: montanyas - parallax lento (0.1)
+        if (capasBosque[1] != null) {
+            int xPos = (int) (-(xLvlOffset * 0.1f)) % W;
+            if (xPos > 0)
+                xPos -= W;
+            g.drawImage(capasBosque[1], xPos, 0, W, H, null);
+            g.drawImage(capasBosque[1], xPos + W, 0, W, H, null);
+        }
+
+        // Capa 2: arboles lejanos - parallax medio (0.35)
+        if (capasBosque[2] != null) {
+            int xPos = (int) (-(xLvlOffset * 0.35f)) % W;
+            if (xPos > 0)
+                xPos -= W;
+            g.drawImage(capasBosque[2], xPos, 0, W, H, null);
+            g.drawImage(capasBosque[2], xPos + W, 0, W, H, null);
+        }
+
+        // Capa 3: arboles cercanos - parallax rapido (0.7)
+        if (capasBosque[3] != null) {
+            int xPos = (int) (-(xLvlOffset * 0.7f)) % W;
+            if (xPos > 0)
+                xPos -= W;
+            g.drawImage(capasBosque[3], xPos, 0, W, H, null);
+            g.drawImage(capasBosque[3], xPos + W, 0, W, H, null);
         }
     }
 
@@ -484,7 +507,7 @@ public class Juego extends Thread {
                 System.out.println("Cargando pista del desierto");
                 break;
             case 3:
-                reproductorAudio.reproducirMusica("mundo3_soundtrack.wav");
+                reproductorAudio.reproducirMusica("castle_soundtrack.wav");
                 break;
             case 4:
                 reproductorAudio.reproducirMusica("pista_victory.wav");
@@ -562,17 +585,18 @@ public class Juego extends Thread {
         calcularCameraOffset();
         enemyManager.resetAllEnemies(levelMan.getLevelIndex());
         objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
-        
+
         xLvlOffset = 0;
         yLvlOffset = 0;
         victoria = false;
         gameOver = false;
-        enSeleccion = false; 
+        enSeleccion = false;
         enInicio = false;
 
         reproductorAudio.detenerMusica();
         cargarPista(levelMan.getLevelIndex());
     }
+
     public MenuSeleccion getMenuSeleccion() {
         return menuSeleccion;
     }

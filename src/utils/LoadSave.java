@@ -38,10 +38,17 @@ public class LoadSave {
     public static final String FINAL_BOSS_SPRITE = "Lancer.png";
     public static final String KNIGHT_SPRITE = "Knight.png";
     public static final String ORC_SPRITE = "Orc.png";
+    public static final String ELITE_ORC = "elite_orc.png";
     public static final String ARMORED_ORC = "Armored_orc.png";
     public static final String WEREBEAR = "Werebear.png";
     public static final String SLIME = "Slime.png";
     public static final String WEREWOLF = "Werewolf.png";
+    public static final String ARMORED_AXEMAN = "armored_axeman.png";
+
+    public static final String BOSQUE_FONDO1    = "sky.png";
+    public static final String BOSQUE_FONDO2    = "mountains.png";
+    public static final String BOSQUE_FONDO3    = "near-trees.png";
+    public static final String BOSQUE_FONDO4    = "far-trees.png";
 
     public static final String PLAYING_BG_IMG ="fondo1.png";
     public static final String FONDO_ARBOLES_IMG="fondo2.png";

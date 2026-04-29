@@ -98,44 +98,111 @@ public class Enemy1 extends Enemigo {
         drawHealthBar(g, xLvlOffset, yLvlOffset);
     }
 
+    // private void cargarAnimaciones(int levelNumber) {
+    //     BufferedImage img = null;
+    //     switch (levelNumber) {
+    //         case 0:
+    //             img = LoadSave.GetSpriteAtlas(LoadSave.SKELETON_SPRITE);
+    //             tipoEnemigo = ConstantesEnemigos.ESQUELETO;
+    //             break;
+    //         case 1:
+    //             img = LoadSave.GetSpriteAtlas(LoadSave.SLIME);
+    //             tipoEnemigo = ConstantesEnemigos.SLIME;
+    //             break;
+    //         case 2:
+    //             img = LoadSave.GetSpriteAtlas(LoadSave.WEREWOLF);
+    //             tipoEnemigo = ConstantesEnemigos.WEREWOLF;
+    //             damage = 15;
+    //             break;
+    //         case 3:
+    //             img = LoadSave.GetSpriteAtlas(LoadSave.ARMORED_AXEMAN);
+    //             tipoEnemigo = ConstantesEnemigos.ORCO;
+    //             damage = 20;
+    //             break;
+    //         default:
+    //             break;
+    //     }
+
+    //     animaciones = new BufferedImage[7][12];
+
+    //     for (int j = 0; j < animaciones.length; j++) {
+    //         int cantidadFrames = ConstantesEnemigos.GetSpriteAmount(tipoEnemigo, j);
+    //         if (cantidadFrames == 0) {
+    //             continue;
+    //         }
+
+    //         int filaY = j;
+    //         if (j == ConstantesEnemigos.RECIBIR_GOLPE) {
+    //             filaY = 3; 
+    //         } else if (j == ConstantesEnemigos.MUERTO) {
+    //             filaY = 4; 
+    //         }
+
+    //         for (int i = 0; i < cantidadFrames; i++) {
+    //             animaciones[j][i] = img.getSubimage(i * 100, filaY * 100, 100, 100);
+    //         }
+    //     }
+    // }
     private void cargarAnimaciones(int levelNumber) {
         BufferedImage img = null;
+        animaciones = new BufferedImage[7][12];
+
+        
         switch (levelNumber) {
             case 0:
-                img = LoadSave.GetSpriteAtlas(LoadSave.SKELETON_SPRITE);
                 tipoEnemigo = ConstantesEnemigos.ESQUELETO;
+                img = LoadSave.GetSpriteAtlas(LoadSave.SKELETON_SPRITE);
+
+                for (int i = 0; i < 7; i++)
+                    animaciones[ATACAR][i] = img.getSubimage(i * 100, 300, 100, 100);
+                for (int i = 0; i < 4; i++)
+                    animaciones[RECIBIR_GOLPE][i] = img.getSubimage(i * 100, 500, 100, 100);
+                for (int i = 0; i < 4; i++)
+                    animaciones[MUERTO][i] = img.getSubimage(i * 100, 600, 100, 100);
                 break;
             case 1:
-                img = LoadSave.GetSpriteAtlas(LoadSave.SLIME);
                 tipoEnemigo = ConstantesEnemigos.SLIME;
+                img = LoadSave.GetSpriteAtlas(LoadSave.SLIME);
+                for (int i = 0; i < 12; i++)
+                    animaciones[ATACAR][i] = img.getSubimage(i * 100, 300, 100, 100);
+                for (int i = 0; i < 4; i++)
+                    animaciones[RECIBIR_GOLPE][i] = img.getSubimage(i * 100, 400, 100, 100);
+                for (int i = 0; i < 4; i++)
+                    animaciones[MUERTO][i] = img.getSubimage(i * 100, 500, 100, 100);
                 break;
             case 2:
                 img = LoadSave.GetSpriteAtlas(LoadSave.WEREWOLF);
                 tipoEnemigo = ConstantesEnemigos.WEREWOLF;
-                damage = 15;
+                for (int i = 0; i < 12; i++)
+                    animaciones[ATACAR][i] = img.getSubimage(i * 100, 300, 100, 100);
+                for (int i = 0; i < 4; i++)
+                    animaciones[RECIBIR_GOLPE][i] = img.getSubimage(i * 100, 400, 100, 100);
+                for (int i = 0; i < 4; i++)
+                    animaciones[MUERTO][i] = img.getSubimage(i * 100, 500, 100, 100);
+                break;
+            case 3:
+                img = LoadSave.GetSpriteAtlas(LoadSave.ARMORED_AXEMAN);
+                tipoEnemigo = ConstantesEnemigos.ARMORED_AXEMAN;
+                for (int i = 0; i < 12; i++)
+                    animaciones[ATACAR][i] = img.getSubimage(i * 100, 400, 100, 100);
+                for (int i = 0; i < 4; i++)
+                    animaciones[RECIBIR_GOLPE][i] = img.getSubimage(i * 100, 500, 100, 100);
+                for (int i = 0; i < 4; i++)
+                    animaciones[MUERTO][i] = img.getSubimage(i * 100, 600, 100, 100);
                 break;
             default:
                 break;
         }
 
-        animaciones = new BufferedImage[7][12];
-
-        for (int j = 0; j < animaciones.length; j++) {
-            int cantidadFrames = ConstantesEnemigos.GetSpriteAmount(tipoEnemigo, j);
-            if (cantidadFrames == 0) {
-                continue;
-            }
-
-            int filaY = j;
-            if (j == ConstantesEnemigos.RECIBIR_GOLPE) {
-                filaY = 3; 
-            } else if (j == ConstantesEnemigos.MUERTO) {
-                filaY = 4; 
-            }
-
-            for (int i = 0; i < cantidadFrames; i++) {
-                animaciones[j][i] = img.getSubimage(i * 100, filaY * 100, 100, 100);
-            }
-        }
+        for (int i = 0; i < 6; i++)
+            animaciones[INACTIVO][i] = img.getSubimage(i * 100, 0, 100, 100);
+        for (int i = 0; i < 6; i++)
+            animaciones[CORRER][i] = img.getSubimage(i * 100, 100, 100, 100);
+        // for (int i = 0; i < 7; i++)
+        //     animaciones[ATACAR][i] = img.getSubimage(i * 100, 200, 100, 100);
+        // for (int i = 0; i < 4; i++)
+        //     animaciones[RECIBIR_GOLPE][i] = img.getSubimage(i * 100, 400, 100, 100);
+        // for (int i = 0; i < 4; i++)
+        //     animaciones[MUERTO][i] = img.getSubimage(i * 100, 500, 100, 100);
     }
 }

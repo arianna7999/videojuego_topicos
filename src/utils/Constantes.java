@@ -84,6 +84,8 @@ public class Constantes {
         public static final int ORCO_ARMADO = 5;
         public static final int WEREBEAR = 6;
         public static final int WEREWOLF = 7;
+        public static final int ELITE_ORC = 8;
+        public static final int ARMORED_AXEMAN = 9;
 
 
         public static final int INACTIVO = 0;
@@ -167,6 +169,7 @@ public class Constantes {
                     break;
                 case ORCO:
                 case ORCO_ARMADO:
+                case ELITE_ORC:
                     switch (enemy_state) {
                         case INACTIVO:
                             return 6;

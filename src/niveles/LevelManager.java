@@ -23,29 +23,31 @@ public class LevelManager {
         levels.add(new Level(LoadSave.GetLevelData(1)));
         levels.add(new Level(LoadSave.GetLevelData(2)));
         levels.add(new Level(LoadSave.GetLevelData(3)));
+        levels.add(new Level(LoadSave.GetLevelData(4)));
     }
 
 
     public void loadSpritesForCurrentLevel() {
-        String atlasName = (lvlIndex == 0) ? LoadSave.LEVEL_ATLAS : (lvlIndex == 1) ? LoadSave.LEVEL_ATLAS_2 : LoadSave.LEVEL_ATLAS_3;
+        String atlasName = (lvlIndex == 0) ? LoadSave.LEVEL_ATLAS 
+                         : (lvlIndex == 1) ? LoadSave.LEVEL_ATLAS_2 
+                         : (lvlIndex == 2) ? LoadSave.LEVEL_ATLAS_3 
+                         : (lvlIndex == 3) ? LoadSave.LEVEL_ATLAS_4 
+                         : null;
         BufferedImage img = LoadSave.GetSpriteAtlas(atlasName);
 
         int tileW = 32;
         int tileH = 32;
-
         int columnas = img.getWidth() / tileW;
         int filas = img.getHeight() / tileH;
         int totalSprites = columnas * filas;
 
         levelSprite = new BufferedImage[totalSprites];
-
         for (int j = 0; j < filas; j++) {
             for (int i = 0; i < columnas; i++) {
                 int index = j * columnas + i;
-                levelSprite[index] = img.getSubimage(i * tileW, j * tileH, tileW, tileH);                
+                levelSprite[index] = img.getSubimage(i * tileW, j * tileH, tileW, tileH);
             }
         }
-        
     }
 
     public void loadNextLevel() {
@@ -93,5 +95,5 @@ public class LevelManager {
         lvlIndex = 2;
         loadSpritesForCurrentLevel();
     }
-
+ 
 }

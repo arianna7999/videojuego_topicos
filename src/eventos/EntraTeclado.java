@@ -62,7 +62,6 @@ public class EntraTeclado implements KeyListener {
         pan.getGame().getPlayer().setJump(true);
         break;
       case KeyEvent.VK_E:
-        // Activar habilidad especial del personaje
         pan.getGame().getPlayer().usarHabilidad();
         break;
       case KeyEvent.VK_ENTER:
