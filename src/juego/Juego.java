@@ -2,7 +2,10 @@ package juego;
 
 import elementos.EnemyManager;
 import elementos.Jugador;
+import elementos.MenuSeleccion;
 import elementos.ObjectManager;
+import elementos.PantallaVictoria;
+
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -19,6 +22,8 @@ public class Juego extends Thread {
     private LevelManager levelMan;
     private EnemyManager enemyManager;
     private ObjectManager objectManager;
+    private MenuSeleccion menuSeleccion;
+    private PantallaVictoria pantallaVictoria;
 
     private int xLvlOffset;
     private int leftBorder = (int) (0.2 * Juego.GAME_WIDTH);
@@ -60,23 +65,6 @@ public class Juego extends Thread {
 
     private boolean enInicio = true;
     private boolean enSeleccion = false;
-    private int seleccionIndice = 0;
-
-    // Imágenes de portada de personajes
-    private java.awt.image.BufferedImage[] portadasPersonajes;
-
-    // Personajes disponibles: nombre, vida, vel, daño, salto, sprite, cols, filas,
-    // celdaW, celdaH, habilidad, drawOffX, drawOffY, tiempoParaCurar, cantCura
-    private final elementos.Personaje[] PERSONAJES = {
-            new elementos.Personaje("Hank", 120, 2.5f, 25, -2.25f, "Soldier.png", 9, 7, 100, 100, "golpe_brutal", 87f,
-                    80f, 500, 3),
-            new elementos.Personaje("Frank", 200, 2f, 20, -2.25f, "Frank.png", 9, 7, 100, 100, "coraza", 87f, 80f, 400,
-                    2),
-            new elementos.Personaje("Saori", 180, 2.8f, 20, -2.6f, "Saori.png", 13, 8, 100, 100, "robo_vida", 87f, 80f,
-                    200, 5),
-            new elementos.Personaje("Lucerys", 180, 2.5f, 18, -2.4f, "Lucerys.png", 13, 8, 100, 100, "lluvia", 87f, 80f,
-                    400, 3)
-    };
 
     public boolean isResetRequerido() {
         return resetRequerido;
@@ -105,6 +93,8 @@ public class Juego extends Thread {
         inicializarFondosDeMundos();
         fondoArbolesPos = new int[8];
         inicializarObjetos();
+        menuSeleccion = new MenuSeleccion(this);
+        pantallaVictoria = new PantallaVictoria(this);
 
         titleFont = customFont.deriveFont(java.awt.Font.BOLD, (int) (48 * Juego.SCALE));
         subFont = customFont.deriveFont(java.awt.Font.PLAIN, (int) (16 * Juego.SCALE));
@@ -113,18 +103,18 @@ public class Juego extends Thread {
         shadowColor = java.awt.Color.DARK_GRAY;
 
         // Cargar imágenes de portada de personajes
-        String[] portadaArchivos = { "hank_portada.png", "frank_portada.png", "saori_portada.png",
-                "lucerys_portada.png" };
-        portadasPersonajes = new java.awt.image.BufferedImage[portadaArchivos.length];
-        for (int i = 0; i < portadaArchivos.length; i++) {
-            try {
-                java.io.InputStream is = getClass().getResourceAsStream("/res/" + portadaArchivos[i]);
-                if (is != null)
-                    portadasPersonajes[i] = javax.imageio.ImageIO.read(is);
-            } catch (Exception e) {
-                portadasPersonajes[i] = null;
-            }
-        }
+        // String[] portadaArchivos = { "hank_portada.png", "frank_portada.png", "saori_portada.png",
+        //         "lucerys_portada.png" };
+        // portadasPersonajes = new java.awt.image.BufferedImage[portadaArchivos.length];
+        // for (int i = 0; i < portadaArchivos.length; i++) {
+        //     try {
+        //         java.io.InputStream is = getClass().getResourceAsStream("/res/" + portadaArchivos[i]);
+        //         if (is != null)
+        //             portadasPersonajes[i] = javax.imageio.ImageIO.read(is);
+        //     } catch (Exception e) {
+        //         portadasPersonajes[i] = null;
+        //     }
+        // }
 
         reproductorAudio = new utils.AudioPlayer();
         player = new Jugador(250, 200, (int) (200 * SCALE), (int) (200 * SCALE), reproductorAudio);
@@ -326,36 +316,36 @@ public class Juego extends Thread {
         g2.drawString(subText, xSub, ySub);
     }
 
-    void dibujarInicio(Graphics g) {
-        g.setColor(java.awt.Color.BLACK);
-        g.fillRect(0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT);
-        java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
-        g2.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,
-                java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    // void dibujarInicio(Graphics g) {
+    //     g.setColor(java.awt.Color.BLACK);
+    //     g.fillRect(0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT);
+    //     java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
+    //     g2.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,
+    //             java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        String tituloText = "¡LIMPIA LA CUEVA!";
-        String subText = "[Presiona ENTER para comenzar]";
+    //     String tituloText = "¡LIMPIA LA CUEVA!";
+    //     String subText = "[Presiona ENTER para comenzar]";
 
-        g2.setFont(titleFont);
-        java.awt.FontMetrics metricsTitle = g2.getFontMetrics(titleFont);
-        int xTitle = (Juego.GAME_WIDTH - metricsTitle.stringWidth(tituloText)) / 2;
-        int yTitle = (Juego.GAME_HEIGHT / 2) - (metricsTitle.getHeight() / 2);
+    //     g2.setFont(titleFont);
+    //     java.awt.FontMetrics metricsTitle = g2.getFontMetrics(titleFont);
+    //     int xTitle = (Juego.GAME_WIDTH - metricsTitle.stringWidth(tituloText)) / 2;
+    //     int yTitle = (Juego.GAME_HEIGHT / 2) - (metricsTitle.getHeight() / 2);
 
-        g2.setFont(subFont);
-        java.awt.FontMetrics metricsSub = g2.getFontMetrics(subFont);
-        int xSub = (Juego.GAME_WIDTH - metricsSub.stringWidth(subText)) / 2;
-        int ySub = yTitle + metricsTitle.getHeight() + (int) (20 * Juego.SCALE);
+    //     g2.setFont(subFont);
+    //     java.awt.FontMetrics metricsSub = g2.getFontMetrics(subFont);
+    //     int xSub = (Juego.GAME_WIDTH - metricsSub.stringWidth(subText)) / 2;
+    //     int ySub = yTitle + metricsTitle.getHeight() + (int) (20 * Juego.SCALE);
 
-        g2.setFont(titleFont);
-        g2.setColor(shadowColor);
-        g2.drawString(tituloText, xTitle + 3, yTitle + 3);
-        g2.setColor(goldColor);
-        g2.drawString(tituloText, xTitle, yTitle);
+    //     g2.setFont(titleFont);
+    //     g2.setColor(shadowColor);
+    //     g2.drawString(tituloText, xTitle + 3, yTitle + 3);
+    //     g2.setColor(goldColor);
+    //     g2.drawString(tituloText, xTitle, yTitle);
 
-        g2.setFont(subFont);
-        g2.setColor(java.awt.Color.WHITE);
-        g2.drawString(subText, xSub, ySub);
-    }
+    //     g2.setFont(subFont);
+    //     g2.setColor(java.awt.Color.WHITE);
+    //     g2.drawString(subText, xSub, ySub);
+    // }
 
     void render(Graphics g) {
         g.drawImage(bgImg, 0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT, null);
@@ -372,43 +362,17 @@ public class Juego extends Thread {
             return;
         }
         if (enSeleccion) {
-            dibujarSeleccion(g);
+            menuSeleccion.dibujar(g);
             return;
         }
-        if (enInicio) {
-            dibujarInicio(g);
-            return;
-        }
+        // if (enInicio) {
+        //     dibujarInicio(g);
+        //     return;
+        // }
 
         if (victoria) {
-            g.setColor(java.awt.Color.BLACK);
-            g.fillRect(0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT);
-            java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
-            g2.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,
-                    java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-            String tituloText = "¡VICTORIA CUEVA LIMPIA!";
-            String subText = "[Presiona ENTER para reiniciar]";
-
-            g2.setFont(titleFont);
-            java.awt.FontMetrics metricsTitle = g2.getFontMetrics(titleFont);
-            int xTitle = (Juego.GAME_WIDTH - metricsTitle.stringWidth(tituloText)) / 2;
-            int yTitle = (Juego.GAME_HEIGHT / 2) - (metricsTitle.getHeight() / 2);
-
-            g2.setFont(subFont);
-            java.awt.FontMetrics metricsSub = g2.getFontMetrics(subFont);
-            int xSub = (Juego.GAME_WIDTH - metricsSub.stringWidth(subText)) / 2;
-            int ySub = yTitle + metricsTitle.getHeight() + (int) (20 * Juego.SCALE);
-
-            g2.setFont(titleFont);
-            g2.setColor(shadowColor);
-            g2.drawString(tituloText, xTitle + 3, yTitle + 3);
-            g2.setColor(goldColor);
-            g2.drawString(tituloText, xTitle, yTitle);
-
-            g2.setFont(subFont);
-            g2.setColor(java.awt.Color.WHITE);
-            g2.drawString(subText, xSub, ySub);
+            pantallaVictoria.dibujar(g);
+            return;
         }
     }
 
@@ -465,7 +429,7 @@ public class Juego extends Thread {
     private void drawFondoMundo3_Cielo(Graphics g) {
         if (levelMan.getLevelIndex() != 2 || fondo3_1 == null)
             return;
-        
+
         int anchoCielo = Juego.GAME_WIDTH;
         int altoCielo = Juego.GAME_HEIGHT;
 
@@ -502,9 +466,10 @@ public class Juego extends Thread {
     public void reiniciarDesdePantalla() {
         if (victoria || gameOver || enInicio || enSeleccion) {
             irASeleccion();
-            
+
         }
     }
+
     public void cargarPista(int levelIndex) {
         reproductorAudio.detenerMusica();
         switch (levelIndex) {
@@ -533,6 +498,7 @@ public class Juego extends Thread {
                 break;
         }
     }
+
     public void cargarSiguienteNivel() {
         levelMan.loadNextLevel();
 
@@ -568,36 +534,6 @@ public class Juego extends Thread {
         return enSeleccion;
     }
 
-    public int getSeleccionIndice() {
-        return seleccionIndice;
-    }
-
-    public void moverSeleccion(int delta) {
-        seleccionIndice = (seleccionIndice + delta + PERSONAJES.length) % PERSONAJES.length;
-    }
-
-    public void confirmarSeleccion() {
-
-        levelMan.resetToFirstLevel();
-        // 2. Aplicar el personaje elegido
-        player.setPersonaje(PERSONAJES[seleccionIndice]);
-        player.setSpawn(levelMan.getLevelIndex());
-        // 3. Resetear estado del jugador y enemigos
-        player.resetAll(levelMan.getLevelIndex());
-        player.loadLvlData(levelMan.currentLevel().getLvlData(), levelMan.getLevelIndex());
-        calcularCameraOffset();
-        enemyManager.resetAllEnemies(levelMan.getLevelIndex());
-        objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
-        xLvlOffset = 0;
-        yLvlOffset = 0;
-        victoria = false;
-        gameOver = false;
-        enSeleccion = false;
-        enInicio = false;
-        reproductorAudio.detenerMusica();
-        cargarPista(levelMan.getLevelIndex());
-    }
-
     public void irASeleccion() {
         victoria = false;
         gameOver = false;
@@ -615,126 +551,29 @@ public class Juego extends Thread {
         cargarPista(5);
     }
 
-    void dibujarSeleccion(Graphics g) {
-        g.setColor(java.awt.Color.BLACK);
-        g.fillRect(0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT);
-        java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
-        g2.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,
-                java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    public void aplicarPersonajeElegido(elementos.Personaje personajeElegido) {
+        levelMan.resetToFirstLevel();
 
-        java.awt.Font selTitleFont = customFont.deriveFont(java.awt.Font.BOLD, (int) (32 * Juego.SCALE));
-        java.awt.Font selNameFont = customFont.deriveFont(java.awt.Font.BOLD, (int) (20 * Juego.SCALE));
-        java.awt.Font selStatFont = customFont.deriveFont(java.awt.Font.PLAIN, (int) (11 * Juego.SCALE));
-        java.awt.Font selHintFont = customFont.deriveFont(java.awt.Font.PLAIN, (int) (13 * Juego.SCALE));
+        player.setPersonaje(personajeElegido);
+        player.setSpawn(levelMan.getLevelIndex());
 
-        g2.setFont(selTitleFont);
-        String titulo = "ELIGE TU PERSONAJE";
-        java.awt.FontMetrics fmT = g2.getFontMetrics();
-        g2.setColor(new java.awt.Color(212, 175, 55));
-        g2.drawString(titulo, (Juego.GAME_WIDTH - fmT.stringWidth(titulo)) / 2, (int) (60 * Juego.SCALE));
+        player.resetAll(levelMan.getLevelIndex());
+        player.loadLvlData(levelMan.currentLevel().getLvlData(), levelMan.getLevelIndex());
+        calcularCameraOffset();
+        enemyManager.resetAllEnemies(levelMan.getLevelIndex());
+        objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
+        
+        xLvlOffset = 0;
+        yLvlOffset = 0;
+        victoria = false;
+        gameOver = false;
+        enSeleccion = false; 
+        enInicio = false;
 
-        int cardW = (int) (90 * Juego.SCALE);
-        int imgH = (int) (70 * Juego.SCALE);
-        int cardH = (int) (175 * Juego.SCALE);
-        int gap = (int) (20 * Juego.SCALE);
-        int totalW = PERSONAJES.length * cardW + (PERSONAJES.length - 1) * gap;
-        int startX = (Juego.GAME_WIDTH - totalW) / 2;
-        int cardY = (int) (80 * Juego.SCALE);
-
-        int[][] stats = { { 120, 25, 25, 23 }, { 200, 20, 20, 22 }, { 180, 28, 20, 26 }, { 180, 25, 18, 24 } };
-        int[] statMax = { 200, 30, 30, 30 };
-        String[] roles = { "Guerrero", "Tanque", "Doctora", "Arquero" };
-        java.awt.Color[] roleColors = {
-                new java.awt.Color(100, 180, 255), new java.awt.Color(100, 220, 100),
-                new java.awt.Color(255, 180, 60), new java.awt.Color(200, 100, 255)
-        };
-
-        for (int i = 0; i < PERSONAJES.length; i++) {
-            int cx = startX + i * (cardW + gap);
-            boolean sel = (i == seleccionIndice);
-
-            // Fondo de tarjeta
-            if (sel) {
-                g2.setColor(new java.awt.Color(60, 50, 20));
-                g2.fillRoundRect(cx - 4, cardY - 4, cardW + 8, cardH + 8, 16, 16);
-                g2.setColor(goldColor);
-                g2.setStroke(new java.awt.BasicStroke(3));
-                g2.drawRoundRect(cx - 4, cardY - 4, cardW + 8, cardH + 8, 16, 16);
-            } else {
-                g2.setColor(new java.awt.Color(30, 30, 40));
-                g2.fillRoundRect(cx, cardY, cardW, cardH, 12, 12);
-                g2.setColor(new java.awt.Color(80, 80, 100));
-                g2.setStroke(new java.awt.BasicStroke(1.5f));
-                g2.drawRoundRect(cx, cardY, cardW, cardH, 12, 12);
-            }
-
-            int padding = (int) (4 * Juego.SCALE);
-            int imgX = cx + padding;
-            int imgY = cardY + padding;
-            int imgW = cardW - padding * 2;
-            java.awt.Shape oldClip = g2.getClip();
-            g2.setClip(new java.awt.geom.RoundRectangle2D.Float(imgX, imgY, imgW, imgH, 10, 10));
-            if (portadasPersonajes != null && portadasPersonajes[i] != null) {
-                g2.drawImage(portadasPersonajes[i], imgX, imgY, imgW, imgH, null);
-            } else {
-
-                g2.setColor(new java.awt.Color(50, 50, 70));
-                g2.fillRect(imgX, imgY, imgW, imgH);
-                g2.setColor(new java.awt.Color(100, 100, 130));
-                g2.drawString("?", imgX + imgW / 2 - 5, imgY + imgH / 2 + 5);
-            }
-            g2.setClip(oldClip);
-
-            g2.setColor(sel ? goldColor : new java.awt.Color(60, 60, 80));
-            g2.setStroke(new java.awt.BasicStroke(1.5f));
-            g2.drawRoundRect(imgX, imgY, imgW, imgH, 10, 10);
-
-            int textBaseY = cardY + imgH + padding * 2;
-            g2.setFont(selNameFont);
-            java.awt.FontMetrics fmN = g2.getFontMetrics();
-            g2.setColor(sel ? goldColor : java.awt.Color.WHITE);
-            String nombre = PERSONAJES[i].nombre;
-            g2.drawString(nombre, cx + (cardW - fmN.stringWidth(nombre)) / 2, textBaseY + (int) (14 * Juego.SCALE));
-
-            g2.setFont(selStatFont);
-            java.awt.FontMetrics fmS = g2.getFontMetrics();
-            g2.setColor(roleColors[i]);
-            String rol = "[" + roles[i] + "]";
-            g2.drawString(rol, cx + (cardW - fmS.stringWidth(rol)) / 2, textBaseY + (int) (24 * Juego.SCALE));
-
-            // Barras de estadísticas
-            String[] statLabels = { "VID", "VEL", "DAÑ", "SAL" };
-            int[] statVals = stats[i];
-            java.awt.Color[] barColors = {
-                    new java.awt.Color(220, 80, 80), new java.awt.Color(80, 200, 120),
-                    new java.awt.Color(255, 160, 40), new java.awt.Color(80, 160, 255)
-            };
-            int barY = textBaseY + (int) (32 * Juego.SCALE);
-            int barAreaW = cardW - (int) (20 * Juego.SCALE);
-            int barH2 = (int) (7 * Juego.SCALE);
-            int barSpacing = (int) (16 * Juego.SCALE);
-            for (int s = 0; s < 4; s++) {
-                int by = barY + s * barSpacing;
-                g2.setColor(new java.awt.Color(180, 180, 180));
-                g2.drawString(statLabels[s], cx + (int) (6 * Juego.SCALE), by + barH2);
-                int bx = cx + (int) (26 * Juego.SCALE);
-                int bw = barAreaW - (int) (20 * Juego.SCALE);
-                g2.setColor(new java.awt.Color(50, 50, 60));
-                g2.fillRoundRect(bx, by, bw, barH2, 4, 4);
-                int fill = (int) ((float) statVals[s] / statMax[s] * bw);
-                g2.setColor(barColors[s]);
-                g2.fillRoundRect(bx, by, fill, barH2, 4, 4);
-            }
-        }
-        g2.setFont(selTitleFont);
-        g2.setColor(new java.awt.Color(212, 175, 55, 180));
-        int arrowY = cardY + cardH / 2 + (int) (10 * Juego.SCALE);
-        g2.drawString("<", startX - (int) (30 * Juego.SCALE), arrowY);
-        g2.drawString(">", startX + totalW + (int) (10 * Juego.SCALE), arrowY);
-        g2.setFont(selHintFont);
-        java.awt.FontMetrics fmH = g2.getFontMetrics();
-        String hint = "LEFT/RIGHT para navegar    ENTER para confirmar";
-        g2.setColor(new java.awt.Color(180, 180, 180));
-        g2.drawString(hint, (Juego.GAME_WIDTH - fmH.stringWidth(hint)) / 2, cardY + cardH + (int) (30 * Juego.SCALE));
+        reproductorAudio.detenerMusica();
+        cargarPista(levelMan.getLevelIndex());
+    }
+    public MenuSeleccion getMenuSeleccion() {
+        return menuSeleccion;
     }
 }

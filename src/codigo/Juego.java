@@ -581,6 +581,7 @@ public class Juego extends Thread {
         levelMan.resetToFirstLevel();
         // 2. Aplicar el personaje elegido
         player.setPersonaje(PERSONAJES[seleccionIndice]);
+        player.setSpawn(levelMan.getLevelIndex());
         // 3. Resetear estado del jugador y enemigos
         player.resetAll(levelMan.getLevelIndex());
         player.loadLvlData(levelMan.currentLevel().getLvlData(), levelMan.getLevelIndex());

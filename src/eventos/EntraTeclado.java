@@ -3,6 +3,7 @@ package eventos;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import juego.PanelJuego;
+import juego.Juego;
 
 public class EntraTeclado implements KeyListener {
   private PanelJuego pan;
@@ -21,14 +22,14 @@ public class EntraTeclado implements KeyListener {
       switch (e.getKeyCode()) {
         case KeyEvent.VK_LEFT:
         case KeyEvent.VK_A:
-          pan.getGame().moverSeleccion(-1);
+          pan.getGame().getMenuSeleccion().moverSeleccion(-1);
           return;
         case KeyEvent.VK_RIGHT:
         case KeyEvent.VK_D:
-          pan.getGame().moverSeleccion(1);
+          pan.getGame().getMenuSeleccion().moverSeleccion(1);
           return;
         case KeyEvent.VK_ENTER:
-          pan.getGame().confirmarSeleccion();
+          pan.getGame().getMenuSeleccion().confirmarSeleccion();
           return;
       }
       return; // bloquear otras teclas en selección
