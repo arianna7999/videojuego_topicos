@@ -24,6 +24,7 @@ public class LevelManager {
         levels.add(new Level(LoadSave.GetLevelData(2)));
         levels.add(new Level(LoadSave.GetLevelData(3)));
         levels.add(new Level(LoadSave.GetLevelData(4)));
+        
     }
 
 

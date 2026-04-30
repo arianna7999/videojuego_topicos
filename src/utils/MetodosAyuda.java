@@ -45,7 +45,7 @@ public class MetodosAyuda {
                 int valor = lvlData[yIndex][xIndex];
 
                 switch (levelIndex) {
-                    case 0: // Mundo 1
+                    case 0:
                         if (valor == 11 || valor == 4 || valor == 5 ||
                                 valor == 16 || valor == 17 ||
                                 valor == 3 || valor == 15 || valor == 27 ||
@@ -54,10 +54,8 @@ public class MetodosAyuda {
                         }
                         break;
 
-                    case 2: // Mundo 3 (NUEVO)
-                        // Aquí agregamos el 20 y cualquier otro bloque decorativo del Mundo 3
+                    case 2:
                           if (valor == 11 || valor == 4 || valor == 5 ||
-                                valor == 16 || valor == 17 ||
                                 valor == 3 || valor == 15 || valor == 27 ||
                                 valor == 8 || valor == 20 || valor == 32|| valor==45) {
                             return false; 

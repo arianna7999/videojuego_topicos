@@ -273,53 +273,61 @@ public class ObjectManager {
         }
     }
 
-    public void checkObjectHit(java.awt.geom.Rectangle2D.Float attackBox) {
-
-        // 1. Revisar los contenedores (cofres y barriles)
+    public void checkObjectHit(java.awt.geom.Rectangle2D.Float attackBox, Jugador j) {
         for (Contenedor c : contenedores) {
             if (c.isActivo() && c.getEstado() == INACTIVO && attackBox.intersects(c.getHitbox())) {
                 c.recibirGolpe();
 
                 if (c.getTipoObjeto() == BARRIL) {
                     audioPlayer.reproducirEfecto("sonido-explosion.wav");
+                    java.util.ArrayList<Integer> opciones = new java.util.ArrayList<>();
+
+                    if (j.getAtomosH() < 2)
+                        opciones.add(ATOMO_H);
+                    if (j.getAtomosO() < 2)
+                        opciones.add(ATOMO_O);
+                    if (j.getAtomosC() < 2)
+                        opciones.add(ATOMO_C);
+
+                    int objetoASoltar;
+
+                    if (opciones.isEmpty()) {
+                        objetoASoltar = CORAZON;
+                    } else {
+                        int rand = (int) (Math.random() * opciones.size());
+                        objetoASoltar = opciones.get(rand);
+                    }
+
+                    recompensas.add(new Recompensas((int) c.getHitbox().x, (int) c.getHitbox().y, objetoASoltar));
                 }
 
                 if (c.getTipoObjeto() == COFRE) {
                     recompensas.add(new Recompensas((int) c.getHitbox().x, (int) c.getHitbox().y, CORAZON));
                 }
-            } // <--- ESTA LLAVE CIERRA EL IF DEL COFRE
-        } // <--- ESTA LLAVE CIERRA EL FOR DE LOS CONTENEDORES
-
-        // 2. Revisar las máquinas (Completamente AFUERA de lo anterior)
-        for (MaquinaGolpeable m : maquinas) {
-            if (attackBox.intersects(m.getHitbox())) {
-                m.golpear(); // Cambia el color
-                audioPlayer.reproducirEfecto("sonido-golpe.wav"); // Suena el golpe
-                return; // Salimos para solo golpear una a la vez
             }
         }
-        // En src/elementos/ObjectManager.java dentro de checkObjectHit
 
-        // En src/elementos/ObjectManager.java dentro de checkObjectHit
+        // 2. Revisar las máquinas
+        for (MaquinaGolpeable m : maquinas) {
+            if (attackBox.intersects(m.getHitbox())) {
+                m.golpear();
+                audioPlayer.reproducirEfecto("sonido-golpe.wav");
+                return;
+            }
+        }
 
         for (BotonGolpeable b : botones) {
             if (attackBox.intersects(b.getHitbox())) {
 
-                // Detenemos a Dua inmediatamente al presionar el botón
                 audioPlayer.detenerCancionDua();
 
                 boolean m1OK = false, m2OK = false, m3OK = false;
 
                 for (MaquinaGolpeable m : maquinas) {
-                    // Máquina 1 (Esferas) en la Imagen 1 (índice 0)
                     if (m.getTipoMaquina() == 0 && m.getColorActual() == 0)
                         m1OK = true;
-
-                    // Máquina 2 (Cuadrados) en la Imagen 3 (índice 2)
                     if (m.getTipoMaquina() == 1 && m.getColorActual() == 2)
                         m2OK = true;
-
-                    // Máquina 3 (Triángulos) en la Imagen 3 (índice 2)
                     if (m.getTipoMaquina() == 2 && m.getColorActual() == 2)
                         m3OK = true;
                 }
@@ -328,7 +336,6 @@ public class ObjectManager {
                     System.out.println("¡PUZZLE RESUELTO!");
                     audioPlayer.reproducirEfecto("sonido-acertado.wav");
 
-                    // --- NUEVO: Abre la puerta al resolver el puzzle ---
                     for (PuertaMovil p : puertas) {
                         if (!p.estaAbierta() && !p.estaAbriendo()) {
                             p.abrir();
@@ -346,18 +353,14 @@ public class ObjectManager {
                     }
 
                     if (m2EnImagenDua) {
-                        // Si la máquina 2 está en la imagen 2, suena Dua
                         audioPlayer.reproducirCancionErrorDua();
                     } else {
-                        // Error normal para cualquier otra combinación incorrecta
                         audioPlayer.reproducirEfecto("sonido incorrecto.wav");
                     }
-
                     return;
                 }
             }
         }
-
     }
 
     public void checkPicking(Jugador j) {
@@ -369,6 +372,12 @@ public class ObjectManager {
                     j.curarVida(25);
                 } else if (r.getTipoObjeto() == LLAVE) {
                     j.recogerLlave();
+                } else if (r.getTipoObjeto() == ATOMO_H) {
+                    j.recogerAtomoH();
+                } else if (r.getTipoObjeto() == ATOMO_O) {
+                    j.recogerAtomoO();
+                } else if (r.getTipoObjeto() == ATOMO_C) {
+                    j.recogerAtomoC();
                 }
             }
         }
@@ -400,7 +409,6 @@ public class ObjectManager {
     }
 
     public void draw(Graphics g, int xLvlOffset, int yLvlOffset, int levelIndex) {
-        // 1. Contenedores y explosiones
         for (Contenedor c : contenedores) {
             if (c.isActivo()) {
                 BufferedImage img = (c.getTipoObjeto() == BARRIL) ? barrilImgs[c.getAnimInd()]
@@ -415,11 +423,8 @@ public class ObjectManager {
             }
         }
 
-        // 2. Plataformas móviles
         for (PlataformaMovil p : plataformas) {
             if (p.isActivo()) {
-                // Selecciona la imagen: si el nivel es 2 (Mundo 3), usa la del desierto. Si no,
-                // usa la normal.
                 BufferedImage imgActual = (levelIndex == 2) ? plataformaDesiertoImg : plataformaImg;
 
                 g.drawImage(imgActual,
@@ -442,7 +447,25 @@ public class ObjectManager {
                             (int) (r.getHitbox().y - yLvlOffset + 15),
                             (int) (24 * Juego.SCALE), (int) (24 * Juego.SCALE), null);
                 }
+                // --- LÓGICA QUÍMICA: Dibujo de átomos sin imagen externa ---
+                else if (r.getTipoObjeto() == ATOMO_H || r.getTipoObjeto() == ATOMO_O || r.getTipoObjeto() == ATOMO_C) {
+                    int rx = (int) (r.getHitbox().x - xLvlOffset);
+                    int ry = (int) (r.getHitbox().y - yLvlOffset + 15);
+                    int size = (int) (20 * Juego.SCALE);
+
+                    g.setColor(r.getTipoObjeto() == ATOMO_H ? java.awt.Color.CYAN
+                            : r.getTipoObjeto() == ATOMO_O ? java.awt.Color.RED : java.awt.Color.GRAY);
+                    g.fillOval(rx, ry, size, size);
+
+                    g.setColor(java.awt.Color.WHITE);
+                    g.drawOval(rx, ry, size, size);
+
+                    g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int) (14 * Juego.SCALE)));
+                    String letra = r.getTipoObjeto() == ATOMO_H ? "H" : r.getTipoObjeto() == ATOMO_O ? "O" : "C";
+                    g.drawString(letra, rx + (int) (size * 0.25), ry + size - (int) (4 * Juego.SCALE));
+                }
             }
+
             if (r.getTipoObjeto() == CRANEO_SIMPLE) {
                 g.drawImage(craneoSimpleImg,
                         (int) (r.getHitbox().x - xLvlOffset),
@@ -454,38 +477,35 @@ public class ObjectManager {
                         (int) (r.getHitbox().y - yLvlOffset),
                         (int) (32 * Juego.SCALE), (int) (32 * Juego.SCALE), null);
             }
+            if (r.getTipoObjeto() == PIRAMIDE) {
+                g.drawImage(piramides,
+                        (int) (r.getHitbox().x - xLvlOffset - (45 * Juego.SCALE)),
+                        (int) (r.getHitbox().y - yLvlOffset - (90 * Juego.SCALE)),
+                        250, 200, null);
+            }
         }
 
         // 4. Puertas
         for (PuertaMovil p : puertas) {
             if (p.isActivo()) {
-
-                // Si estamos en el Mundo 3 (El Desierto)
                 if (levelIndex == 2) {
+                    int anchoMundo3 = (int) (100 * Juego.SCALE);
+                    int altoMundo3 = (int) (100 * Juego.SCALE);
 
-                    // --- AQUÍ MODIFICAS EL TAMAÑO SOLO PARA EL MUNDO 3 ---
-                    int anchoMundo3 = (int) (100 * Juego.SCALE); // Ejemplo: el doble de ancha
-                    int altoMundo3 = (int) (100 * Juego.SCALE); // Ejemplo: mucho más alta
+                    int ajusteX = 0;
+                    int ajusteY = -100;
 
-                    int ajusteX = 0; // Cambia este número para moverla a la izquierda o derecha
-                    int ajusteY = -100; // Cambia este número para subirla o bajarla
-
-                    // Capa 1: El Marco fijo
                     g.drawImage(marcoM3,
                             (int) (p.getHitbox().x - xLvlOffset) + ajusteX,
                             (int) (p.getHitbox().y - yLvlOffset) + ajusteY,
                             anchoMundo3, altoMundo3, null);
 
-                    // Capa 2: Las Rejas animadas
                     g.drawImage(rejasM3[p.getAnimInd()],
                             (int) (p.getHitbox().x - xLvlOffset) + ajusteX,
                             (int) (p.getHitbox().y - yLvlOffset) + ajusteY,
                             anchoMundo3, altoMundo3, null);
 
                 } else {
-
-                    // Si estamos en CUALQUIER OTRO MUNDO (Bosque, Castillo, etc.)
-                    // Mantenemos las medidas originales intactas (32 y 96)
                     g.drawImage(puertaImg,
                             (int) (p.getHitbox().x - xLvlOffset),
                             (int) (p.getHitbox().y - yLvlOffset),
@@ -505,11 +525,8 @@ public class ObjectManager {
                         null);
             }
         }
-        // agua mar
         if (marSprites != null) {
             for (java.awt.geom.Rectangle2D.Float agua : aguas) {
-
-                // Cambiamos a levelIndex == 1 para que sea en el Segundo Mundo
                 BufferedImage[] spritesActuales = (levelIndex == 1 && marFuegoSprites != null) ? marFuegoSprites
                         : marSprites;
 
@@ -520,7 +537,6 @@ public class ObjectManager {
             }
         }
 
-        // aguila
         if (levelIndex == 2) {
             for (Aguila a : aguilas) {
                 g.drawImage(aguilaImgs[a.getAniIndex()],
@@ -534,7 +550,6 @@ public class ObjectManager {
         }
         for (Recompensas r : recompensas) {
             if (r.isActivo()) {
-                // ... (otros if de pociones o llaves)
                 if (r.getTipoObjeto() == PIRAMIDE) {
                     g.drawImage(piramides,
                             (int) (r.getHitbox().x - xLvlOffset - (45 * Juego.SCALE)),
@@ -547,15 +562,13 @@ public class ObjectManager {
         if (maquinaSprites != null) {
             for (MaquinaGolpeable m : maquinas) {
                 java.awt.image.BufferedImage imgActual = maquinaSprites[m.getTipoMaquina()][m.getColorActual()];
-
-                // Usamos el ancho y alto directamente de la hitbox que ya agrandamos
                 int ancho = (int) m.getHitbox().width;
                 int alto = (int) m.getHitbox().height;
 
                 g.drawImage(imgActual,
                         (int) (m.getHitbox().x - xLvlOffset),
                         (int) (m.getHitbox().y - yLvlOffset),
-                        ancho, alto, // <--- Aquí aplicamos el nuevo tamaño
+                        ancho, alto,
                         null);
             }
         }
@@ -588,24 +601,53 @@ public class ObjectManager {
         j.setEnPlataforma(false);
     }
 
-    public void checkPuertaInteraccion(Jugador j) {
+    public void checkPuertaInteraccion(Jugador j, int levelIndex) {
         for (PuertaMovil p : puertas) {
             if (j.getHitbox().intersects(p.getHitbox())) {
 
-                // --- AJUSTE: Solo permite abrir con llave si NO es el Mundo 3 ---
-                if (nivelActual != 2) {
-                    if (j.getTieneLlave() && !p.estaAbierta() && !p.estaAbriendo()) {
+                if (!p.estaAbierta() && !p.estaAbriendo()) {
+                    boolean puedeAbrir = false;
+
+                    if (j.getTieneLlave()) {
+                        puedeAbrir = true;
+                    } else {
+                        if (levelIndex == 0) {
+                            if (j.sintetizarAgua()) {
+                                puedeAbrir = true;
+                            } else {
+                                // EL JUEGO TE AVISA QUÉ TE FALTA
+                                System.out.println("¡ACCESO DENEGADO! Requiere Agua (H2O). Tienes -> H: "
+                                        + j.getAtomosH() + " | O: " + j.getAtomosO());
+                            }
+                        } else if (levelIndex == 1) {
+                            if (j.sintetizarDioxidoCarbono()) {
+                                puedeAbrir = true;
+                            } else {
+                                System.out.println("¡ACCESO DENEGADO! Requiere CO2. Tienes -> C: " + j.getAtomosC()
+                                        + " | O: " + j.getAtomosO());
+                            }
+                        } else {
+                            if (j.sintetizarDioxidoCarbono()) {
+                                puedeAbrir = true;
+                            } else {
+                                System.out.println("¡ACCESO DENEGADO! Requiere CH4.");
+                            }
+                        }
+                    }
+
+                    if (puedeAbrir) {
                         p.abrir();
-                        audioPlayer.reproducirEfecto("sonido-abertura.wav");
+                        if (audioPlayer != null) {
+                            audioPlayer.reproducirEfecto("sonido-abertura.wav");
+                        }
                     }
                 }
-
-                // La lógica de colisión (empujar al jugador) debe quedar FUERA del if anterior
-                // para que el jugador no atraviese la puerta cerrada en el Mundo 3.
-                if (j.getHitbox().x < p.getHitbox().x) {
-                    j.getHitbox().x = p.getHitbox().x - j.getHitbox().width - 1;
-                } else {
-                    j.getHitbox().x = p.getHitbox().x + p.getHitbox().width + 1;
+                if (!p.estaAbierta()) {
+                    if (j.getHitbox().x < p.getHitbox().x) {
+                        j.getHitbox().x = p.getHitbox().x - j.getHitbox().width - 1;
+                    } else {
+                        j.getHitbox().x = p.getHitbox().x + p.getHitbox().width + 1;
+                    }
                 }
             }
         }
@@ -613,7 +655,6 @@ public class ObjectManager {
 
     public boolean checkMuertePorAgua(java.awt.geom.Rectangle2D.Float hitboxJugador) {
         for (java.awt.geom.Rectangle2D.Float agua : aguas) {
-            // Revisar si el centro del jugador toca el agua
             int centerX = (int) (hitboxJugador.x + hitboxJugador.width / 2);
             int centerY = (int) (hitboxJugador.y + hitboxJugador.height / 2);
             if (agua.contains(centerX, centerY)) {

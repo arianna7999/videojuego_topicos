@@ -145,7 +145,7 @@ public class Enemy1 extends Enemigo {
     // }
     private void cargarAnimaciones(int levelNumber) {
         BufferedImage img = null;
-        animaciones = new BufferedImage[7][12];
+        animaciones = new BufferedImage[8][12];
 
         
         switch (levelNumber) {
@@ -183,7 +183,7 @@ public class Enemy1 extends Enemigo {
             case 3:
                 img = LoadSave.GetSpriteAtlas(LoadSave.ARMORED_AXEMAN);
                 tipoEnemigo = ConstantesEnemigos.ARMORED_AXEMAN;
-                for (int i = 0; i < 12; i++)
+                for (int i = 0; i < 11; i++)
                     animaciones[ATACAR][i] = img.getSubimage(i * 100, 400, 100, 100);
                 for (int i = 0; i < 4; i++)
                     animaciones[RECIBIR_GOLPE][i] = img.getSubimage(i * 100, 500, 100, 100);
@@ -198,11 +198,5 @@ public class Enemy1 extends Enemigo {
             animaciones[INACTIVO][i] = img.getSubimage(i * 100, 0, 100, 100);
         for (int i = 0; i < 6; i++)
             animaciones[CORRER][i] = img.getSubimage(i * 100, 100, 100, 100);
-        // for (int i = 0; i < 7; i++)
-        //     animaciones[ATACAR][i] = img.getSubimage(i * 100, 200, 100, 100);
-        // for (int i = 0; i < 4; i++)
-        //     animaciones[RECIBIR_GOLPE][i] = img.getSubimage(i * 100, 400, 100, 100);
-        // for (int i = 0; i < 4; i++)
-        //     animaciones[MUERTO][i] = img.getSubimage(i * 100, 500, 100, 100);
     }
 }

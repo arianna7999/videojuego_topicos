@@ -183,6 +183,21 @@ public class Constantes {
                             return 4;
                     }
                     break;
+                case ARMORED_AXEMAN:
+                    switch (enemy_state) {
+                        case INACTIVO:
+                            return 6;
+                        case CORRER:
+                            return 6;
+                        case ATACAR:
+                            return 11;
+                        case RECIBIR_GOLPE:
+                            return 4;
+                        case MUERTO:
+                            return 4;
+                    }
+                    break;
+
             }
 
             return 0;
@@ -198,9 +213,13 @@ public class Constantes {
         public static final int PUERTA = 6;
         public static final int CANDELABRO = 7;
         public static final int PIRAMIDE = 11;
-        public static final int CRANEO_SIMPLE = 12; // Nuevo ID
+        public static final int CRANEO_SIMPLE = 12;
         public static final int CRANEO_CUERNOS = 13;
 
+        public static final int ATOMO_H = 8;
+        public static final int ATOMO_O = 9; 
+        public static final int ATOMO_C = 10;
+        
         public static final int INACTIVO = 0;
         public static final int ANIMACION = 1;
 

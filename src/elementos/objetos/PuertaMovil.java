@@ -22,18 +22,29 @@ public class PuertaMovil extends ObjetoJuego {
 
     public void update() {
         if (abriendo) {
+            
+            // 1. Mover la puerta hacia arriba físicamente (Para Mundo 1 y 2)
+            hitbox.y -= velocidad;
+
+            // 2. Avanzar la animación de las rejas (Para Mundo 3)
             animTick++;
             if (animTick >= animSpeed) {
                 animTick = 0;
                 animInd++;
-                // Cuando llega al frame 4 (el quinto), se queda abierta
+                // Límite de la animación
                 if (animInd >= 4) {
                     animInd = 4;
-                    abriendo = false;
-                    abierta = true;
-                    // Al abrirse, eliminamos la colisión haciendo la hitbox pequeña
-                    hitbox.height = 0;
                 }
+            }
+
+            // 3. Detener la puerta cuando llegue a su altura objetivo
+            if (hitbox.y <= yObjetivo) {
+                hitbox.y = yObjetivo; // Asegurar que quede exactamente en el borde
+                abriendo = false;
+                abierta = true;
+                
+                // Al terminar de subir, apagamos la colisión para que el jugador pase
+                hitbox.height = 0; 
             }
         }
     }

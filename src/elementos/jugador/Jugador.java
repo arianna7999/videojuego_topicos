@@ -37,6 +37,11 @@ public class Jugador extends Cascaron {
     private boolean enPlataforma = false;
     private boolean tieneLlave = false;
 
+    // inventario
+    private int atomosH = 2;
+    private int atomosO = 2;
+    private int atomosC = 2;
+
     private boolean up, down, left, right, jump;
 
     private int[][] lvlData;
@@ -78,8 +83,8 @@ public class Jugador extends Cascaron {
     private int invulnerableTimer = 0;
 
     private int healTimer = 0;
-    private int tiempoParaCurar = 400;
-    private int cantidadCuraAutomatica = 4;
+    private int tiempoParaCurar = 200;
+    private int cantidadCuraAutomatica = 8;
 
     public boolean isDead() {
         return isDead;
@@ -466,13 +471,12 @@ public class Jugador extends Cascaron {
             if (playerAction == ATACAR1 && animInd == 1 && !attackChecked) {
                 audioPlayer.reproducirEfecto("sonido-golpe.wav");
                 enemyMan.checkEnemyHit(attackBox, this);
-                objectMan.checkObjectHit(attackBox);
+                objectMan.checkObjectHit(attackBox, this);
                 attackChecked = true;
             }
 
             if (playerAction == ARCO && animInd == 8 && !arrowChecked) {
                 audioPlayer.reproducirEfecto("sonido-golpe.wav");
-                // Spawn flecha visible desde el hitbox del jugador
                 float flechaX = (playerDirec == 1)
                         ? hitbox.x + hitbox.width + 5 * Juego.SCALE
                         : hitbox.x - 5 * Juego.SCALE;
@@ -814,6 +818,13 @@ public class Jugador extends Cascaron {
 
         dibujarIndicadorHabilidad(g2d, xHeart, yHeart + heartH + (int) (4 * Juego.SCALE));
         dibujarUsosHabilidad(g2d, xHeart, yHeart + heartH + (int) (22 * Juego.SCALE));
+        drawInventario(g2d, xHeart, yHeart, heartH);
+
+    }
+    private void drawInventario(java.awt.Graphics2D g2d, int xHeart, int yHeart, int heartH) {
+        g2d.setColor(java.awt.Color.WHITE);
+        g2d.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(12 * Juego.SCALE)));
+        g2d.drawString("MATERIA -  H: " + atomosH + "  |  O: " + atomosO + "  |  C: " + atomosC, xHeart, yHeart + heartH + (int)(45 * Juego.SCALE));
     }
 
     private void dibujarIndicadorHabilidad(java.awt.Graphics2D g2d, int x, int y) {
@@ -951,54 +962,68 @@ public class Jugador extends Cascaron {
         return airSpeed;
     }
 
-    private void revisarAgua(ObjectManager objectMan) {
+   private void revisarAgua(ObjectManager objectMan) {
         if (objectMan.checkMuertePorAgua(hitbox)) {
             if (!isDead) {
                 if (audioPlayer != null)
-                    audioPlayer.reproducirEfecto("sonido-dano.wav");
-                vidaActual = 0;
-                setDead(true);
+                    audioPlayer.reproducirEfecto("sonido-dano.wav"); // Puedes cambiar este sonido por uno de caída si tienes
+                
+                vidaActual = 0; // Matamos al jugador lógicamente
+                
+                // --- INICIA EFECTO DE CAÍDA AL VACÍO ---
+                inKnockback = true; 
+                knockbackDir = 0; // 0 para que no se mueva a los lados
+                inAir = true; // Forzamos que esté "en el aire"
+                airSpeed = 3.0f * Juego.SCALE; // Lo empujamos rápidamente hacia ABAJO
+                // ----------------------------------------
             }
         }
     }
-
     private void revisarBloqueDanoM3(int levelIndex) {
-        // Solo funciona en el Mundo 3 (index 2)
-        if (levelIndex == 2) {
-            int x = (int) (hitbox.x + hitbox.width / 2) / juego.Juego.TILES_SIZE;
-            int y = (int) (hitbox.y + hitbox.height / 2) / juego.Juego.TILES_SIZE;
+        if (levelIndex == 2) { // Recuerda: levelIndex 2 es el Mundo 3
+            int leftCol = (int) (hitbox.x - 3) / juego.Juego.TILES_SIZE;
+            int rightCol = (int) (hitbox.x + hitbox.width + 3) / juego.Juego.TILES_SIZE;
+            int topRow = (int) (hitbox.y - 3) / juego.Juego.TILES_SIZE;
+            int bottomRow = (int) (hitbox.y + hitbox.height + 5) / juego.Juego.TILES_SIZE;
 
-            if (x >= 0 && x < lvlData[0].length && y >= 0 && y < lvlData.length) {
-                if (lvlData[y][x] == 45) {
-                    if (!isDead && invulnerableTimer == 0) {
-                        if (audioPlayer != null) {
-                            audioPlayer.reproducirEfecto("sonido-dano.wav");
+            for (int c = leftCol; c <= rightCol; c++) {
+                for (int r = topRow; r <= bottomRow; r++) {
+                    if (c >= 0 && c < lvlData[0].length && r >= 0 && r < lvlData.length) {
+                        
+                        int bloquePisado = lvlData[r][c];
+                        
+                        // --- ESTA LÍNEA IMPRIMIRÁ EN LA CONSOLA QUÉ BLOQUE ESTÁS TOCANDO ---
+                        // Si pisas el nopal y en la consola NO sale "Bloque actual: 46", 
+                        // entonces el problema está en cómo el LevelManager lee la imagen.
+                        System.out.println("Bloque tocado: " + bloquePisado); 
+
+                        if (bloquePisado == 42 || bloquePisado == 43 || bloquePisado == 44 || bloquePisado == 45 || bloquePisado == 46) {
+                            
+                            System.out.println("¡TRAMPA DETECTADA! isDead: " + isDead + ", InvTimer: " + invulnerableTimer);
+
+                            if (!isDead && invulnerableTimer == 0) {
+                                if (audioPlayer != null) {
+                                    audioPlayer.reproducirEfecto("sonido-dano.wav");
+                                }
+                                recibirDaño(20, -playerDirec);
+                                return; 
+                            }
                         }
-                        // Aplicamos el daño (20 puntos, igual que los picos)
-                        recibirDaño(20, -playerDirec);
                     }
                 }
             }
         }
     }
-
+    public void vaciarInventario() {
+        atomosH = 0;
+        atomosO = 0;
+        atomosC = 0;
+    }
     public void setSpawn(int levelIndex) {
         switch (levelIndex) {
-            case 0:
-                spawnX = 100;
-                spawnY = 200;
-                break;
-            case 1:
-                spawnX = 100;
-                spawnY = 1500;
-                break;
-            case 2:
-                spawnX = 100;
-                spawnY = 200;
-                break;
             case 3:
                 spawnX = 100;
-                spawnY = 200;
+                spawnY = 1500;
                 break;
             default:
                 spawnX = 100;
@@ -1010,5 +1035,36 @@ public class Jugador extends Cascaron {
             hitbox.x = spawnX;
             hitbox.y = spawnY;
         }
+    }
+    public void recogerAtomoH() { atomosH++; }
+    public void recogerAtomoO() { atomosO++; }
+    public void recogerAtomoC() { atomosC++; }
+
+    public int getAtomosH() { return atomosH; }
+    public int getAtomosO() { return atomosO; }
+    public int getAtomosC() { return atomosC; }
+
+    public boolean sintetizarAgua() { // H2O
+        if (atomosH >= 2 && atomosO >= 1) {
+            atomosH -= 2; atomosO -= 1;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean sintetizarDioxidoCarbono() { // CO2
+        if (atomosC >= 1 && atomosO >= 2) {
+            atomosC -= 1; atomosO -= 2;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean sintetizarMetano() { // CH4
+        if (atomosC >= 1 && atomosH >= 4) {
+            atomosC -= 1; atomosH -= 4;
+            return true;
+        }
+        return false;
     }
 }

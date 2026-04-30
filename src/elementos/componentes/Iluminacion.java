@@ -16,19 +16,17 @@ public class Iluminacion {
     private float[] distancias;
 
     public Iluminacion() {
-        // Configuramos cómo queremos que se vea la luz desde que nace
         radioLuz = 200 * Juego.SCALE;
         distancias = new float[] { 0.0f, 1.0f };
         colores = new Color[] {
-                new Color(0, 0, 0, 0),    // Luz transparente en el centro
-                new Color(0, 0, 0, 240)   // Oscuridad en los bordes
+                new Color(0, 0, 0, 0),
+                new Color(0, 0, 0, 240)   
         };
     }
 
     public void draw(Graphics g, Jugador player, int xLvlOffset, int yLvlOffset) {
         Graphics2D g2 = (Graphics2D) g;
 
-        // Calculamos el centro basándonos en el jugador y la cámara
         int centroX = (int) (player.getHitbox().x + player.getHitbox().width / 2) - xLvlOffset;
         int centroY = (int) (player.getHitbox().y + player.getHitbox().height / 2) - yLvlOffset;
 
@@ -43,7 +41,6 @@ public class Iluminacion {
         }
     }
 
-    // Puedes agregar métodos extra si luego quieres que la luz cambie de tamaño
     public void setRadioLuz(float nuevoRadio) {
         this.radioLuz = nuevoRadio;
     }

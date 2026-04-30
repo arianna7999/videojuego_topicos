@@ -10,6 +10,7 @@ import elementos.pantallas.PantallaVictoria;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.Random;
+
 import niveles.LevelManager;
 import static utils.Constantes.Enviroment.*;
 import utils.LoadSave;
@@ -35,8 +36,8 @@ public class Juego extends Thread {
     private int maxLvlOffsetX;
 
     private int yLvlOffset;
-    private int topBorder = (int) (0.3 * Juego.GAME_HEIGHT); // Borde superior (30% de la pantalla)
-    private int bottomBorder = (int) (0.7 * Juego.GAME_HEIGHT); // Borde inferior (70% de la pantalla)
+    private int topBorder = (int) (0.3 * Juego.GAME_HEIGHT);
+    private int bottomBorder = (int) (0.7 * Juego.GAME_HEIGHT);
     private int lvlTileHeight;
     private int maxLvlOffsetY_tiles;
     private int maxLvlOffsetY;
@@ -49,6 +50,7 @@ public class Juego extends Thread {
     public final static int GAME_HEIGHT = TILES_SIZE * TILES_HEIGHT;
     private BufferedImage bgImg, fondo1_1, fondo1_2, fondo1_3, posteInicio, posteDuenos, fondo2_1, fondo2_2, fondo2_3,
             fondo3_2, fondo3_3, fondo3_4;
+
     private int[] fondoArbolesPos;
     private BufferedImage[] capasBosque;
     private BufferedImage fondo3_1;
@@ -63,7 +65,6 @@ public class Juego extends Thread {
     private java.awt.Font titleFont;
     private java.awt.Font subFont;
     private java.awt.Color redColor;
-    private java.awt.Color goldColor;
     private java.awt.Color shadowColor;
 
     private boolean enInicio = true;
@@ -103,7 +104,6 @@ public class Juego extends Thread {
         titleFont = customFont.deriveFont(java.awt.Font.BOLD, (int) (48 * Juego.SCALE));
         subFont = customFont.deriveFont(java.awt.Font.PLAIN, (int) (16 * Juego.SCALE));
         redColor = new java.awt.Color(200, 50, 50);
-        goldColor = new java.awt.Color(212, 175, 55);
         shadowColor = java.awt.Color.DARK_GRAY;
 
         reproductorAudio = new utils.AudioPlayer();
@@ -256,11 +256,13 @@ public class Juego extends Thread {
 
         if (player.isReadyToRestart() && !gameOver) {
             gameOver = true;
+            player.vaciarInventario();
             reproductorAudio.reproducirMusica("pista_game_over.wav");
             return;
         }
 
         if (victoria || gameOver) {
+            player.vaciarInventario();
             return;
         }
         if (enSeleccion) {
@@ -281,7 +283,7 @@ public class Juego extends Thread {
         enemyManager.update(levelMan.currentLevel().getLvlData(), player, levelMan.getLevelIndex());
         objectManager.update(levelMan.getLevelIndex());
         objectManager.actualizarJugadorEnPlataforma(player);
-        objectManager.checkPuertaInteraccion(player);
+        objectManager.checkPuertaInteraccion(player, levelMan.getLevelIndex());
         objectManager.checkPicking(player);
         objectManager.checkExplosionHit(player);
         checkCloseToBorder();
@@ -321,19 +323,13 @@ public class Juego extends Thread {
     void render(Graphics g) {
         g.drawImage(bgImg, 0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT, null);
         drawFondoMundo3_Cielo(g);
-        
-        if (levelMan.getLevelIndex() == 3) {
-            drawFondoNivel4(g);
-        } else {
-            drawFondos(g);
-        }
-
+        drawFondos(g);
         levelMan.draw(g, xLvlOffset, yLvlOffset);
         objectManager.draw(g, xLvlOffset, yLvlOffset, levelMan.getLevelIndex());
         player.render(g, xLvlOffset, yLvlOffset);
         enemyManager.draw(g, xLvlOffset, yLvlOffset);
-
-        if (levelMan.getLevelIndex() == 1) {
+        
+        if (levelMan.getLevelIndex() == 3) {
             iluminacion.draw(g, player, xLvlOffset, yLvlOffset);
         }
 
@@ -349,6 +345,7 @@ public class Juego extends Thread {
             pantallaVictoria.dibujar(g);
             return;
         }
+        
         player.drawUI(g);
     }
 
@@ -378,11 +375,17 @@ public class Juego extends Thread {
                         new float[] { (float) (POSTE_DUENOS_HEIGHT * 0.15) });
                 break;
             case 1:
-                drawFondoLevel(g, new BufferedImage[] { fondo2_1, fondo2_2 }, Juego.GAME_WIDTH, Juego.GAME_HEIGHT);
-                break;
+                drawFondoNivel2(g);
+                System.out.println("Capas bosque en nivel 2: " + (capasBosque[0] != null) + ", " + (capasBosque[1] != null) + ", "
+                        + (capasBosque[2] != null) + ", " + (capasBosque[3] != null));
+                break;  
             case 2:
                 drawFondoLevel(g, new BufferedImage[] { fondo3_2, fondo3_4, fondo3_3 }, Juego.GAME_WIDTH,
                         Juego.GAME_HEIGHT);
+                break;
+            case 3:
+                drawFondoLevel(g, new BufferedImage[] { fondo2_1, fondo2_2 }, Juego.GAME_WIDTH, Juego.GAME_HEIGHT);
+                break;
             default:
                 break;
         }
@@ -419,7 +422,7 @@ public class Juego extends Thread {
         }
     }
 
-    private void drawFondoNivel4(Graphics g) {
+    private void drawFondoNivel2(Graphics g) {
         int W = Juego.GAME_WIDTH;
         int H = Juego.GAME_HEIGHT;
 

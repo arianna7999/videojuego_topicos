@@ -4,8 +4,6 @@ import juego.Juego;
 import static utils.Constantes.ConstantesObjetos.*;
 
 public class Recompensas extends ObjetoJuego {
-
-    // Variables de animación
     private int aniTick, aniIndex;
     private int aniSpeed = 25;
     private int maxFrames;
