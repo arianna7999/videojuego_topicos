@@ -3,7 +3,6 @@ package elementos.pantallas;
 import juego.VtaJuego;
 import javax.swing.*;
 import java.awt.*;
-import juego.VtaJuego;
 
 public class PantallaIntro extends JPanel {
     private VtaJuego ventana;
@@ -47,7 +46,7 @@ public class PantallaIntro extends JPanel {
     if (timerSalto != null) timerSalto.stop();
     ventana.getAudioPlayer().detenerMusica();
     ventana.mostrarMenu(); 
-    ventana.getAudioPlayer().reproducirMusica("soundtrack.wav");
+    ventana.getAudioPlayer().reproducirMusica("soundtrack.wav");  
 }
 
     private void configurarSaltoTeclado() {

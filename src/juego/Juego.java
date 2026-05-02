@@ -6,6 +6,7 @@ import elementos.managers.EnemyManager;
 import elementos.managers.ObjectManager;
 import elementos.managers.ScoreManager;
 import elementos.pantallas.MenuSeleccion;
+import elementos.pantallas.PantallaIntro;
 import elementos.pantallas.PantallaVictoria;
 
 import java.awt.Graphics;
@@ -528,15 +529,15 @@ public class Juego extends Thread {
             case 4:
                 reproductorAudio.reproducirMusica("pista_victory.wav");
                 break;
-            case 5:
-                reproductorAudio.reproducirMusica("soundtrack.wav");
-                System.out.println("Cargando pista de selección");
-                break;
             default:
                 reproductorAudio.reproducirMusica("pista_cueva.wav");
                 break;
         }
     }
+
+
+
+
 
     public void cargarSiguienteNivel() {
         levelMan.loadNextLevel();
@@ -586,8 +587,7 @@ public class Juego extends Thread {
         objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
         xLvlOffset = 0;
         yLvlOffset = 0;
-        reproductorAudio.detenerMusica();
-        cargarPista(5);
+
     }
 
     public void aplicarPersonajeElegido(elementos.jugador.Personaje personajeElegido) {
@@ -608,7 +608,7 @@ public class Juego extends Thread {
         enSeleccion = false;
         enInicio = false;
 
-        reproductorAudio.detenerMusica();
+        vta.getAudioPlayer().detenerMusica();
         cargarPista(levelMan.getLevelIndex());
     }
 

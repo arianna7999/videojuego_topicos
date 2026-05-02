@@ -91,4 +91,9 @@ public class VtaJuego extends JFrame {
     public AudioPlayer getAudioPlayer() {
         return this.audioPlayer;
     }
+
+    public Juego getGame() {
+    return panelJuego.getGame();
+}
+
 }
