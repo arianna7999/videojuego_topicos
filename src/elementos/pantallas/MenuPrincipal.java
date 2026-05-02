@@ -144,14 +144,13 @@ public class MenuPrincipal extends JPanel {
         // 5. BOTONES (ESTÁTICOS)
         // Calculamos una posición Y fija para los botones ignorando el desplazamientoY
         // del logo
-        int yBotonesBase = (getHeight() / 15) + logoH + 40;
+            int yBase = logoY + logoH + (int)(getHeight() * 0.05); 
 
-        rectInicio = dibujarBotonAnimado(g2d, btnInicio, btnInicioGlow, centroX, yBotonesBase);
-
-        int separacion = rectInicio.height + 20;
-        rectOpciones = dibujarBotonAnimado(g2d, btnOpciones, btnOpcionesGlow, centroX, yBotonesBase + separacion);
-
-        rectSalir = dibujarBotonAnimado(g2d, btnSalir, btnSalirGlow, centroX, yBotonesBase + (separacion * 2));
+    // Usamos factores de desplazamiento (factorY) para que la separación sea elástica
+    // 0.0 = En la base, 0.12 = 12% más abajo, 0.24 = 24% más abajo
+    rectInicio = dibujarBotonEscalable(g2d, btnInicio, btnInicioGlow, centroX, yBase, 0.0);
+    rectOpciones = dibujarBotonEscalable(g2d, btnOpciones, btnOpcionesGlow, centroX, yBase, 0.11);
+    rectSalir = dibujarBotonEscalable(g2d, btnSalir, btnSalirGlow, centroX, yBase, 0.22);
 
         // Luz focalizada en el puntero del mouse
         float radioLuz = 250f;
@@ -165,31 +164,7 @@ public class MenuPrincipal extends JPanel {
         g2d.fillOval(mouseX - (int) radioLuz, mouseY - (int) radioLuz, (int) radioLuz * 2, (int) radioLuz * 2);
     }
 
-    private Rectangle dibujarBotonAnimado(Graphics2D g2d, BufferedImage img, BufferedImage imgGlow, int centroX,
-            int y) {
-        double escala = (getWidth() * 0.45) / img.getWidth();
-        int w = (int) (img.getWidth() * escala);
-        int h = (int) (img.getHeight() * escala);
-        int x = centroX - (w / 2);
-        Rectangle rect = new Rectangle(x, y, w, h);
-
-        if (rect.contains(mouseX, mouseY)) {
-            // Brillo con la forma del botón
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
-            int b = 4;
-            for (int dx = -b; dx <= b; dx += 2) {
-                for (int dy = -b; dy <= b; dy += 2) {
-                    g2d.drawImage(imgGlow, x + dx, y + dy, w, h, null);
-                }
-            }
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-            g2d.drawImage(img, x - 2, y - 2, w + 4, h + 4, null);
-        } else {
-            g2d.drawImage(img, x, y, w, h, null);
-        }
-        return rect;
-    }
-
+    
     private void configurarTeclas() {
         InputMap im = getInputMap(WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = getActionMap();
@@ -250,4 +225,33 @@ public class MenuPrincipal extends JPanel {
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
     }
 
+ private Rectangle dibujarBotonEscalable(Graphics2D g2d, BufferedImage img, BufferedImage imgGlow, int centroX, int yBase, double factorY) {
+    double escala = (getWidth() * 0.40) / img.getWidth();
+    int w = (int) (img.getWidth() * escala);
+    int h = (int) (img.getHeight() * escala);
+    int x = centroX - (w / 2);
+    int y = yBase + (int)(getHeight() * factorY);
+
+    Rectangle rect = new Rectangle(x, y, w, h);
+
+    if (rect.contains(mouseX, mouseY)) {
+        // --- EFECTO DE BRILLO ---
+        // 1. Configuramos la transparencia del brillo (50% de opacidad)
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+        
+        // 2. Dibujamos la imagen de brillo un poco más grande o desplazada
+        int offset = 4;
+        g2d.drawImage(imgGlow, x - offset, y - offset, w + (offset * 2), h + (offset * 2), null);
+        
+        // 3. Restauramos la opacidad al 100% para el botón principal
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+        
+        // 4. Dibujamos el botón original encima del brillo
+        g2d.drawImage(img, x, y, w, h, null);
+    } else {
+        // Estado normal sin brillo
+        g2d.drawImage(img, x, y, w, h, null);
+    }
+    return rect;
+}
 }
