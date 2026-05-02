@@ -3,52 +3,63 @@ package elementos.objetos;
 import juego.Juego;
 
 public class PuertaMovil extends ObjetoJuego {
+
     private float yObjetivo;
     private float velocidad = .5f * Juego.SCALE;
     private boolean abriendo = false;
     private boolean abierta = false;
     private int animTick, animInd, animSpeed = 15;
+    private int nivelActual;
 
-    public PuertaMovil(int x, int y, int tipo, int pixelesASubir) {
+    public PuertaMovil(int x, int y, int tipo, int pixelesASubir, int nivelActual) {
         super(x, y, tipo);
-        // Calculamos hasta dónde debe subir la pared (restando en el eje Y)
+        this.nivelActual = nivelActual;
         this.yObjetivo = y - (pixelesASubir * Juego.SCALE);
-
-        // Hitbox: 1 tile de ancho (32) y 3 tiles de alto (96) para tu imagen
         initHitbox(32, 96);
     }
-
-    // Velocidad de apertura
 
     public void update() {
         if (abriendo) {
             
-            // 1. Mover la puerta hacia arriba físicamente (Para Mundo 1 y 2)
-            hitbox.y -= velocidad;
+            // LÓGICA DE MOVIMIENTO FÍSICO
+            // Solo restamos Y si NO estamos en el Mundo 3 (nivel index 2)
+            if (this.nivelActual != 2) {
+                hitbox.y -= velocidad;
+            }
 
-            // 2. Avanzar la animación de las rejas (Para Mundo 3)
+            // LÓGICA DE ANIMACIÓN (Afecta a los frames de REJAS.png)
             animTick++;
             if (animTick >= animSpeed) {
                 animTick = 0;
                 animInd++;
-                // Límite de la animación
+                
+                // El límite de animación según tus assets es el frame 4 (total 5)
                 if (animInd >= 4) {
                     animInd = 4;
+                    // En el mundo 3, aquí termina el proceso
+                    if (this.nivelActual == 2) {
+                        abriendo = false;
+                        abierta = true;
+                        // Al terminar la animación, eliminamos la colisión
+                        hitbox.height = 0;
+                    }
                 }
             }
 
-            // 3. Detener la puerta cuando llegue a su altura objetivo
-            if (hitbox.y <= yObjetivo) {
-                hitbox.y = yObjetivo; // Asegurar que quede exactamente en el borde
-                abriendo = false;
-                abierta = true;
-                
-                // Al terminar de subir, apagamos la colisión para que el jugador pase
-                hitbox.height = 0; 
+            // LÓGICA DE PARADA PARA PUERTAS QUE SE ALZAN (Mundos 1 y 2)
+            if (this.nivelActual != 2) {
+                if (hitbox.y <= yObjetivo) {
+                    hitbox.y = yObjetivo; // Asegurar posición exacta
+                    abriendo = false;
+                    abierta = true;
+                    // Eliminamos la colisión física para permitir el paso
+                    hitbox.height = 0;
+                }
             }
         }
     }
 
+    // Getters y Setters de estado
     public int getAnimInd() {
         return animInd;
     }

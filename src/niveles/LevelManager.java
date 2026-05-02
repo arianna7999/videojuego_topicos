@@ -93,8 +93,7 @@ public class LevelManager {
     public void update(){}
 
     public void resetToFirstLevel() {
-        lvlIndex = 2;
+        lvlIndex = 3;
         loadSpritesForCurrentLevel();
     }
- 
 }

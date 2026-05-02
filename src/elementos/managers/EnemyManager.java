@@ -8,6 +8,8 @@ import elementos.enemigos.Caballero;
 import elementos.enemigos.Enemigo;
 import elementos.enemigos.Enemy1;
 import elementos.enemigos.Enemy2;
+import elementos.enemigos.Enemy3;
+import elementos.enemigos.Enemy4;
 import elementos.enemigos.JefeFinal;
 import elementos.jugador.Jugador;
 
@@ -16,8 +18,16 @@ public class EnemyManager {
     private ArrayList<TextoDaño> textosDaño = new ArrayList<>();
     private java.awt.Font fuenteDaño;
 
+    
+    private ScoreManager scoreManager;
+
     public EnemyManager() {
         fuenteDaño = new java.awt.Font("Arial", java.awt.Font.BOLD, (int) (12 * juego.Juego.SCALE));
+    }
+
+  
+    public void setScoreManager(ScoreManager scoreManager) {
+        this.scoreManager = scoreManager;
     }
 
     public void addEnemies(int nivelActual) {
@@ -45,9 +55,16 @@ public class EnemyManager {
                         enemigos.add(new Enemy2(xPos, yPos, nivelActual));
                         break;
                     case 3:
-                        enemigos.add(new JefeFinal(xPos, yPos));
+                        enemigos.add(new JefeFinal(xPos, yPos, nivelActual));
                         break;
-                    
+                    case 4:
+                        enemigos.add(new Enemy3(xPos, yPos, nivelActual));
+                        break;
+                    case 5:
+                        enemigos.add(new Enemy4(xPos, yPos, nivelActual));
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -81,7 +98,8 @@ public class EnemyManager {
                 }
                 
                 if (e.getEnemyState() == MUERTO) {
-                    jugador.registrarMuerte();
+
+                    jugador.registrarMuerte(scoreManager);
                 }
                 return;
             }
@@ -98,13 +116,13 @@ public class EnemyManager {
                 crearTextoDaño(e.getHitbox(), dañoBase);
                 
                 if (e.getEnemyState() == MUERTO) {
-                    jugador.registrarMuerte();
+                 
+                    jugador.registrarMuerte(scoreManager);
                 }
             }
         }
     }
 
-    // Versión para proyectiles: aplica daño con el valor dado y retorna true si golpeó algo
     public boolean checkEnemyHitAreaFlecha(java.awt.geom.Rectangle2D.Float area, Jugador jugador, int daño) {
         boolean golpeo = false;
         for (Enemigo e : enemigos) {
@@ -112,8 +130,10 @@ public class EnemyManager {
                 e.recibirDaño(daño);
                 jugador.registrarGolpe();
                 crearTextoDaño(e.getHitbox(), daño);
+                
                 if (e.getEnemyState() == MUERTO) {
-                    jugador.registrarMuerte();
+                  
+                    jugador.registrarMuerte(scoreManager);
                 }
                 golpeo = true;
             }
@@ -163,7 +183,7 @@ public class EnemyManager {
             int alpha = (int) ((vidaTotal / 120.0f) * 255);
             alpha = Math.max(0, Math.min(255, alpha));
 
-            g.setFont(fuenteDaño); // Se utiliza la fuente cacheada
+            g.setFont(fuenteDaño); 
             
             g.setColor(new java.awt.Color(0, 0, 0, alpha));
             g.drawString(String.valueOf(valorDaño), (int) (x - xLvlOffset) + 1, (int) (y - yLvlOffset) + 1);

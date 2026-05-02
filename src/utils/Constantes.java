@@ -78,7 +78,10 @@ public class Constantes {
     public static class ConstantesEnemigos {
         public static final int ESQUELETO = 0;
         public static final int CABALLERO = 1;
-        public static final int JEFE_FINAL = 2;
+        public static final int JEFE_NIVEL_1 = 2;
+        public static final int JEFE_NIVEL_2 = 23;
+        public static final int JEFE_NIVEL_3 = 24;
+        public static final int JEFE_NIVEL_4 = 25;
         public static final int ORCO = 3;
         public static final int SLIME = 4;
         public static final int ORCO_ARMADO = 5;
@@ -86,7 +89,13 @@ public class Constantes {
         public static final int WEREWOLF = 7;
         public static final int ELITE_ORC = 8;
         public static final int ARMORED_AXEMAN = 9;
-
+        public static final int PUMPKIN = 10;
+        public static final int WARRIOR = 11;
+        public static final int PLANT = 12;
+        public static final int BAT = 13;
+        public static final int MOTH = 14;
+        public static final int MUSHROOM = 21;
+        public static final int RAT = 22;
 
         public static final int INACTIVO = 0;
         public static final int CORRER = 1;
@@ -109,100 +118,134 @@ public class Constantes {
 
         public static int GetSpriteAmount(int enemy_type, int enemy_state) {
             switch (enemy_type) {
+                case PUMPKIN:
+                    switch (enemy_state) {
+                        case INACTIVO: return 10;
+                        case ATACAR:   return 9;
+                        case MUERTO:   return 7;
+                        default: return 1;
+                    }
+                case RAT:
+                    switch (enemy_state) {
+                        case INACTIVO: return 5;
+                        case CORRER:   return 8;
+                        case ATACAR:   return 6;
+                        case MUERTO:   return 5;
+                        default: return 1;
+                    }
+                case WARRIOR:
+                    switch (enemy_state) {
+                        case INACTIVO: return 5;
+                        case CORRER:   return 8;
+                        case ATACAR:   return 6;
+                        case MUERTO:   return 8;
+                        case RECIBIR_GOLPE: return 4;
+                        default: return 1;
+                    }
+                case PLANT:
+                    switch (enemy_state) {
+                        case INACTIVO: return 5;
+                        case CORRER:   return 8;
+                        case ATACAR:   return 6;
+                        case MUERTO:   return 5;
+                        default: return 1;
+                    }
+                case BAT:
+                    switch (enemy_state) {
+                        case CORRER:   return 4;
+                        case ATACAR:   return 6;
+                        case MUERTO:   return 6;
+                        default: return 1;
+                    }
+                case MOTH:
+                    switch (enemy_state) {
+                        case INACTIVO: return 4;
+                        case CORRER:   return 4;
+                        case ATACAR:   return 4;
+                        case MUERTO:   return 6;
+                        default: return 1;
+                    }
                 case WEREBEAR:
                 case WEREWOLF:
                     switch (enemy_state) {
-                        case INACTIVO:
-                            return 6;
-                        case CORRER:
-                            return 6;
-                        case ATACAR:
-                            return 12;
-                        case RECIBIR_GOLPE:
-                            return 4;
-                        case MUERTO:
-                            return 4;
+                        case INACTIVO: return 6;
+                        case CORRER:   return 6;
+                        case ATACAR:   return 12;
+                        case RECIBIR_GOLPE: return 4;
+                        case MUERTO:   return 4;
+                        default: return 1;
                     }
-                    break;
                 case SLIME:
                     switch (enemy_state) {
                         case INACTIVO:
-                        case CORRER:
-                            return 6;
-                        case ATACAR:
-                            return 6;
-                        case RECIBIR_GOLPE:
-                            return 4;
-                        case MUERTO:
-                            return 4;
+                        case CORRER:   return 6;
+                        case ATACAR:   return 6;
+                        case RECIBIR_GOLPE: return 4;
+                        case MUERTO:   return 4;
+                        default: return 1;
                     }
-                    break;
                 case ESQUELETO:
                 case CABALLERO:
-
                     switch (enemy_state) {
-                        case INACTIVO:
-                            return 6;
-                        case CORRER:
-                            return 8;
-                        case ATACAR:
-                            return 6;
-                        case RECIBIR_GOLPE:
-                            return 4;
-                        case MUERTO:
-                            return 4;
+                        case INACTIVO: return 6;
+                        case CORRER:   return 8;
+                        case ATACAR:   return 6;
+                        case RECIBIR_GOLPE: return 4;
+                        case MUERTO:   return 4;
+                        default: return 1;
                     }
-                    break;
-                case JEFE_FINAL:
+                case JEFE_NIVEL_1:
                     switch (enemy_state) {
-                        case INACTIVO:
-                            return 5;
-                        case CORRER:
-                            return 8;
-                        case ATACAR:
-                            return 7;
-                        case RECIBIR_GOLPE:
-                            return 4;
-                        case MUERTO:
-                            return 4;
+                        case INACTIVO: return 6;
+                        case CORRER:   return 8;
+                        case ATACAR:   return 9;
+                        case RECIBIR_GOLPE: return 4;
+                        case MUERTO:   return 4;
+                        default: return 1;
                     }
-                    break;
+                case JEFE_NIVEL_3:
+                    switch (enemy_state) {
+                        case INACTIVO: return 4;
+                        case CORRER: return 6;
+                        case ATACAR: return 4;
+                        case RECIBIR_GOLPE: return 4;
+                        case MUERTO: return 4;
+                        default:
+                            break;
+                    }
                 case ORCO:
                 case ORCO_ARMADO:
                 case ELITE_ORC:
                     switch (enemy_state) {
-                        case INACTIVO:
-                            return 6;
-                        case CORRER:
-                            return 6;
-                        case ATACAR:
-                            return 7;
-                        case RECIBIR_GOLPE:
-                            return 4;
-                        case MUERTO:
-                            return 4;
+                        case INACTIVO: return 6;
+                        case CORRER:   return 6;
+                        case ATACAR:   return 7;
+                        case RECIBIR_GOLPE: return 4;
+                        case MUERTO:   return 4;
+                        default: return 1;
                     }
-                    break;
                 case ARMORED_AXEMAN:
                     switch (enemy_state) {
-                        case INACTIVO:
-                            return 6;
-                        case CORRER:
-                            return 6;
-                        case ATACAR:
-                            return 11;
-                        case RECIBIR_GOLPE:
-                            return 4;
-                        case MUERTO:
-                            return 4;
+                        case INACTIVO: return 6;
+                        case CORRER:   return 6;
+                        case ATACAR:   return 11;
+                        case RECIBIR_GOLPE: return 4;
+                        case MUERTO:   return 4;
+                        default: return 1;
                     }
-                    break;
-
-            }
-
-            return 0;
-        }
-    }
+                case MUSHROOM: 
+                    switch (enemy_state) {
+                        case INACTIVO: return 5;
+                        case CORRER:   return 5;
+                        case ATACAR:   return 6;
+                        case MUERTO:   return 6;
+                        default: return 1;
+                    }
+                default:
+                    return 0;
+            } 
+        } 
+    } 
 
     public static class ConstantesObjetos {
         public static final int BARRIL = 0;
@@ -215,6 +258,7 @@ public class Constantes {
         public static final int PIRAMIDE = 11;
         public static final int CRANEO_SIMPLE = 12;
         public static final int CRANEO_CUERNOS = 13;
+        public static final int MESA_QUIMICA = 14;
 
         public static final int ATOMO_H = 8;
         public static final int ATOMO_O = 9; 
@@ -235,6 +279,8 @@ public class Constantes {
                     return 12;
                 case CANDELABRO:
                     return 7;
+                case MESA_QUIMICA:
+                    return 5;
             }
             return 1;
         }

@@ -20,6 +20,7 @@ public class EventoMouse extends MouseAdapter{
     public void mousePressed(MouseEvent e){
       System.out.println("click");
        pan.getGame().getPlayer().setAttacking(true);
+       
 
     }
     public void mouseReleased(MouseEvent e){

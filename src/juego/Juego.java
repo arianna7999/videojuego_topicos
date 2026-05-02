@@ -4,6 +4,7 @@ import elementos.jugador.Jugador;
 import elementos.componentes.*;
 import elementos.managers.EnemyManager;
 import elementos.managers.ObjectManager;
+import elementos.managers.ScoreManager;
 import elementos.pantallas.MenuSeleccion;
 import elementos.pantallas.PantallaVictoria;
 
@@ -24,7 +25,9 @@ public class Juego extends Thread {
     private LevelManager levelMan;
     private EnemyManager enemyManager;
     private ObjectManager objectManager;
+    private ScoreManager scoreManager;
     private Iluminacion iluminacion;
+    private InventarioUI inventarioUI;
     private MenuSeleccion menuSeleccion;
     private PantallaVictoria pantallaVictoria;
 
@@ -100,7 +103,8 @@ public class Juego extends Thread {
         menuSeleccion = new MenuSeleccion(this);
         pantallaVictoria = new PantallaVictoria(this);
         iluminacion = new Iluminacion();
-
+        inventarioUI = new InventarioUI();
+        scoreManager = new ScoreManager();
         titleFont = customFont.deriveFont(java.awt.Font.BOLD, (int) (48 * Juego.SCALE));
         subFont = customFont.deriveFont(java.awt.Font.PLAIN, (int) (16 * Juego.SCALE));
         redColor = new java.awt.Color(200, 50, 50);
@@ -110,6 +114,7 @@ public class Juego extends Thread {
         player = new Jugador(250, 200, (int) (200 * SCALE), (int) (200 * SCALE), reproductorAudio);
         enemyManager = new EnemyManager();
         objectManager = new ObjectManager(reproductorAudio);
+        enemyManager.setScoreManager(scoreManager);
 
         levelMan = new LevelManager(this);
         calcularCameraOffset();
@@ -324,14 +329,22 @@ public class Juego extends Thread {
         g.drawImage(bgImg, 0, 0, Juego.GAME_WIDTH, Juego.GAME_HEIGHT, null);
         drawFondoMundo3_Cielo(g);
         drawFondos(g);
-        levelMan.draw(g, xLvlOffset, yLvlOffset);
-        objectManager.draw(g, xLvlOffset, yLvlOffset, levelMan.getLevelIndex());
-        player.render(g, xLvlOffset, yLvlOffset);
-        enemyManager.draw(g, xLvlOffset, yLvlOffset);
-        
-        if (levelMan.getLevelIndex() == 3) {
-            iluminacion.draw(g, player, xLvlOffset, yLvlOffset);
-        }
+      levelMan.draw(g, xLvlOffset, yLvlOffset); // Mapa de fondo[cite: 1, 2]
+
+    // 1. Dibujar objetos normales (barriles, cofres, plataformas) detrás del player
+    objectManager.draw(g, xLvlOffset, yLvlOffset, levelMan.getLevelIndex());
+
+    // 2. Dibujar enemigos y al jugador
+    enemyManager.draw(g, xLvlOffset, yLvlOffset);
+    player.render(g, xLvlOffset, yLvlOffset); // El jugador se dibuja aquí[cite: 1, 2]
+
+    // 3. Dibujar EXCLUSIVAMENTE las rejas/puertas después del player
+    // Esto hace que REJASM3 se sobreponga al personaje
+    objectManager.drawPuertasYRejas(g, xLvlOffset, yLvlOffset, levelMan.getLevelIndex());
+
+    if (levelMan.getLevelIndex() == 3) {
+        iluminacion.draw(g, player, xLvlOffset, yLvlOffset);
+    }
 
         if (gameOver) {
             dibujarGameOver(g);
@@ -347,6 +360,7 @@ public class Juego extends Thread {
         }
         
         player.drawUI(g);
+        inventarioUI.draw(g, player);
     }
 
     private void drawObjetosRandom(Graphics g, BufferedImage[] objetos, float[] posicionesX, float[] posicionesY,
@@ -602,5 +616,8 @@ public class Juego extends Thread {
 
     public MenuSeleccion getMenuSeleccion() {
         return menuSeleccion;
+    }
+    public ScoreManager getScoreManager() {
+        return scoreManager;
     }
 }

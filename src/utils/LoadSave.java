@@ -23,7 +23,7 @@ public class LoadSave {
     // --- MAPAS (ROJO = TERRENO) ---
     public static final String LEVEL_ONE_LONG = "mapa.png";
     public static final String LEVEL_TWO_LONG = "mapa2.png";
-    public static final String LEVEL_THREE_LONG = "mapa3.png";
+    public static final String LEVEL_THREE_LONG = "mapa3O.png";
     public static final String LEVEL_FOUR_LONG = "mapa4.png";
 
     // --- MAPAS (VERDE = ENEMIGOS, AZUL = OBJETOS) ---
@@ -36,6 +36,7 @@ public class LoadSave {
     public static final String PLAYER_ATLAS = "Soldier.png";
     public static final String SKELETON_SPRITE = "Skeleton.png";
     public static final String FINAL_BOSS_SPRITE = "Lancer.png";
+    public static final String FINAL_BOSS_3 = "jefe_nivel_3.png";
     public static final String KNIGHT_SPRITE = "Knight.png";
     public static final String ORC_SPRITE = "Orc.png";
     public static final String ELITE_ORC = "elite_orc.png";
@@ -44,6 +45,13 @@ public class LoadSave {
     public static final String SLIME = "Slime.png";
     public static final String WEREWOLF = "Werewolf.png";
     public static final String ARMORED_AXEMAN = "armored_axeman.png";
+    public static final String PUMPKIN_SPRITE = "Pumpkin.png";
+    public static final String WARRIOR_SPRITE = "Orc sheet.png"; 
+    public static final String PLANT_SPRITE = "Plant sheet.png";
+    public static final String BAT_SPRITE = "Bat sheet.png";
+    public static final String MOTH_SPRITE = "Mosquito sheet.png";
+    public static final String RAT_SPRITE = "Rat sheet.png";
+    public static final String MUSHROOM_SPRITE = "Mushroom sheet.png";
 
     public static final String BOSQUE_FONDO1    = "sky.png";
     public static final String BOSQUE_FONDO2    = "mountains.png";
@@ -71,6 +79,9 @@ public class LoadSave {
     public static final String PLATAFORMA_MOVIBLE = "plataforma-movible.png";
     public static final String CANDELABRO_SPRITE = "candelabro.png";
     public static final String AGUILA_SPRITE = "aguila.png";
+
+    public static final String BOTON_X = "gold_checkbox_unchecked.png"; // La imagen de la X
+    public static final String PANEL_CAFE = "Wood_panel2.png"; // El fondo café
 
     public static int[][] GetEnemyData(int levelNumber) {
         String mapName = LEVEL_ONE_OBJECTS;

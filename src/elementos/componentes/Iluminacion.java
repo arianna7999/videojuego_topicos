@@ -19,8 +19,8 @@ public class Iluminacion {
         radioLuz = 200 * Juego.SCALE;
         distancias = new float[] { 0.0f, 1.0f };
         colores = new Color[] {
-                new Color(0, 0, 0, 0),
-                new Color(0, 0, 0, 240)   
+                new Color(0, 0, 0, 000),
+                new Color(0, 0, 0, 200)   
         };
     }
 

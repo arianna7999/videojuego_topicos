@@ -818,13 +818,6 @@ public class Jugador extends Cascaron {
 
         dibujarIndicadorHabilidad(g2d, xHeart, yHeart + heartH + (int) (4 * Juego.SCALE));
         dibujarUsosHabilidad(g2d, xHeart, yHeart + heartH + (int) (22 * Juego.SCALE));
-        drawInventario(g2d, xHeart, yHeart, heartH);
-
-    }
-    private void drawInventario(java.awt.Graphics2D g2d, int xHeart, int yHeart, int heartH) {
-        g2d.setColor(java.awt.Color.WHITE);
-        g2d.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(12 * Juego.SCALE)));
-        g2d.drawString("MATERIA -  H: " + atomosH + "  |  O: " + atomosO + "  |  C: " + atomosC, xHeart, yHeart + heartH + (int)(45 * Juego.SCALE));
     }
 
     private void dibujarIndicadorHabilidad(java.awt.Graphics2D g2d, int x, int y) {
@@ -880,9 +873,14 @@ public class Jugador extends Cascaron {
         golpesAcertados++;
     }
 
-    public void registrarMuerte() {
+    public void registrarMuerte(elementos.managers.ScoreManager scoreMan) {
         enemigosDerrotados++;
         calcularMejoraDaño();
+
+        if (scoreMan != null) {
+            scoreMan.checkInsigniaVerdugo(golpesAcertados, enemigosDerrotados);
+            scoreMan.addPuntosEnemigoDerrotado(150); // Le da 150 pts por matar a alguien
+        }
     }
 
     private void calcularMejoraDaño() {
