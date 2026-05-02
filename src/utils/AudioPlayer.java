@@ -15,27 +15,23 @@ public class AudioPlayer {
     private boolean mute = false;
 
     public void reproducirMusica(String nombreArchivo) {
-        detenerMusica();
-        
-        try {
-            URL url = getClass().getResource("/res/" + nombreArchivo);
-            
-            if (url == null) {
-                System.err.println("No se encontró el archivo de audio: " + nombreArchivo);
-                return;
-            }
-
-            AudioInputStream audioInput = AudioSystem.getAudioInputStream(url);
-            musicaFondo = AudioSystem.getClip();
-            musicaFondo.open(audioInput);
-            musicaFondo.loop(Clip.LOOP_CONTINUOUSLY);
-            musicaFondo.start();
-            
-        } catch (Exception e) {
-            System.err.println("Error al cargar la música: " + e.getMessage());
-            e.printStackTrace();
+    detenerMusica();
+    try {
+        URL url = getClass().getResource("/res/" + nombreArchivo);
+        if (url == null) {
+            // SI SALE ESTE MENSAJE, LA RUTA ESTÁ MAL
+            System.err.println("¡ERROR! No se encontró el archivo: " + nombreArchivo);
+            return;
         }
+        System.out.println("Cargando audio: " + nombreArchivo); // Mensaje de éxito
+        AudioInputStream audioInput = AudioSystem.getAudioInputStream(url);
+        musicaFondo = AudioSystem.getClip();
+        musicaFondo.open(audioInput);
+        musicaFondo.start();
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
 
     public void detenerMusica() {
         if (musicaFondo != null && musicaFondo.isRunning()) {

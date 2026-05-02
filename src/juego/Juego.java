@@ -122,7 +122,7 @@ public class Juego extends Thread {
         objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
         enInicio = false;
         enSeleccion = true;
-        cargarPista(5);
+        //cargarPista(5);
         player.setSpawn(levelMan.getLevelIndex());
     }
 

@@ -3,62 +3,76 @@ package elementos.pantallas;
 import juego.VtaJuego;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.net.URL;
+import juego.VtaJuego;
 
 public class PantallaIntro extends JPanel {
     private VtaJuego ventana;
-    private Timer timer;
-    private ImageIcon gifIntro;
+    private Timer timerSalto;
+    private Image gifImagen;
+    private boolean yaSalto = false; // Para evitar múltiples saltos
 
     public PantallaIntro(VtaJuego ventana) {
         this.ventana = ventana;
         this.setLayout(new BorderLayout());
         this.setBackground(Color.BLACK);
+        
 
-        URL urlVideo = getClass().getResource("/res/intro.gif");
-        if (urlVideo != null) {
-            gifIntro = new ImageIcon(urlVideo);
-            JLabel labelVideo = new JLabel(gifIntro);
-            this.add(labelVideo, BorderLayout.CENTER);
+        try {
+
+            java.net.URL imgUrl = getClass().getResource("/res/intro.gif");
+            if (imgUrl != null) {
+                this.gifImagen = new ImageIcon(imgUrl).getImage();
+            } else {
+                System.err.println("Error: No se encontró el archivo intro.gif en /res/");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        this.timerSalto = new Timer(18500, e -> saltarAlMenu());
 
-        // Timer de 16.5 segundos (16500 ms)
-        timer = new Timer(16500, e -> terminarIntro());
-        timer.setRepeats(false);
+        // Ahora que ya no es null, podemos llamar a start()
+        this.timerSalto.setRepeats(false);
+        this.timerSalto.start();
 
-        configurarSaltoIntro();
+        this.setFocusable(false);
+
+        // 3. Permitir saltar la intro con cualquier tecla
+        configurarSaltoTeclado();
     }
 
-    public void iniciar() {
-        // 1. Iniciar el audio de la intro
-        // Asegúrate de que el archivo se llame intro_audio.wav en tu carpeta res
-        ventana.getAudioPlayer().reproducirMusica("intro_audio.wav"); 
-        
-        // 2. Iniciar el cronómetro para el cambio de pantalla
-        timer.start();
-    }
+    private void saltarAlMenu() {
+    if (yaSalto) return; // Si ya cambió, no hagas nada más
+    yaSalto = true;
+    
+    if (timerSalto != null) timerSalto.stop();
+    ventana.getAudioPlayer().detenerMusica();
+    ventana.mostrarMenu(); 
+    ventana.getAudioPlayer().reproducirMusica("soundtrack.wav");
+}
 
-    private void terminarIntro() {
-        if (timer.isRunning()) timer.stop();
-        
-        // 3. Detener la música de la intro antes de cambiar
-        ventana.getAudioPlayer().detenerMusica(); 
-        
-        // 4. Cambiar al menú
-        ventana.mostrarMenu(); 
-    }
-
-    private void configurarSaltoIntro() {
+    private void configurarSaltoTeclado() {
         this.setFocusable(true);
-        KeyAdapter saltarTeclado = new KeyAdapter() {
+        this.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) { terminarIntro(); }
-        };
-        this.addKeyListener(saltarTeclado);
-        this.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) { terminarIntro(); }
+public void keyPressed(java.awt.event.KeyEvent e) {
+    e.consume(); // Evita que la tecla "pase" a la siguiente pantalla
+    saltarAlMenu();
+}
         });
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        if (gifImagen != null) {
+            // g.drawImage escala la imagen al tamaño actual del JPanel
+            // Esto lo hace totalmente escalable a la ventana
+            g.drawImage(gifImagen, 0, 0, this.getWidth(), this.getHeight(), this);
+        } else {
+            // Mensaje de depuración visual si no carga la imagen
+            g.setColor(Color.WHITE);
+            g.drawString("Cargando Intro...", 20, 20);
+        }
     }
 }

@@ -10,13 +10,14 @@ import elementos.pantallas.MenuOpciones;
 import elementos.pantallas.MenuPrincipal;
 import elementos.pantallas.PantallaIntro;
 import utils.AudioPlayer;
+import elementos.pantallas.PantallaIntro;
 
 public class VtaJuego extends JFrame {
 
     private JPanel contenedor;
     private CardLayout cardLayout;
     private AudioPlayer audioPlayer = new AudioPlayer();
-    
+
     // 1. Guardamos las pantallas como variables de la clase para no perderlas
     private PantallaIntro intro;
     private MenuPrincipal menu;
@@ -25,7 +26,7 @@ public class VtaJuego extends JFrame {
 
     public VtaJuego(PanelJuego n) {
         this.panelJuego = n; // Guardamos el panel del juego
-        
+
         // Configuraciones de la Ventana (Modo Ventana)
         this.setTitle("Mi Juego");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -33,12 +34,14 @@ public class VtaJuego extends JFrame {
         this.setResizable(true);
         this.setSize(1280, 720);
         this.setLocationRelativeTo(null);
+        audioPlayer.reproducirMusica("SonidoIntro.wav");
 
         // Configuración del Layout
         cardLayout = new CardLayout();
         contenedor = new JPanel(cardLayout);
 
         // Inicialización de Pantallas
+        PantallaIntro intro = new PantallaIntro(this);
         intro = new PantallaIntro(this);
         menu = new MenuPrincipal(this);
         opciones = new MenuOpciones(this);
@@ -64,14 +67,13 @@ public class VtaJuego extends JFrame {
                 }
             }
         });
-
+        cardLayout.show(contenedor, "INTRO"); // Mostrar la intro al iniciar
         this.setVisible(true);
     }
 
     public void mostrarMenu() {
         cardLayout.show(contenedor, "MENU");
-        // 2. Le pedimos el foco DIRECTAMENTE al objeto
-        menu.requestFocusInWindow();
+        contenedor.getComponent(0).requestFocusInWindow(); // Asegura el foco en el Menú
     }
 
     public void mostrarJuego() {
