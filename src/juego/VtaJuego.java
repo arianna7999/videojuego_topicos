@@ -41,7 +41,6 @@ public class VtaJuego extends JFrame {
         contenedor = new JPanel(cardLayout);
 
         // Inicialización de Pantallas
-        PantallaIntro intro = new PantallaIntro(this);
         intro = new PantallaIntro(this);
         menu = new MenuPrincipal(this);
         opciones = new MenuOpciones(this);

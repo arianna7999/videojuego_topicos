@@ -122,7 +122,6 @@ public class Juego extends Thread {
         objectManager.cargarObjetosDeNivel(levelMan.getLevelIndex());
         enInicio = false;
         enSeleccion = true;
-        //cargarPista(5);
         player.setSpawn(levelMan.getLevelIndex());
     }
 
@@ -593,7 +592,6 @@ public class Juego extends Thread {
 
     public void aplicarPersonajeElegido(elementos.jugador.Personaje personajeElegido) {
         levelMan.resetToFirstLevel();
-
         player.setPersonaje(personajeElegido);
         player.setSpawn(levelMan.getLevelIndex());
 
